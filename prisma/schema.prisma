@@ -18,3 +18,14 @@ model User {
   email String  @unique
   name  String?
 }
+
+model Course {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  userId      String    // For personal courses
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+}

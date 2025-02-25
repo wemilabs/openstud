@@ -18,9 +18,7 @@ export const metadata: Metadata = {
 
 export default function DashboardLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistMono.className} antialiased`}>
@@ -36,7 +34,9 @@ export default function DashboardLayout({
               <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto border-r md:sticky md:block">
                 <DashboardNav />
               </aside>
-              <main className="flex w-full flex-col overflow-hidden">{children}</main>
+              <main className="flex w-full flex-col overflow-hidden">
+                {children}
+              </main>
             </div>
           </div>
         </ThemeProvider>
