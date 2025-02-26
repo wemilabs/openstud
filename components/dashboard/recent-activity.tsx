@@ -1,6 +1,5 @@
 "use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Card,
   CardContent,
@@ -16,10 +15,6 @@ const activities = [
     title: "Math Assignment Submitted",
     description: "Linear Algebra - Chapter 5",
     timestamp: "2 hours ago",
-    user: {
-      name: "John D.",
-      image: "/avatars/01.png",
-    },
   },
   {
     id: 2,
@@ -27,10 +22,6 @@ const activities = [
     title: "New Grade Posted",
     description: "Physics Quiz 3: 92%",
     timestamp: "5 hours ago",
-    user: {
-      name: "Sarah M.",
-      image: "/avatars/02.png",
-    },
   },
   {
     id: 3,
@@ -38,10 +29,6 @@ const activities = [
     title: "Course Material Updated",
     description: "Chemistry Lab Manual",
     timestamp: "1 day ago",
-    user: {
-      name: "Prof. Smith",
-      image: "/avatars/03.png",
-    },
   },
 ]
 
@@ -53,28 +40,22 @@ export function RecentActivity() {
         <CardDescription>Your latest academic updates</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <div className="space-y-4">
           {activities.map((activity) => (
             <div
               key={activity.id}
-              className="flex items-center space-x-4 rounded-lg p-3 transition-all hover:bg-muted/50"
+              className="flex items-center justify-between rounded-lg p-3 transition-all hover:bg-muted/50"
             >
-              <Avatar className="h-9 w-9 border">
-                <AvatarImage src={activity.user.image} alt="Avatar" />
-                <AvatarFallback>
-                  {activity.user.name.split(" ").map((n) => n[0]).join("")}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-1">
+              <div className="space-y-1">
                 <p className="text-sm font-medium leading-none">
                   {activity.title}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {activity.description}
                 </p>
-                <p className="text-xs text-muted-foreground/75">
-                  {activity.timestamp}
-                </p>
+              </div>
+              <div className="ml-auto text-sm text-muted-foreground">
+                {activity.timestamp}
               </div>
             </div>
           ))}

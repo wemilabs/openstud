@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -37,7 +37,10 @@ const courseFormSchema = z.object({
   description: z
     .string()
     .min(10, "Description must be at least 10 characters")
-    .max(500, "Description must not exceed 500 characters"),
+    .max(500, "Description must not exceed 500 characters")
+    .optional()
+    .nullable()
+    .or(z.literal("")),
 });
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
@@ -49,32 +52,36 @@ const defaultValues: Partial<CourseFormValues> = {
 
 export function CreateCourse() {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
     defaultValues,
   });
 
+  const { isSubmitting } = form.formState;
+
   async function onSubmit(data: CourseFormValues) {
     try {
-      setIsLoading(true);
-      const result = await createCourse(data);
+      // Convert empty string to null for description
+      const formData = {
+        ...data,
+        description: data.description || null,
+      };
+
+      const result = await createCourse(formData);
 
       if (result.error) {
         toast.error(result.error);
         return;
       }
 
-      toast.success("Course created successfully");
+      toast.success("Course created successfully!");
       setOpen(false);
       form.reset();
       router.refresh();
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -82,15 +89,15 @@ export function CreateCourse() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 size-4" />
+          <Plus className="mr-2 h-4 w-4" />
           Create Course
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Course</DialogTitle>
           <DialogDescription>
-            Add a new course to your study plan. Fill out the details below.
+            Add a new course to your dashboard.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -100,7 +107,7 @@ export function CreateCourse() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Course Name</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g. Mathematics 101" {...field} />
                   </FormControl>
@@ -113,11 +120,13 @@ export function CreateCourse() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description (optional)</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Brief description of the course..."
+                      className="resize-none"
                       {...field}
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -125,8 +134,8 @@ export function CreateCourse() {
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Course"}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Creating..." : "Create"}
               </Button>
             </DialogFooter>
           </form>

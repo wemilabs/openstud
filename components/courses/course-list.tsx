@@ -21,8 +21,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, Book, Calendar } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
 
 interface CourseListProps {
   courses?: Pick<Course, "id" | "name" | "description" | "createdAt">[]
@@ -82,21 +83,33 @@ export function CourseList({ courses = [] }: CourseListProps) {
       <ScrollArea className="h-[calc(100vh-220px)]">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => (
-            <Card key={course.id}>
-              <CardHeader>
-                <CardTitle className="line-clamp-1">{course.name}</CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {course.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Created {formatDistanceToNow(course.createdAt)} ago
-                </p>
-              </CardContent>
-              <CardFooter className="flex justify-end space-x-2">
+            <Card key={course.id} className="group relative overflow-hidden transition-all hover:shadow-md">
+              <div className="absolute right-2 top-2 flex space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
                 <EditCourse course={course} />
                 <DeleteCourse courseId={course.id} courseName={course.name} />
+              </div>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Book className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="line-clamp-1 text-base">
+                    {course.name}
+                  </CardTitle>
+                </div>
+                {course.description && (
+                  <CardDescription className="line-clamp-2 mt-2.5">
+                    {course.description}
+                  </CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>Created {formatDistanceToNow(course.createdAt)} ago</span>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between border-t pt-4">
+                <Badge variant="secondary">0 Students</Badge>
+                <Badge variant="outline">No assignments</Badge>
               </CardFooter>
             </Card>
           ))}

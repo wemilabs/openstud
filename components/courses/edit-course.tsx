@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -37,7 +38,10 @@ const courseFormSchema = z.object({
   description: z
     .string()
     .min(10, "Description must be at least 10 characters")
-    .max(500, "Description must not exceed 500 characters"),
+    .max(500, "Description must not exceed 500 characters")
+    .optional()
+    .nullable()
+    .or(z.literal("")),
 });
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
@@ -48,54 +52,51 @@ interface EditCourseProps {
 
 export function EditCourse({ course }: EditCourseProps) {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
       name: course.name,
-      description: course.description,
+      description: course.description || "",
     },
   });
 
+  const { isSubmitting } = form.formState;
+
   async function onSubmit(data: CourseFormValues) {
     try {
-      setIsLoading(true);
-      const result = await updateCourse(course.id, data);
+      const formData = {
+        ...data,
+        description: data.description || null,
+      };
+
+      const result = await updateCourse(course.id, formData);
 
       if (result.error) {
         toast.error(result.error);
         return;
       }
 
-      toast.success("Course updated successfully");
+      toast.success("Course updated successfully!");
       setOpen(false);
       router.refresh();
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => setOpen(true)}
-      >
-        <Pencil className="h-4 w-4" />
-        <span className="sr-only">Edit course</span>
-      </Button>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Course</DialogTitle>
-          <DialogDescription>
-            Make changes to your course here. Click save when you&apos;re done.
-          </DialogDescription>
+          <DialogDescription>Make changes to your course.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -104,9 +105,9 @@ export function EditCourse({ course }: EditCourseProps) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Course Name</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="e.g. Mathematics 101" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -117,17 +118,22 @@ export function EditCourse({ course }: EditCourseProps) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description (optional)</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea
+                      placeholder="Brief description of the course..."
+                      className="resize-none"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save changes"}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save changes"}
               </Button>
             </DialogFooter>
           </form>

@@ -3,6 +3,7 @@
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
+import { auth } from "@/lib/auth"
 
 // Schema for course creation/update validation
 const CourseSchema = z.object({
@@ -13,7 +14,9 @@ const CourseSchema = z.object({
   description: z
     .string()
     .min(10, "Description must be at least 10 characters")
-    .max(500, "Description must not exceed 500 characters"),
+    .max(500, "Description must not exceed 500 characters")
+    .optional()
+    .nullable(),
 })
 
 export type CourseInput = z.infer<typeof CourseSchema>
@@ -32,13 +35,17 @@ interface GetCoursesOptions {
  */
 export async function createCourse(input: CourseInput) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "Unauthorized" };
+    }
+
     const validatedData = CourseSchema.parse(input)
-    const userId = "temp-user-id" // TODO: Get from auth
 
     const course = await prisma.course.create({
       data: {
         ...validatedData,
-        userId,
+        userId: session.user.id,
       },
     })
 
@@ -62,46 +69,35 @@ export async function getCourses({
   sortOrder = "desc",
 }: GetCoursesOptions = {}) {
   try {
-    const userId = "temp-user-id" // TODO: Get from auth
-
-    // Calculate skip for pagination
-    const skip = (page - 1) * ITEMS_PER_PAGE
-
-    // Build where clause for search
-    const where = {
-      userId,
-      ...(search
-        ? {
-            OR: [
-              { name: { contains: search, mode: "insensitive" as const } },
-              { description: { contains: search, mode: "insensitive" as const } },
-            ],
-          }
-        : {}),
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "Unauthorized" };
     }
 
-    // Get total count for pagination
-    const totalCount = await prisma.course.count({ where })
-    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+    const skip = (page - 1) * ITEMS_PER_PAGE
 
-    // Get courses with pagination and sorting
-    const courses = await prisma.course.findMany({
-      where,
-      orderBy: { [sortBy]: sortOrder },
-      skip,
-      take: ITEMS_PER_PAGE,
-    })
+    const where = {
+      userId: session.user.id,
+      name: { contains: search, mode: "insensitive" as const },
+    }
+
+    const [courses, total] = await Promise.all([
+      prisma.course.findMany({
+        where,
+        skip,
+        take: ITEMS_PER_PAGE,
+        orderBy: { [sortBy]: sortOrder },
+      }),
+      prisma.course.count({ where }),
+    ])
+
+    const pageCount = Math.ceil(total / ITEMS_PER_PAGE)
 
     return {
       data: {
         courses,
-        pagination: {
-          currentPage: page,
-          totalPages,
-          totalItems: totalCount,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1,
-        },
+        pageCount,
+        total,
       },
     }
   } catch (error) {
@@ -114,12 +110,15 @@ export async function getCourses({
  */
 export async function getCourseById(id: string) {
   try {
-    const userId = "temp-user-id" // TODO: Get from auth
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "Unauthorized" };
+    }
 
-    const course = await prisma.course.findFirst({
+    const course = await prisma.course.findUnique({
       where: { 
         id,
-        userId, // Ensure user owns the course
+        userId: session.user.id, // Ensure user can only access their own courses
       },
     })
 
@@ -138,23 +137,18 @@ export async function getCourseById(id: string) {
  */
 export async function updateCourse(id: string, input: CourseInput) {
   try {
-    const validatedData = CourseSchema.parse(input)
-    const userId = "temp-user-id" // TODO: Get from auth
-
-    // Check if course exists and belongs to user
-    const existingCourse = await prisma.course.findFirst({
-      where: { 
-        id,
-        userId,
-      },
-    })
-
-    if (!existingCourse) {
-      return { error: "Course not found" }
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "Unauthorized" };
     }
 
+    const validatedData = CourseSchema.parse(input)
+
     const course = await prisma.course.update({
-      where: { id },
+      where: { 
+        id,
+        userId: session.user.id, // Ensure user can only update their own courses
+      },
       data: validatedData,
     })
 
@@ -173,22 +167,16 @@ export async function updateCourse(id: string, input: CourseInput) {
  */
 export async function deleteCourse(id: string) {
   try {
-    const userId = "temp-user-id" // TODO: Get from auth
-
-    // Check if course exists and belongs to user
-    const existingCourse = await prisma.course.findFirst({
-      where: { 
-        id,
-        userId,
-      },
-    })
-
-    if (!existingCourse) {
-      return { error: "Course not found" }
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { error: "Unauthorized" };
     }
 
     await prisma.course.delete({
-      where: { id },
+      where: { 
+        id,
+        userId: session.user.id, // Ensure user can only delete their own courses
+      },
     })
 
     revalidatePath("/dashboard/courses")

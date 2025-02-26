@@ -21,9 +21,10 @@ interface CoursesPageProps {
 
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   const { page, search, sort } = await searchParams;
+  const currentPage = Number(page) || 1;
 
   const { data, error } = await getCourses({
-    page: Number(page) || 1,
+    page: currentPage,
     search,
     ...(sort
       ? {
@@ -51,10 +52,10 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
 
         <Suspense fallback={<div>Loading courses...</div>}>
           <CourseList courses={data?.courses} />
-          {data?.pagination && (
+          {data && data.pageCount > 1 && (
             <Pagination
-              currentPage={data.pagination.currentPage}
-              totalPages={data.pagination.totalPages}
+              currentPage={currentPage}
+              totalPages={data.pageCount}
             />
           )}
         </Suspense>
