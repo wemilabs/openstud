@@ -89,7 +89,11 @@ export function EditCourse({ course }: EditCourseProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8 bg-muted text-primary dark:text-primary hover:bg-muted/90"
+        >
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>

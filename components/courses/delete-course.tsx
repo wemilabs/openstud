@@ -52,7 +52,7 @@ export function DeleteCourse({ courseId, courseName }: DeleteCourseProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="size-8"
+        className="size-8 bg-destructive text-muted hover:text-muted dark:text-primary hover:bg-destructive/90"
         onClick={() => setOpen(true)}
       >
         <Trash2 className="size-4" />
