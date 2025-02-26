@@ -7,7 +7,7 @@ export function Hero() {
       <div className="container relative">
         <div className="mx-auto flex max-w-[980px] flex-col items-center gap-4 text-center">
           <span className="text-sm text-muted font-medium -tracking-tight bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-2 rounded-full">
-            Introducing OpenStud v0.1.0
+            Introducing OpenStud v0.2.4
           </span>
           <h1 className="text-3xl font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1]">
             Transform your study journey with{" "}

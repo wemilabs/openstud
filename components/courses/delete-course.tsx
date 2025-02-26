@@ -70,7 +70,7 @@ export function DeleteCourse({ courseId, courseName }: DeleteCourseProps) {
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onDelete}
-            className="bg-destructive text-muted hover:bg-destructive/90"
+            className="bg-destructive text-muted dark:text-primary hover:bg-destructive/90"
             disabled={isLoading}
           >
             {isLoading ? "Deleting..." : "Delete"}
