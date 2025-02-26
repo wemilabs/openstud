@@ -1,6 +1,7 @@
 "use server"
 
 import { z } from "zod"
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/lib/auth"
@@ -52,9 +53,7 @@ export async function createCourse(input: CourseInput) {
     revalidatePath("/dashboard/courses")
     return { data: course }
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { error: "Invalid course data" }
-    }
+    console.error("Error creating course:", error)
     return { error: "Failed to create course" }
   }
 }
@@ -76,19 +75,36 @@ export async function getCourses({
 
     const skip = (page - 1) * ITEMS_PER_PAGE
 
-    const where = {
+    const where: Prisma.CourseWhereInput = {
       userId: session.user.id,
-      name: { contains: search, mode: "insensitive" as const },
+      ...(search
+        ? {
+            OR: [
+              {
+                name: {
+                  contains: search,
+                  mode: "insensitive" as Prisma.QueryMode,
+                },
+              },
+              {
+                description: {
+                  contains: search,
+                  mode: "insensitive" as Prisma.QueryMode,
+                },
+              },
+            ],
+          }
+        : {}),
     }
 
-    const [courses, total] = await Promise.all([
+    const [total, courses] = await Promise.all([
+      prisma.course.count({ where }),
       prisma.course.findMany({
         where,
-        skip,
-        take: ITEMS_PER_PAGE,
         orderBy: { [sortBy]: sortOrder },
+        take: ITEMS_PER_PAGE,
+        skip,
       }),
-      prisma.course.count({ where }),
     ])
 
     const pageCount = Math.ceil(total / ITEMS_PER_PAGE)
@@ -101,6 +117,7 @@ export async function getCourses({
       },
     }
   } catch (error) {
+    console.error("Error fetching courses:", error)
     return { error: "Failed to fetch courses" }
   }
 }
@@ -116,9 +133,9 @@ export async function getCourseById(id: string) {
     }
 
     const course = await prisma.course.findUnique({
-      where: { 
+      where: {
         id,
-        userId: session.user.id, // Ensure user can only access their own courses
+        userId: session.user.id,
       },
     })
 
@@ -128,6 +145,7 @@ export async function getCourseById(id: string) {
 
     return { data: course }
   } catch (error) {
+    console.error("Error fetching course:", error)
     return { error: "Failed to fetch course" }
   }
 }
@@ -145,9 +163,9 @@ export async function updateCourse(id: string, input: CourseInput) {
     const validatedData = CourseSchema.parse(input)
 
     const course = await prisma.course.update({
-      where: { 
+      where: {
         id,
-        userId: session.user.id, // Ensure user can only update their own courses
+        userId: session.user.id,
       },
       data: validatedData,
     })
@@ -155,9 +173,7 @@ export async function updateCourse(id: string, input: CourseInput) {
     revalidatePath("/dashboard/courses")
     return { data: course }
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { error: "Invalid course data" }
-    }
+    console.error("Error updating course:", error)
     return { error: "Failed to update course" }
   }
 }
@@ -173,15 +189,16 @@ export async function deleteCourse(id: string) {
     }
 
     await prisma.course.delete({
-      where: { 
+      where: {
         id,
-        userId: session.user.id, // Ensure user can only delete their own courses
+        userId: session.user.id,
       },
     })
 
     revalidatePath("/dashboard/courses")
-    return { success: true }
+    return { data: null }
   } catch (error) {
+    console.error("Error deleting course:", error)
     return { error: "Failed to delete course" }
   }
 }
