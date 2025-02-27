@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { CreateCourse } from "@/components/courses/create-course";
 import { CourseList } from "@/components/courses/course-list";
-import { CourseSearch } from "@/components/courses/course-search";
 import { Pagination } from "@/components/courses/pagination";
 import { getCourses } from "@/actions/courses";
 
@@ -37,13 +36,14 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Courses</h1>
-          <p className="text-muted-foreground">
-            Create and manage your courses.
-          </p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            Courses
+          </h1>
+          <h2 className="text-sm md:text-base text-muted-foreground">
+            Add and manage courses.
+          </h2>
         </div>
         <div className="flex items-center gap-4">
-          <CourseSearch />
           <CreateCourse />
         </div>
       </div>

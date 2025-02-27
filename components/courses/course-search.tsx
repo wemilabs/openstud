@@ -1,40 +1,40 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Input } from "@/components/ui/input"
-import { useDebounce } from "@/hooks/use-debounce"
-import { Search, Loader2 } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Search, Loader2 } from "lucide-react";
 
 export function CourseSearch() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [value, setValue] = React.useState(searchParams.get("search") ?? "")
-  const [isSearching, setIsSearching] = React.useState(false)
-  const debouncedValue = useDebounce(value, 500)
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [value, setValue] = useState(searchParams.get("search") ?? "");
+  const [isSearching, setIsSearching] = useState(false);
+  const debouncedValue = useDebounce(value, 500);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Don't trigger search if value is empty and there was no previous search
-    if (!debouncedValue && !searchParams.get("search")) return
+    if (!debouncedValue && !searchParams.get("search")) return;
 
-    setIsSearching(true)
+    setIsSearching(true);
 
-    const params = new URLSearchParams(searchParams)
+    const params = new URLSearchParams(searchParams);
     if (debouncedValue) {
-      params.set("search", debouncedValue)
-      params.set("page", "1") // Reset to first page on new search
+      params.set("search", debouncedValue);
+      params.set("page", "1"); // Reset to first page on new search
     } else {
-      params.delete("search")
+      params.delete("search");
     }
-    
+
     // Use setTimeout to simulate network delay for a better UX
     const timeoutId = setTimeout(() => {
-      router.push(`?${params.toString()}`)
-      setIsSearching(false)
-    }, 300)
+      router.push(`?${params.toString()}`);
+      setIsSearching(false);
+    }, 300);
 
-    return () => clearTimeout(timeoutId)
-  }, [debouncedValue, router, searchParams])
+    return () => clearTimeout(timeoutId);
+  }, [debouncedValue, router, searchParams]);
 
   return (
     <div className="relative w-full max-w-sm">
@@ -53,5 +53,5 @@ export function CourseSearch() {
         </div>
       )}
     </div>
-  )
+  );
 }

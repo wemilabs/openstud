@@ -1,10 +1,10 @@
-"use server"
+"use server";
 
-import { z } from "zod"
-import { Prisma } from "@prisma/client"
-import { prisma } from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
-import { auth } from "@/lib/auth"
+import { z } from "zod";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth";
 
 // Schema for course creation/update validation
 const CourseSchema = z.object({
@@ -18,17 +18,17 @@ const CourseSchema = z.object({
     .max(500, "Description must not exceed 500 characters")
     .optional()
     .nullable(),
-})
+});
 
-export type CourseInput = z.infer<typeof CourseSchema>
+export type CourseInput = z.infer<typeof CourseSchema>;
 
-const ITEMS_PER_PAGE = 9
+const ITEMS_PER_PAGE = 9;
 
 interface GetCoursesOptions {
-  page?: number
-  search?: string
-  sortBy?: "name" | "createdAt"
-  sortOrder?: "asc" | "desc"
+  page?: number;
+  search?: string;
+  sortBy?: "name" | "createdAt";
+  sortOrder?: "asc" | "desc";
 }
 
 /**
@@ -41,20 +41,20 @@ export async function createCourse(input: CourseInput) {
       return { error: "Unauthorized" };
     }
 
-    const validatedData = CourseSchema.parse(input)
+    const validatedData = CourseSchema.parse(input);
 
     const course = await prisma.course.create({
       data: {
         ...validatedData,
         userId: session.user.id,
       },
-    })
+    });
 
-    revalidatePath("/dashboard/courses")
-    return { data: course }
+    revalidatePath("/dashboard/courses");
+    return { data: course };
   } catch (error) {
-    console.error("Error creating course:", error)
-    return { error: "Failed to create course" }
+    console.error("Error creating course:", error);
+    return { error: "Failed to create course" };
   }
 }
 
@@ -73,7 +73,7 @@ export async function getCourses({
       return { error: "Unauthorized" };
     }
 
-    const skip = (page - 1) * ITEMS_PER_PAGE
+    const skip = (page - 1) * ITEMS_PER_PAGE;
 
     const where: Prisma.CourseWhereInput = {
       userId: session.user.id,
@@ -86,16 +86,10 @@ export async function getCourses({
                   mode: "insensitive" as Prisma.QueryMode,
                 },
               },
-              {
-                description: {
-                  contains: search,
-                  mode: "insensitive" as Prisma.QueryMode,
-                },
-              },
             ],
           }
         : {}),
-    }
+    };
 
     const [total, courses] = await Promise.all([
       prisma.course.count({ where }),
@@ -105,9 +99,9 @@ export async function getCourses({
         take: ITEMS_PER_PAGE,
         skip,
       }),
-    ])
+    ]);
 
-    const pageCount = Math.ceil(total / ITEMS_PER_PAGE)
+    const pageCount = Math.ceil(total / ITEMS_PER_PAGE);
 
     return {
       data: {
@@ -115,10 +109,10 @@ export async function getCourses({
         pageCount,
         total,
       },
-    }
+    };
   } catch (error) {
-    console.error("Error fetching courses:", error)
-    return { error: "Failed to fetch courses" }
+    console.error("Error fetching courses:", error);
+    return { error: "Failed to fetch courses" };
   }
 }
 
@@ -137,16 +131,16 @@ export async function getCourseById(id: string) {
         id,
         userId: session.user.id,
       },
-    })
+    });
 
     if (!course) {
-      return { error: "Course not found" }
+      return { error: "Course not found" };
     }
 
-    return { data: course }
+    return { data: course };
   } catch (error) {
-    console.error("Error fetching course:", error)
-    return { error: "Failed to fetch course" }
+    console.error("Error fetching course:", error);
+    return { error: "Failed to fetch course" };
   }
 }
 
@@ -160,7 +154,7 @@ export async function updateCourse(id: string, input: CourseInput) {
       return { error: "Unauthorized" };
     }
 
-    const validatedData = CourseSchema.parse(input)
+    const validatedData = CourseSchema.parse(input);
 
     const course = await prisma.course.update({
       where: {
@@ -168,13 +162,13 @@ export async function updateCourse(id: string, input: CourseInput) {
         userId: session.user.id,
       },
       data: validatedData,
-    })
+    });
 
-    revalidatePath("/dashboard/courses")
-    return { data: course }
+    revalidatePath("/dashboard/courses");
+    return { data: course };
   } catch (error) {
-    console.error("Error updating course:", error)
-    return { error: "Failed to update course" }
+    console.error("Error updating course:", error);
+    return { error: "Failed to update course" };
   }
 }
 
@@ -193,12 +187,12 @@ export async function deleteCourse(id: string) {
         id,
         userId: session.user.id,
       },
-    })
+    });
 
-    revalidatePath("/dashboard/courses")
-    return { data: null }
+    revalidatePath("/dashboard/courses");
+    return { data: null };
   } catch (error) {
-    console.error("Error deleting course:", error)
-    return { error: "Failed to delete course" }
+    console.error("Error deleting course:", error);
+    return { error: "Failed to delete course" };
   }
 }

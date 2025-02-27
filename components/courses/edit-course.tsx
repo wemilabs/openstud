@@ -136,7 +136,11 @@ export function EditCourse({ course }: EditCourseProps) {
               )}
             />
             <DialogFooter>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-blue-600 to-cyan-500"
+              >
                 {isSubmitting ? "Saving..." : "Save changes"}
               </Button>
             </DialogFooter>
