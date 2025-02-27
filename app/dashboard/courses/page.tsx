@@ -4,7 +4,6 @@ import { CourseList } from "@/components/courses/course-list";
 import { CourseSearch } from "@/components/courses/course-search";
 import { Pagination } from "@/components/courses/pagination";
 import { getCourses } from "@/actions/courses";
-import { DashboardShell } from "@/components/dashboard/shell";
 
 export const metadata = {
   title: "Courses - OpenStud",
@@ -35,31 +34,26 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   });
 
   return (
-    <DashboardShell>
-      <div className="flex flex-col gap-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Courses</h1>
-            <p className="text-muted-foreground">
-              Create and manage your courses.
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <CourseSearch />
-            <CreateCourse />
-          </div>
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Courses</h1>
+          <p className="text-muted-foreground">
+            Create and manage your courses.
+          </p>
         </div>
-
-        <Suspense fallback={<div>Loading courses...</div>}>
-          <CourseList courses={data?.courses} />
-          {data && data.pageCount > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={data.pageCount}
-            />
-          )}
-        </Suspense>
+        <div className="flex items-center gap-4">
+          <CourseSearch />
+          <CreateCourse />
+        </div>
       </div>
-    </DashboardShell>
+
+      <Suspense fallback={<div>Loading courses...</div>}>
+        <CourseList courses={data?.courses} />
+        {data && data.pageCount > 1 && (
+          <Pagination currentPage={currentPage} totalPages={data.pageCount} />
+        )}
+      </Suspense>
+    </div>
   );
 }

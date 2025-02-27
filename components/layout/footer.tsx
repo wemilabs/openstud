@@ -27,10 +27,8 @@ export function Footer() {
     <footer className="border-t bg-muted/30">
       <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-          <div className="space-y-4">
-            <Link href="/" className="">
-              <Logo className="h-24 w-auto transition-colors duration-200" />
-            </Link>
+          <div>
+            <Logo />
             <p className="text-sm leading-6 text-muted-foreground">
               Making academic success accessible and achievable for every
               student.

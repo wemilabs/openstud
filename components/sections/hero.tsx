@@ -3,11 +3,11 @@ import Link from "next/link";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden py-20 md:py-30">
+    <section className="relative overflow-hidden py-20 md:pt-36">
       <div className="container relative">
         <div className="mx-auto flex max-w-[980px] flex-col items-center gap-4 text-center">
           <span className="text-sm text-muted font-medium -tracking-tight bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-2 rounded-full">
-            Introducing OpenStud v0.2.4
+            Introducing OpenStud v0.2.6
           </span>
           <h1 className="text-3xl font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1]">
             Transform your study journey with{" "}
@@ -15,7 +15,7 @@ export function Hero() {
               OpenStud
             </span>
           </h1>
-          <p className="max-w-[750px] text-lg text-muted-foreground sm:text-xl">
+          <p className="max-w-[750px] text-muted-foreground md:text-lg">
             Your all-in-one platform for efficient study management, revision
             tracking, and academic success. Built by{" "}
             <a

@@ -1,6 +1,13 @@
-"use client"
+"use client";
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 
 const data = [
   {
@@ -23,7 +30,7 @@ const data = [
     name: "English",
     total: 95,
   },
-]
+];
 
 export function OverviewChart() {
   return (
@@ -53,12 +60,8 @@ export function OverviewChart() {
           }}
           labelStyle={{ color: "var(--foreground)" }}
         />
-        <Bar
-          dataKey="total"
-          radius={[6, 6, 0, 0]}
-          className="fill-primary"
-        />
+        <Bar dataKey="total" radius={[6, 6, 0, 0]} className="fill-[#155DFC]" />
       </BarChart>
     </ResponsiveContainer>
-  )
+  );
 }

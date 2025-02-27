@@ -3,5 +3,7 @@ interface DashboardShellProps {
 }
 
 export function DashboardShell({ children }: DashboardShellProps) {
-  return <div className="flex-1 space-y-4 p-8 pt-6">{children}</div>;
+  return (
+    <div className="flex-1 space-y-4 px-4 md:px-0 pt-10 pb-8">{children}</div>
+  );
 }

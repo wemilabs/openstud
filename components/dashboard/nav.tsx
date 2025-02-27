@@ -1,16 +1,20 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import { Icons } from "@/components/icons";
 
 interface NavItem {
-  title: string
-  href: string
-  icon: keyof typeof Icons
+  title: string;
+  href: string;
+  icon: keyof typeof Icons;
+}
+
+interface DashboardNavProps {
+  className?: string;
 }
 
 const navItems: NavItem[] = [
@@ -37,26 +41,33 @@ const navItems: NavItem[] = [
   {
     title: "Progress",
     href: "/dashboard/progress",
-    icon: "barChart",
+    icon: "chartNoAxesColumn",
+  },
+  {
+    title: "Billing",
+    href: "/dashboard/billing",
+    icon: "billing",
   },
   {
     title: "Settings",
     href: "/dashboard/settings",
     icon: "settings",
   },
-]
+  {
+    title: "Help",
+    href: "/docs/introduction",
+    icon: "help",
+  },
+];
 
-export function DashboardNav() {
-  const pathname = usePathname()
+export function DashboardNav({ className }: DashboardNavProps) {
+  const pathname = usePathname();
 
   return (
-    <nav className="grid items-start gap-2 p-4">
-      <div className="flex items-center space-x-4 rounded-lg px-3 py-2">
-        <span className="text-lg font-semibold">Dashboard</span>
-      </div>
-      <div className="grid gap-1 pt-2">
+    <nav className={cn("grid items-start gap-2 p-4", className)}>
+      <div className="grid gap-1 pt-4 pl-8">
         {navItems.map((item) => {
-          const Icon = Icons[item.icon]
+          const Icon = Icons[item.icon];
           return (
             <Link
               key={item.href}
@@ -65,16 +76,16 @@ export function DashboardNav() {
                 buttonVariants({ variant: "ghost" }),
                 pathname === item.href
                   ? "bg-muted hover:bg-muted"
-                  : "hover:bg-transparent hover:underline",
-                "justify-start h-10"
+                  : "hover:bg-transparent",
+                "justify-start h-10 font-medium"
               )}
             >
-              <Icon className="mr-2 h-4 w-4" />
+              <Icon className="mr-2 size-4" />
               {item.title}
             </Link>
-          )
+          );
         })}
       </div>
     </nav>
-  )
+  );
 }

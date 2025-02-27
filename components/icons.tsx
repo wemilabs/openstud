@@ -3,7 +3,7 @@ import type { SVGProps } from "react";
 import {
   AlertTriangle,
   ArrowRight,
-  BarChart,
+  ChartNoAxesColumn,
   Book,
   Calendar,
   Check,
@@ -57,7 +57,7 @@ export const Icons = {
   book: Book,
   pencil: Pencil,
   calendar: Calendar,
-  barChart: BarChart,
+  chartNoAxesColumn: ChartNoAxesColumn,
   check: Check,
 } as const;
 

@@ -3,7 +3,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 
 const faqs = [
   {
@@ -36,7 +36,7 @@ const faqs = [
     answer:
       "Simply sign up for a free account, choose your subjects, and start organizing your study materials. Our onboarding process will guide you through setting up your first study plan.",
   },
-]
+];
 
 export function FAQ() {
   return (
@@ -46,10 +46,10 @@ export function FAQ() {
           Frequently Asked Questions
         </h2>
         <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-          Find answers to common questions about OpenStud
+          Find answers to common questions
         </p>
       </div>
-      <div className="mx-auto max-w-[700px] mt-16">
+      <div className="mx-auto max-w-[700px] mt-16 px-6 md:px-0">
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
             <AccordionItem key={index} value={`item-${index}`}>
@@ -60,5 +60,5 @@ export function FAQ() {
         </Accordion>
       </div>
     </section>
-  )
+  );
 }
