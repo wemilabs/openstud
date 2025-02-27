@@ -1,6 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { Bell, Check, ChevronsUpDown, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Logo } from "@/components/layout/logo";
@@ -13,23 +18,68 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Bell,
-  ChevronDown,
-  LogOut,
-  Settings,
-  Slash,
-  CircleHelp,
-} from "lucide-react";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { RightSideMenu } from "@/components/dashboard/right-side-menu";
-import { useSession, signOut } from "next-auth/react";
-import Image from "next/image";
-import { Icons } from "../icons";
+import { Icons } from "@/components/icons";
+
+const teams = [
+  {
+    value: "individual",
+    label: "Individual",
+  },
+  {
+    value: "group-one",
+    label: "Group 1",
+  },
+  {
+    value: "group-four",
+    label: "Group 4",
+  },
+  {
+    value: "group-nine",
+    label: "Group 9",
+  },
+];
+
+const academicYears = [
+  {
+    value: "2024-2025",
+    label: "2024-2025",
+  },
+  {
+    value: "2025-2026",
+    label: "2025-2026",
+  },
+  {
+    value: "2026-2027",
+    label: "2026-2027",
+  },
+  {
+    value: "2027-2028",
+    label: "2027-2028",
+  },
+];
 
 export function DashboardHeader() {
   const { data: session } = useSession();
   const user = session?.user;
+  const [openTeam, setOpenTeam] = useState(false);
+  const [openAcademicYear, setOpenAcademicYear] = useState(false);
+  const [academicYearValue, setAcademicYearValue] = useState("");
+  const [teamValue, setTeamValue] = useState("");
 
   const handleSignOut = async () => {
     try {
@@ -64,53 +114,126 @@ export function DashboardHeader() {
           </span>
 
           {/* Team selector */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="hidden md:flex">
-              <Button variant="ghost" className="h-8 gap-1 px-2 font-normal">
-                <span className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-md px-1.5 py-0"
-                  >
-                    P
-                  </Badge>
-                  <span className="font-medium">Personal Team</span>
-                </span>
-                <ChevronDown className="h-4 w-4 opacity-50" />
+          <Popover open={openTeam} onOpenChange={setOpenTeam}>
+            <PopoverTrigger asChild className="hidden md:flex">
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openTeam}
+                className="justify-between border-none shadow-none"
+              >
+                <Badge
+                  variant="outline"
+                  className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-md px-1.5"
+                >
+                  Ind
+                </Badge>
+                {teamValue
+                  ? teams.find((team) => team.value === teamValue)?.label
+                  : "Individual"}
+                <ChevronsUpDown className="opacity-50" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem>Personal Team</DropdownMenuItem>
-              <DropdownMenuItem>Create New Team</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0">
+              <Command>
+                <CommandInput placeholder="Search team..." className="h-9" />
+                <CommandList>
+                  <CommandEmpty>No team found.</CommandEmpty>
+                  <CommandGroup>
+                    {teams.map((team) => (
+                      <CommandItem
+                        key={team.value}
+                        value={team.value}
+                        onSelect={(currentValue) => {
+                          setTeamValue(
+                            currentValue === teamValue ? "" : currentValue
+                          );
+                          setOpenTeam(false);
+                        }}
+                      >
+                        {team.label}
+                        <Check
+                          className={cn(
+                            "ml-auto",
+                            team.value === teamValue
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
 
           {/* Divider slash */}
           <span className="hidden md:block font-thin text-2xl text-muted-foreground">
             /
           </span>
 
-          {/* Project selector */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="hidden md:flex">
-              <Button variant="ghost" className="h-8 gap-1 px-2 font-normal">
-                <span className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-md px-1.5 py-0"
-                  >
-                    AY
-                  </Badge>
-                  <span className="font-medium">2024-2025</span>
-                </span>
-                <ChevronDown className="h-4 w-4 opacity-50" />
+          {/* Academic year selector */}
+          <Popover open={openAcademicYear} onOpenChange={setOpenAcademicYear}>
+            <PopoverTrigger asChild className="hidden md:flex">
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openAcademicYear}
+                className="justify-between border-none shadow-none"
+              >
+                <Badge
+                  variant="outline"
+                  className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-md px-1.5"
+                >
+                  AY
+                </Badge>
+                {academicYearValue
+                  ? academicYears.find(
+                      (year) => year.value === academicYearValue
+                    )?.label
+                  : "2024-2025"}
+                <ChevronsUpDown className="opacity-50" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem>2024-2025</DropdownMenuItem>
-              <DropdownMenuItem>Add New Academic Year</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0">
+              <Command>
+                <CommandInput
+                  placeholder="Search academic year..."
+                  className="h-9"
+                />
+                <CommandList>
+                  <CommandEmpty>No academic year found.</CommandEmpty>
+                  <CommandGroup>
+                    {academicYears.map((year) => (
+                      <CommandItem
+                        key={year.value}
+                        value={year.value}
+                        onSelect={(currentValue) => {
+                          setAcademicYearValue(
+                            currentValue === academicYearValue
+                              ? ""
+                              : currentValue
+                          );
+                          setOpenAcademicYear(false);
+                        }}
+                      >
+                        {year.label}
+                        <Check
+                          className={cn(
+                            "ml-auto",
+                            year.value === academicYearValue
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Right side controls */}

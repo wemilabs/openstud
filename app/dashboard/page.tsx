@@ -12,7 +12,7 @@ export default function DashboardPage() {
           Here's an overview of your academic progress.
         </p>
       </div>
-      <div className="grid gap-4 md:grid-cols-7 lg:grid-cols-12">
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-12">
         {/* Overview section */}
         <div className="col-span-full md:col-span-5 lg:col-span-8">
           <Overview />

@@ -13,8 +13,7 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: "Openstud",
-  description:
-    "A simple yet intuitive and efficient way to manage your study process.",
+  description: "The Ultimate Place for Smarter Learning",
 };
 
 export default function RootLayout({
