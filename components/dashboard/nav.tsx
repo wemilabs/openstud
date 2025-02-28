@@ -44,6 +44,11 @@ const navItems: NavItem[] = [
     icon: "chartNoAxesColumn",
   },
   {
+    title: "Workspaces",
+    href: "/dashboard/workspaces",
+    icon: "users",
+  },
+  {
     title: "Billing",
     href: "/dashboard/billing",
     icon: "billing",
