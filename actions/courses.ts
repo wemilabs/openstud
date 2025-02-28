@@ -75,39 +75,45 @@ export async function getCourses({
 
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
+    // Create the where clause for filtering
     const where: Prisma.CourseWhereInput = {
       userId: session.user.id,
       ...(search
         ? {
             OR: [
-              {
-                name: {
-                  contains: search,
-                  mode: "insensitive" as Prisma.QueryMode,
-                },
-              },
+              { name: { contains: search, mode: "insensitive" } },
+              { description: { contains: search, mode: "insensitive" } },
             ],
           }
         : {}),
     };
 
-    const [total, courses] = await Promise.all([
-      prisma.course.count({ where }),
-      prisma.course.findMany({
-        where,
-        orderBy: { [sortBy]: sortOrder },
-        take: ITEMS_PER_PAGE,
-        skip,
-      }),
-    ]);
+    // Get total count for pagination
+    const totalCount = await prisma.course.count({ where });
+    const pageCount = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
-    const pageCount = Math.ceil(total / ITEMS_PER_PAGE);
+    // Get courses with pagination, sorting, and filtering
+    const courses = await prisma.course.findMany({
+      where,
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip,
+      take: ITEMS_PER_PAGE,
+      include: {
+        _count: {
+          select: {
+            notes: true
+          }
+        }
+      }
+    });
 
     return {
       data: {
         courses,
         pageCount,
-        total,
+        totalCount,
       },
     };
   } catch (error) {

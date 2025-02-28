@@ -25,9 +25,14 @@ import { ArrowUpDown, Book, Calendar } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { CourseSearch } from "./course-search";
+import Link from "next/link";
 
 interface CourseListProps {
-  courses?: Pick<Course, "id" | "name" | "description" | "createdAt">[];
+  courses?: (Pick<Course, "id" | "name" | "description" | "createdAt"> & {
+    _count: {
+      notes: number;
+    };
+  })[];
 }
 
 export function CourseList({ courses = [] }: CourseListProps) {
@@ -121,9 +126,11 @@ export function CourseList({ courses = [] }: CourseListProps) {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Book className="h-4 w-4 text-muted-foreground" />
-                  <CardTitle className="line-clamp-1 text-base">
-                    {course.name}
-                  </CardTitle>
+                  <Link href={`/dashboard/courses/${course.id}`}>
+                    <CardTitle className="line-clamp-1 text-base">
+                      {course.name}
+                    </CardTitle>
+                  </Link>
                 </div>
                 {course.description && (
                   <CardDescription className="line-clamp-2 mt-2.5">
@@ -144,7 +151,8 @@ export function CourseList({ courses = [] }: CourseListProps) {
                   variant="secondary"
                   className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
                 >
-                  0 Notes
+                  {course._count.notes}{" "}
+                  {course._count.notes === 1 ? "Note" : "Notes"}
                 </Badge>
                 <Badge variant="outline">No assignments</Badge>
               </CardFooter>

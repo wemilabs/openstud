@@ -21,7 +21,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   const { page, search, sort } = await searchParams;
   const currentPage = Number(page) || 1;
 
-  const { data, error } = await getCourses({
+  const { data } = await getCourses({
     page: currentPage,
     search,
     ...(sort
@@ -34,16 +34,16 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
             Courses
           </h1>
           <h2 className="text-sm md:text-base text-muted-foreground">
-            Add and manage courses.
+            Add and manage courses. Click on a course title to view your notes.
           </h2>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center">
           <CreateCourse />
         </div>
       </div>

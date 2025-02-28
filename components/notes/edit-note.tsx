@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,63 +26,65 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { updateNote } from "@/actions/notes";
+import { Note } from "@prisma/client";
 import { Pencil } from "lucide-react";
-import { updateCourse } from "@/actions/courses";
-import type { Course } from "@prisma/client";
 
-const courseFormSchema = z.object({
-  name: z
+// Form validation schema
+const noteFormSchema = z.object({
+  title: z
     .string()
-    .min(3, "Course name must be at least 3 characters")
-    .max(50, "Course name must not exceed 50 characters"),
-  description: z
+    .min(3, "Title must be at least 3 characters")
+    .max(100, "Title must not exceed 100 characters"),
+  content: z
     .string()
-    .min(10, "Description must be at least 10 characters")
-    .max(500, "Description must not exceed 500 characters")
     .optional()
     .nullable()
-    .or(z.literal("")),
+    .transform((val) => (val === "" ? null : val))
+    .refine((val) => !val || val.length >= 10, {
+      message: "Content must be at least 10 characters if provided",
+    })
+    .refine((val) => !val || val.length <= 10000, {
+      message: "Content must not exceed 10000 characters",
+    }),
 });
 
-type CourseFormValues = z.infer<typeof courseFormSchema>;
-
-interface EditCourseProps {
-  course: Pick<Course, "id" | "name" | "description">;
+interface EditNoteProps {
+  note: Note;
 }
 
-export function EditCourse({ course }: EditCourseProps) {
+export function EditNote({ note }: EditNoteProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<CourseFormValues>({
-    resolver: zodResolver(courseFormSchema),
+  const form = useForm<z.infer<typeof noteFormSchema>>({
+    resolver: zodResolver(noteFormSchema),
     defaultValues: {
-      name: course.name,
-      description: course.description || "",
+      title: note.title,
+      content: note.content || "",
     },
   });
 
-  const { isSubmitting } = form.formState;
+  // Handle form submission
+  async function onSubmit(values: z.infer<typeof noteFormSchema>) {
+    setIsSubmitting(true);
 
-  async function onSubmit(data: CourseFormValues) {
     try {
-      const formData = {
-        ...data,
-        description: data.description || null,
-      };
-
-      const result = await updateCourse(course.id, formData);
+      const result = await updateNote(note.id, values);
 
       if (result.error) {
         toast.error(result.error);
-        return;
+      } else {
+        toast.success("Note updated successfully");
+        setOpen(false);
+        router.refresh();
       }
-
-      toast.success("Course updated successfully!");
-      setOpen(false);
-      router.refresh();
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Failed to update note");
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -95,24 +97,24 @@ export function EditCourse({ course }: EditCourseProps) {
           className="size-8 bg-muted text-primary dark:text-primary hover:bg-muted/90 cursor-pointer"
         >
           <Pencil className="h-4 w-4" />
-          <span className="sr-only">Edit course</span>
+          <span className="sr-only">Edit note</span>
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Edit Course</DialogTitle>
-          <DialogDescription>Make changes to your course.</DialogDescription>
+          <DialogTitle>Edit note</DialogTitle>
+          <DialogDescription>Make changes to your note.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
+              name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Mathematics 101" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,14 +122,13 @@ export function EditCourse({ course }: EditCourseProps) {
             />
             <FormField
               control={form.control}
-              name="description"
+              name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (optional)</FormLabel>
+                  <FormLabel>Content</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Brief description of the course..."
-                      className="resize-none"
+                      className="min-h-[200px]"
                       {...field}
                       value={field.value || ""}
                     />
@@ -138,11 +139,19 @@ export function EditCourse({ course }: EditCourseProps) {
             />
             <DialogFooter>
               <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                className="cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-cyan-500 ease-in-out duration-500 cursor-pointer text-white dark:text-primary"
+                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-cyan-500 hover:ease-in-out hover:duration-500 cursor-pointer text-white dark:text-primary"
               >
-                {isSubmitting ? "Saving..." : "Save changes"}
+                {isSubmitting ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </form>

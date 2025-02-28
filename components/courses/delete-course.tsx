@@ -52,7 +52,7 @@ export function DeleteCourse({ courseId, courseName }: DeleteCourseProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="size-8 bg-destructive text-muted hover:text-muted dark:text-primary hover:bg-destructive/90"
+        className="size-8 bg-destructive text-muted hover:text-muted dark:text-primary hover:bg-destructive/90 cursor-pointer"
         onClick={() => setOpen(true)}
       >
         <Trash2 className="size-4" />
@@ -67,11 +67,13 @@ export function DeleteCourse({ courseId, courseName }: DeleteCourseProps) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel className="cursor-pointer">
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={onDelete}
-            className="bg-destructive text-muted dark:text-primary hover:bg-destructive/90"
             disabled={isLoading}
+            className="bg-destructive text-muted dark:text-primary hover:bg-destructive/90 cursor-pointer"
           >
             {isLoading ? "Deleting..." : "Delete"}
           </AlertDialogAction>

@@ -71,8 +71,21 @@ model Course {
   updatedAt   DateTime @updatedAt
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes       Note[]
 
   @@index([userId])
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  title       String
+  content     String?  @db.Text
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([courseId])
 }
 
 model Team {

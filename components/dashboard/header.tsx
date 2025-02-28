@@ -73,13 +73,43 @@ const academicYears = [
   },
 ];
 
+const semesters = [
+  {
+    value: "semester-one",
+    label: "Semester 1",
+  },
+  {
+    value: "semester-two",
+    label: "Semester 2",
+  },
+  {
+    value: "semester-three",
+    label: "Semester 3",
+  },
+  {
+    value: "semester-four",
+    label: "Semester 4",
+  },
+  {
+    value: "semester-five",
+    label: "Semester 5",
+  },
+  {
+    value: "semester-six",
+    label: "Semester 6",
+  },
+];
+
 export function DashboardHeader() {
   const { data: session } = useSession();
   const user = session?.user;
   const [openTeam, setOpenTeam] = useState(false);
   const [openAcademicYear, setOpenAcademicYear] = useState(false);
+  const [openSemester, setOpenSemester] = useState(false);
+
   const [academicYearValue, setAcademicYearValue] = useState("");
   const [teamValue, setTeamValue] = useState("");
+  const [semesterValue, setSemesterValue] = useState("");
 
   const handleSignOut = async () => {
     try {
@@ -234,6 +264,71 @@ export function DashboardHeader() {
               </Command>
             </PopoverContent>
           </Popover>
+
+          {/* Divider slash */}
+          <span className="hidden md:block font-thin text-2xl text-muted-foreground">
+            /
+          </span>
+
+          {/* Semester selector */}
+          <Popover open={openSemester} onOpenChange={setOpenSemester}>
+            <PopoverTrigger asChild className="hidden md:flex">
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openSemester}
+                className="justify-between border-none shadow-none"
+              >
+                <Badge
+                  variant="outline"
+                  className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-md px-1.5"
+                >
+                  S
+                </Badge>
+                {semesterValue
+                  ? semesters.find(
+                      (semester) => semester.value === semesterValue
+                    )?.label
+                  : "Semester 1"}
+                <ChevronsUpDown className="opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-0">
+              <Command>
+                <CommandInput
+                  placeholder="Search semester..."
+                  className="h-9"
+                />
+                <CommandList>
+                  <CommandEmpty>No semester found.</CommandEmpty>
+                  <CommandGroup>
+                    {semesters.map((semester) => (
+                      <CommandItem
+                        key={semester.value}
+                        value={semester.value}
+                        onSelect={(currentValue) => {
+                          setSemesterValue(
+                            currentValue === semesterValue ? "" : currentValue
+                          );
+                          setOpenSemester(false);
+                        }}
+                      >
+                        {semester.label}
+                        <Check
+                          className={cn(
+                            "ml-auto",
+                            semester.value === semesterValue
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Right side controls */}
@@ -263,11 +358,8 @@ export function DashboardHeader() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="cursor-pointer">
-              <Button
-                variant="ghost"
-                className="relative h-8 flex items-center gap-2 ml-2 mr-4"
-              >
-                <Avatar className="h-8 w-8">
+              <Button variant="ghost" className="relative flex items-center">
+                <Avatar className="size-8">
                   {user?.image ? (
                     <div className="relative aspect-square h-full w-full">
                       <Image
