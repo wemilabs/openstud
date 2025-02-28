@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -8,31 +9,60 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { getTaskStatsByCategory } from "@/actions/dashboard";
+import { toast } from "sonner";
 
-const data = [
+// Fallback data in case there's no real data yet
+const fallbackData = [
   {
-    name: "Math",
+    name: "Assignment",
     total: 85,
   },
   {
-    name: "Physics",
+    name: "Exam",
     total: 78,
   },
   {
-    name: "Chemistry",
+    name: "Presentation",
     total: 92,
   },
   {
-    name: "Biology",
+    name: "Reading",
     total: 88,
   },
   {
-    name: "English",
+    name: "Project",
     total: 95,
   },
 ];
 
 export function OverviewChart() {
+  const [data, setData] = useState(fallbackData);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getTaskStatsByCategory();
+        
+        if (result.error) {
+          toast.error(`Error: ${result.error}`);
+          return;
+        }
+        
+        if (result.data && result.data.length > 0) {
+          setData(result.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch task statistics:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>

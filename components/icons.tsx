@@ -26,6 +26,7 @@ import {
   SunMedium,
   Trash,
   User,
+  Users,
   X,
   type Icon as LucideIcon,
 } from "lucide-react";
@@ -48,6 +49,7 @@ export const Icons = {
   add: Plus,
   warning: AlertTriangle,
   user: User,
+  users: Users,
   arrowRight: ArrowRight,
   help: HelpCircle,
   sun: SunMedium,
