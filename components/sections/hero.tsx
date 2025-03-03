@@ -1,15 +1,19 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { MyHoverCard } from "@/components/sections/my-hover-card";
+import { Badge } from "@/components/ui/badge";
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden min-h-screen pt-24 md:pt-30">
       <div className="container relative">
         <div className="mx-auto flex max-w-[980px] flex-col items-center gap-6 md:gap-y-10 text-center">
-          <span className="text-sm text-muted font-medium -tracking-tight bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-2 rounded-full mb-2">
+          <Badge
+            variant="outline"
+            className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-full px-3 py-2 text-sm leading-6 tracking-wide border-none shadow-none"
+          >
             Introducing OpenStud v0.2.9
-          </span>
+          </Badge>
           <h1 className="text-4xl font-extrabold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1] bg-gradient-to-r from-primary/10 via-primary to-primary/65 bg-clip-text text-transparent mt-2">
             The Ultimate Place for Smarter Learning
           </h1>

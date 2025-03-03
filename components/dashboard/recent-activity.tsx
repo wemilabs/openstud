@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { getRecentActivity } from "@/actions/dashboard";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -9,6 +15,7 @@ import { CheckCircle, Clock, FileEdit, BarChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/tasks/progress-bar";
+import { ScrollArea } from "../ui/scroll-area";
 
 // Activity type
 interface Activity {
@@ -32,7 +39,7 @@ const fallbackActivities: Activity[] = [
     category: "reading",
     projectName: "Environmental Biology",
     taskTitle: "Literature Review",
-    completionPercentage: 0
+    completionPercentage: 0,
   },
   {
     id: "2",
@@ -42,7 +49,7 @@ const fallbackActivities: Activity[] = [
     category: "assignment",
     projectName: "Calculus II",
     taskTitle: "Math Assignment",
-    completionPercentage: 50
+    completionPercentage: 50,
   },
   {
     id: "3",
@@ -52,8 +59,8 @@ const fallbackActivities: Activity[] = [
     category: "lab",
     projectName: "Physics 101",
     taskTitle: "Physics Lab Report",
-    completionPercentage: 100
-  }
+    completionPercentage: 100,
+  },
 ];
 
 /**
@@ -74,10 +81,12 @@ export function RecentActivity() {
           setActivities(fallbackActivities);
         } else if (result.data && result.data.length > 0) {
           // Format the data
-          const formattedActivities: Activity[] = result.data.map((activity: any) => ({
-            ...activity,
-            date: new Date(activity.date)
-          }));
+          const formattedActivities: Activity[] = result.data.map(
+            (activity: any) => ({
+              ...activity,
+              date: new Date(activity.date),
+            })
+          );
           setActivities(formattedActivities);
         } else {
           // Use fallback data if no real data is available
@@ -115,7 +124,7 @@ export function RecentActivity() {
   // Get category badge color
   const getCategoryColor = (category: string | null | undefined) => {
     if (!category) return "bg-gray-200 text-gray-700";
-    
+
     switch (category.toLowerCase()) {
       case "assignment":
         return "bg-blue-100 text-blue-800";
@@ -144,69 +153,81 @@ export function RecentActivity() {
         <CardDescription>Your latest academic updates</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {isLoading ? (
-          <div className="space-y-2">
-            <div className="h-14 bg-muted animate-pulse rounded-md" />
-            <div className="h-14 bg-muted animate-pulse rounded-md" />
-            <div className="h-14 bg-muted animate-pulse rounded-md" />
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {activities.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No recent activity</p>
-            ) : (
-              activities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start space-x-3 rounded-md border p-3"
-                >
-                  <div className="mt-0.5">{getActivityIcon(activity.type)}</div>
-                  <div className="space-y-1 w-full">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium leading-none">
-                        {activity.taskTitle}
-                      </p>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(activity.date, { addSuffix: true })}
-                      </span>
+        <ScrollArea className="md:h-72 w-full">
+          {isLoading ? (
+            <div className="space-y-2">
+              <div className="h-14 bg-muted animate-pulse rounded-md" />
+              <div className="h-14 bg-muted animate-pulse rounded-md" />
+              <div className="h-14 bg-muted animate-pulse rounded-md" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {activities.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No recent activity
+                </p>
+              ) : (
+                activities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-start space-x-3 rounded-md border p-3"
+                  >
+                    <div className="mt-0.5">
+                      {getActivityIcon(activity.type)}
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.projectName}
-                    </p>
-                    {activity.category && (
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-xs font-normal",
-                          getCategoryColor(activity.category)
-                        )}
-                      >
-                        {activity.category.charAt(0).toUpperCase() + activity.category.slice(1)}
-                      </Badge>
-                    )}
-                    {activity.type === "progress" && (
-                      <div className="w-full mt-2">
-                        <div className="flex justify-between text-xs mb-1">
-                          <span>Progress</span>
-                          <span>{activity.completionPercentage}%</span>
-                        </div>
-                        <ProgressBar 
-                          value={activity.completionPercentage} 
-                          indicatorClassName={
-                            activity.completionPercentage < 25 ? "bg-red-500" :
-                            activity.completionPercentage < 50 ? "bg-orange-500" :
-                            activity.completionPercentage < 75 ? "bg-yellow-500" :
-                            "bg-green-500"
-                          }
-                        />
+                    <div className="space-y-1 w-full">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium leading-none">
+                          {activity.taskTitle}
+                        </p>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(activity.date, {
+                            addSuffix: true,
+                          })}
+                        </span>
                       </div>
-                    )}
+                      <p className="text-xs text-muted-foreground">
+                        {activity.projectName}
+                      </p>
+                      {activity.category && (
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-xs font-normal",
+                            getCategoryColor(activity.category)
+                          )}
+                        >
+                          {activity.category.charAt(0).toUpperCase() +
+                            activity.category.slice(1)}
+                        </Badge>
+                      )}
+                      {activity.type === "progress" && (
+                        <div className="w-full mt-2">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Progress</span>
+                            <span>{activity.completionPercentage}%</span>
+                          </div>
+                          <ProgressBar
+                            value={activity.completionPercentage}
+                            indicatorClassName={
+                              activity.completionPercentage < 25
+                                ? "bg-red-500"
+                                : activity.completionPercentage < 50
+                                ? "bg-orange-500"
+                                : activity.completionPercentage < 75
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
+                            }
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
+                ))
+              )}
+            </div>
+          )}
+        </ScrollArea>
       </CardContent>
     </Card>
   );

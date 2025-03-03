@@ -13,7 +13,7 @@ export default function DashboardPage() {
           Your collaborative space for academic success
         </p>
       </div>
-      
+
       {/* Overview and Recent Activity */}
       <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-12 mb-6">
         {/* Overview section */}
@@ -26,7 +26,7 @@ export default function DashboardPage() {
           <RecentActivity />
         </div>
       </div>
-      
+
       {/* Workspace-specific content */}
       <WorkspaceContent />
     </>
