@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getProject, getProjectTaskStats } from "@/actions/projects";
 import { Progress } from "@/components/ui/progress";
@@ -13,7 +18,16 @@ interface ProjectData {
   id: string;
   name: string;
   description: string | null;
-  teamId: string;
+  teamId: string | null;
+  userId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  team?: {
+    id: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
 }
 
 interface TaskStats {
@@ -30,36 +44,40 @@ interface ProjectHeaderProps {
  */
 export function ProjectHeader({ projectId }: ProjectHeaderProps) {
   const [project, setProject] = useState<ProjectData | null>(null);
-  const [taskStats, setTaskStats] = useState<TaskStats>({ total: 0, completed: 0 });
+  const [taskStats, setTaskStats] = useState<TaskStats>({
+    total: 0,
+    completed: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Calculate progress percentage
-  const progressPercentage = taskStats.total > 0 
-    ? Math.round((taskStats.completed / taskStats.total) * 100) 
-    : 0;
-  
+  const progressPercentage =
+    taskStats.total > 0
+      ? Math.round((taskStats.completed / taskStats.total) * 100)
+      : 0;
+
   // Fetch project data and task stats
   useEffect(() => {
     const fetchProjectData = async () => {
       try {
         setLoading(true);
-        
+
         // Get project details
         const projectResult = await getProject(projectId);
-        
+
         if (projectResult.error) {
           setError(projectResult.error);
           return;
         }
-        
+
         if (!projectResult.data) {
           setError("Project data not found");
           return;
         }
-        
+
         setProject(projectResult.data);
-        
+
         // Get project task statistics
         const statsResult = await getProjectTaskStats(projectId);
         if (statsResult.data) {
@@ -72,10 +90,10 @@ export function ProjectHeader({ projectId }: ProjectHeaderProps) {
         setLoading(false);
       }
     };
-    
+
     fetchProjectData();
   }, [projectId]);
-  
+
   // Show error state
   if (error) {
     return (
@@ -97,10 +115,10 @@ export function ProjectHeader({ projectId }: ProjectHeaderProps) {
       </Card>
     );
   }
-  
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col items-start sm:flex-row sm:items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/dashboard">
@@ -118,9 +136,7 @@ export function ProjectHeader({ projectId }: ProjectHeaderProps) {
               <>
                 <CardTitle className="text-2xl">{project?.name}</CardTitle>
                 {project?.description && (
-                  <CardDescription>
-                    {project.description}
-                  </CardDescription>
+                  <CardDescription>{project.description}</CardDescription>
                 )}
               </>
             )}

@@ -70,7 +70,7 @@ export function DashboardNav({ className }: DashboardNavProps) {
 
   return (
     <nav className={cn("grid items-start gap-2 p-4", className)}>
-      <div className="grid gap-1 pt-4 pl-8">
+      <div className="grid gap-1 pt-4 pl-8 md:mt-8">
         {navItems.map((item) => {
           const Icon = Icons[item.icon];
           return (

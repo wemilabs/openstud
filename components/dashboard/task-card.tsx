@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { updateTask } from "@/actions/tasks";
 import {
   TaskPriority,
   PriorityLevel,
@@ -27,6 +26,7 @@ import {
 } from "@/components/dashboard/task-category";
 import { DatePicker } from "@/components/ui/date-picker";
 import { CompletionSlider } from "@/components/tasks/completion-slider";
+import { useTaskChanges } from "@/contexts/task-changes-context";
 
 // Task type definition
 export interface Task {
@@ -59,7 +59,7 @@ export function TaskCard({
   onDelete,
   onUpdate,
 }: TaskCardProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const { addChange } = useTaskChanges();
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -102,7 +102,8 @@ export function TaskCard({
 
     setIsUpdating(true);
     try {
-      const result = await updateTask(task.id, {
+      // Add the changes to the pending changes
+      addChange(task.id, {
         title: taskTitle.trim(),
         description: taskDescription.trim() || null,
         dueDate: taskDueDate || null,
@@ -110,36 +111,29 @@ export function TaskCard({
         category: taskCategory,
         completionPercentage: taskCompletionPercentage,
         // Set completed status based on completion percentage
-        completed: taskCompletionPercentage === 100 ? true : undefined,
+        // If percentage is 100, mark as completed, if less than 100, mark as not completed
+        completed: taskCompletionPercentage === 100 ? true : false,
       });
 
-      if (result.error) {
-        toast.error(`Error: ${result.error}`);
-        return;
+      // Create a local updated task object to update the UI
+      const updatedTask: Task = {
+        ...task,
+        title: taskTitle.trim(),
+        description: taskDescription.trim() || null,
+        dueDate: taskDueDate || null,
+        priority: taskPriority,
+        category: taskCategory,
+        completionPercentage: taskCompletionPercentage,
+        completed: taskCompletionPercentage === 100,
+        updatedAt: new Date(),
+      };
+
+      if (onUpdate) {
+        onUpdate(updatedTask);
       }
 
-      if (result.data) {
-        // Convert the updated task to the correct type
-        const updatedTask: Task = {
-          ...task, // Keep existing fields
-          ...result.data, // Update with new data
-          priority: result.data.priority as PriorityLevel | null,
-          category: result.data.category as TaskCategory | null,
-          dueDate: result.data.dueDate ? new Date(result.data.dueDate) : null,
-          // Ensure we maintain the correct types for dates
-          createdAt: new Date(result.data.createdAt || task.createdAt),
-          updatedAt: new Date(result.data.updatedAt || task.updatedAt),
-        };
-
-        if (onUpdate) {
-          onUpdate(updatedTask);
-        }
-        setOpenEditDialog(false);
-        toast.success("Task updated successfully");
-
-        // Force a refresh to ensure all components reflect the changes
-        // window.location.reload();
-      }
+      setOpenEditDialog(false);
+      toast.success("Task updated. Click 'Save Changes' to apply.");
     } catch (error) {
       console.error("Error updating task:", error);
       toast.error("Failed to update task");
@@ -154,7 +148,42 @@ export function TaskCard({
 
     setIsUpdatingCompletion(true);
     try {
+      // Add the change to the pending changes
+      addChange(task.id, {
+        // Explicitly set completed to the opposite of current status
+        completed: !task.completed,
+        // If marking as complete, set to 100%, if marking as incomplete, set to current percentage
+        completionPercentage: !task.completed
+          ? 100
+          : task.completionPercentage < 100
+          ? task.completionPercentage
+          : 99,
+      });
+
+      // Create a local updated task object to update the UI
+      const updatedTask: Task = {
+        ...task,
+        completed: !task.completed,
+        // If marking as incomplete and percentage is 100, set it to 99
+        completionPercentage: !task.completed
+          ? 100
+          : task.completionPercentage === 100
+          ? 99
+          : task.completionPercentage,
+        updatedAt: new Date(),
+      };
+
+      // Update the UI
       onToggleComplete(task.id, task.completed);
+
+      toast.success(
+        !task.completed
+          ? "Task marked as completed. Click 'Save Changes' to apply."
+          : "Task marked as incomplete. Click 'Save Changes' to apply."
+      );
+    } catch (error) {
+      console.error("Error toggling task completion:", error);
+      toast.error("Failed to update task status");
     } finally {
       setIsUpdatingCompletion(false);
     }

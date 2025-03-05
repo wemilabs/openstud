@@ -1,10 +1,16 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { ProgressBar } from "@/components/tasks/progress-bar";
-import { Folder, ArrowRight, CheckCircle2, Circle, Clock } from "lucide-react";
+import { Folder, ArrowRight, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface ProjectCardProps {
@@ -24,32 +30,44 @@ interface ProjectCardProps {
 /**
  * Project card component for displaying project information
  */
-export function ProjectCard({ id, name, description, teamId, updatedAt, taskStats }: ProjectCardProps) {
+export function ProjectCard({
+  id,
+  name,
+  description,
+  updatedAt,
+  taskStats,
+}: ProjectCardProps) {
   const router = useRouter();
-  
+
   // Format date for display
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   // Calculate progress percentage based on completed tasks or use average completion percentage
-  const progressPercentage = taskStats?.avgCompletionPercentage !== undefined
-    ? Math.round(Number(taskStats.avgCompletionPercentage))
-    : (taskStats && taskStats.total > 0 
-        ? Math.round((Number(taskStats.completed) / Number(taskStats.total)) * 100) 
-        : 0);
-  
+  const progressPercentage =
+    taskStats?.avgCompletionPercentage !== undefined
+      ? Math.round(Number(taskStats.avgCompletionPercentage))
+      : taskStats && taskStats.total > 0
+      ? Math.round(
+          (Number(taskStats.completed) / Number(taskStats.total)) * 100
+        )
+      : 0;
+
   // Navigate to project page
   const navigateToProject = () => {
     router.push(`/dashboard/projects/${id}`);
   };
-  
+
   return (
-    <Card className="hover:border-primary/50 transition-colors cursor-pointer" onClick={navigateToProject}>
+    <Card
+      className="hover:border-primary/50 transition-colors cursor-pointer"
+      onClick={navigateToProject}
+    >
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -75,13 +93,16 @@ export function ProjectCard({ id, name, description, teamId, updatedAt, taskStat
                 <span>Progress</span>
                 <span>{progressPercentage}%</span>
               </div>
-              <ProgressBar 
-                value={progressPercentage} 
+              <ProgressBar
+                value={progressPercentage}
                 indicatorClassName={
-                  progressPercentage < 25 ? "bg-red-500" :
-                  progressPercentage < 50 ? "bg-orange-500" :
-                  progressPercentage < 75 ? "bg-yellow-500" :
-                  "bg-green-500"
+                  progressPercentage < 25
+                    ? "bg-red-500"
+                    : progressPercentage < 50
+                    ? "bg-orange-500"
+                    : progressPercentage < 75
+                    ? "bg-yellow-500"
+                    : "bg-green-500"
                 }
               />
             </div>

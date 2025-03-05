@@ -5,7 +5,14 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Bell, Check, ChevronsUpDown, LogOut, Plus, Settings } from "lucide-react";
+import {
+  Bell,
+  Check,
+  ChevronsUpDown,
+  LogOut,
+  Plus,
+  Settings,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Logo } from "@/components/layout/logo";
@@ -35,15 +42,17 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { RightSideMenu } from "@/components/dashboard/right-side-menu";
 import { Icons } from "@/components/icons";
-import { useWorkspace, INDIVIDUAL_WORKSPACE } from "@/contexts/workspace-context";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
+import {
+  useWorkspace,
+  INDIVIDUAL_WORKSPACE,
+} from "@/contexts/workspace-context";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  DialogTrigger 
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -110,12 +119,12 @@ export function DashboardHeader() {
   const [semesterValue, setSemesterValue] = useState("");
 
   // Use the workspace context
-  const { 
-    workspaces, 
-    currentWorkspace, 
-    setCurrentWorkspace, 
-    refreshWorkspaces, 
-    isLoading 
+  const {
+    workspaces,
+    currentWorkspace,
+    setCurrentWorkspace,
+    refreshWorkspaces,
+    isLoading,
   } = useWorkspace();
 
   const handleSignOut = async () => {
@@ -135,12 +144,12 @@ export function DashboardHeader() {
     setIsCreatingWorkspace(true);
     try {
       const result = await createWorkspace({ name: newWorkspaceName.trim() });
-      
+
       if (result.error) {
         toast.error(`Error: ${result.error}`);
         return;
       }
-      
+
       if (result.data) {
         toast.success("Workspace created successfully");
         setNewWorkspaceName("");
@@ -160,7 +169,7 @@ export function DashboardHeader() {
       if (error instanceof Error) {
         errorMessage += `: ${error.message}`;
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setIsCreatingWorkspace(false);
@@ -226,7 +235,10 @@ export function DashboardHeader() {
             </PopoverTrigger>
             <PopoverContent className="w-[250px] p-0">
               <Command>
-                <CommandInput placeholder="Search workspace..." className="h-9" />
+                <CommandInput
+                  placeholder="Search workspace..."
+                  className="h-9"
+                />
                 <CommandList>
                   <CommandEmpty>No workspace found.</CommandEmpty>
                   <CommandGroup heading="Your Workspaces">
@@ -257,7 +269,7 @@ export function DashboardHeader() {
                       onSelect={() => {
                         // Close the team popover first
                         setOpenTeam(false);
-                        
+
                         // Use setTimeout to ensure the team popover is fully closed
                         setTimeout(() => {
                           // Then open the create workspace dialog
@@ -275,8 +287,8 @@ export function DashboardHeader() {
           </Popover>
 
           {/* Separate Dialog for creating workspace */}
-          <Dialog 
-            open={openCreateWorkspace} 
+          <Dialog
+            open={openCreateWorkspace}
             onOpenChange={(open) => {
               // Only allow closing if we're not in the middle of creating a workspace
               if (!isCreatingWorkspace || !open) {
@@ -284,7 +296,7 @@ export function DashboardHeader() {
               }
             }}
           >
-            <DialogContent 
+            <DialogContent
               onPointerDownOutside={(e) => {
                 // Prevent closing when clicking outside if creating workspace
                 if (isCreatingWorkspace) {
@@ -322,7 +334,11 @@ export function DashboardHeader() {
                       value={newWorkspaceName}
                       onChange={(e) => setNewWorkspaceName(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !isCreatingWorkspace && newWorkspaceName.trim()) {
+                        if (
+                          e.key === "Enter" &&
+                          !isCreatingWorkspace &&
+                          newWorkspaceName.trim()
+                        ) {
                           e.preventDefault();
                           handleCreateWorkspace();
                         }
@@ -342,7 +358,7 @@ export function DashboardHeader() {
                   >
                     Cancel
                   </Button>
-                  <Button 
+                  <Button
                     type="submit"
                     disabled={isCreatingWorkspace || !newWorkspaceName.trim()}
                   >

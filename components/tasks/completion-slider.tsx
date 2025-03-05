@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
-import { updateTask } from "@/actions/tasks";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ProgressBar } from "@/components/tasks/progress-bar";
+import { useTaskChanges } from "@/contexts/task-changes-context";
 
 interface CompletionSliderProps {
   taskId: string;
@@ -14,7 +13,7 @@ interface CompletionSliderProps {
 }
 
 /**
- * A slider component for updating task completion percentage
+ * Slider component for updating task completion percentage
  */
 export function CompletionSlider({
   taskId,
@@ -22,7 +21,15 @@ export function CompletionSlider({
   onUpdate,
 }: CompletionSliderProps) {
   const [value, setValue] = useState(initialValue);
+  const [initialValueState, setInitialValueState] = useState(initialValue);
+  const { addChange } = useTaskChanges();
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Update the initial value if it changes from props
+  useEffect(() => {
+    setValue(initialValue);
+    setInitialValueState(initialValue);
+  }, [initialValue]);
 
   // Get color based on completion percentage
   const getColor = (percentage: number) => {
@@ -32,49 +39,29 @@ export function CompletionSlider({
     return "bg-green-500";
   };
 
-  // Handle slider change
+  // Handle slider value change
   const handleChange = (newValue: number[]) => {
     setValue(newValue[0]);
   };
 
   // Handle updating the task
   const handleUpdate = async () => {
-    if (value === initialValue) return;
+    if (value === initialValueState) return;
 
-    setIsUpdating(true);
+    // Add the change to the pending changes
+    addChange(taskId, {
+      completionPercentage: value,
+      // Set completed status based on completion percentage
+      // If value is 100, mark as completed, if less than 100, mark as not completed
+      completed: value === 100 ? true : false,
+    });
 
-    try {
-      // Update the task with the new completion percentage
-      // Also mark as completed if percentage is 100%
-      const result = await updateTask(taskId, {
-        completionPercentage: value,
-        completed: value === 100 ? true : undefined,
-      });
+    // Update the local state to reflect the change
+    setInitialValueState(value);
 
-      if (result.error) {
-        toast.error(`Error: ${result.error}`);
-        return;
-      }
-
-      // Update the initial value to the new value
-      setValue(value);
-
-      // Show success message
-      toast.success("Task progress updated");
-
-      // Call the onUpdate callback if provided
-      if (onUpdate) {
-        // Pass the updated task data from the result
-        onUpdate(value);
-
-        // Force a page refresh to ensure all components reflect the changes
-        // window.location.reload();
-      }
-    } catch (error) {
-      console.error("Error updating task:", error);
-      toast.error("Failed to update task progress");
-    } finally {
-      setIsUpdating(false);
+    // Call the onUpdate callback if provided
+    if (onUpdate) {
+      onUpdate(value);
     }
   };
 

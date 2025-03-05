@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, PlusCircle, ArrowUpDown, Filter } from "lucide-react";
+import { PlusCircle, ArrowUpDown, Filter } from "lucide-react";
 import { TaskCard, Task } from "@/components/dashboard/task-card";
 import { createTask, deleteTask, getTasks, updateTask } from "@/actions/tasks";
 import { toast } from "sonner";
@@ -29,14 +29,7 @@ import {
   TaskFilterDropdown,
   TaskFilterValue,
 } from "@/components/dashboard/task-filter";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
 import {
   PriorityLevel,
   TaskPriority,
@@ -51,6 +44,7 @@ import {
 import { ProjectHeader } from "@/components/dashboard/project-header";
 import { DatePicker } from "@/components/ui/date-picker";
 import { CompletionSlider } from "@/components/tasks/completion-slider";
+import { SaveChangesButton } from "@/components/dashboard/save-changes-button";
 
 // Sort options
 type SortOption = "createdAt" | "dueDate" | "priority" | "title";
@@ -62,9 +56,20 @@ export default function ProjectPage() {
   const params = useParams();
   const projectId = params.projectId as string;
 
+  return (
+    <>
+      <ProjectContent projectId={projectId} />
+      <SaveChangesButton />
+    </>
+  );
+}
+
+/**
+ * Project content component that displays tasks
+ */
+function ProjectContent({ projectId }: { projectId: string }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [currentFilter, setCurrentFilter] = useState<TaskFilterValue>("all");
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
   const [openTaskDialog, setOpenTaskDialog] = useState(false);
   const [taskTitle, setTaskTitle] = useState("");
@@ -119,131 +124,81 @@ export default function ProjectPage() {
 
   // Filter and sort tasks
   useEffect(() => {
-    if (tasks.length > 0) {
-      const filtered = tasks
-        .filter((task) => {
-          // Filter by status
-          if (currentFilter === "completed") {
-            // A task is considered completed only if it's marked as completed OR has 100% completion percentage
-            if (!task.completed && task.completionPercentage !== 100)
-              return false;
-          }
-          if (currentFilter === "incomplete") {
-            // A task is considered incomplete if it's not marked as completed AND doesn't have 100% completion percentage
-            if (task.completed || task.completionPercentage === 100)
-              return false;
-          }
+    let filtered = [...tasks];
 
-          // Filter by priority
-          if (filterPriority !== "all" && task.priority !== filterPriority)
-            return false;
-
-          // Filter by category
-          if (filterCategory !== "all" && task.category !== filterCategory)
-            return false;
-
-          return true;
-        })
-        .sort((a, b) => {
-          // Sort by selected field
-          if (sortBy === "dueDate") {
-            // Handle null due dates
-            if (!a.dueDate && !b.dueDate) return 0;
-            if (!a.dueDate) return sortDirection === "asc" ? 1 : -1;
-            if (!b.dueDate) return sortDirection === "asc" ? -1 : 1;
-
-            return sortDirection === "asc"
-              ? new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-              : new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
-          }
-
-          if (sortBy === "priority") {
-            // Priority order: urgent > high > medium > low > null
-            const priorityOrder = {
-              urgent: 4,
-              high: 3,
-              medium: 2,
-              low: 1,
-              null: 0,
-            };
-            const aPriority = a.priority || null;
-            const bPriority = b.priority || null;
-
-            return sortDirection === "asc"
-              ? (priorityOrder[aPriority as keyof typeof priorityOrder] || 0) -
-                  (priorityOrder[bPriority as keyof typeof priorityOrder] || 0)
-              : (priorityOrder[bPriority as keyof typeof priorityOrder] || 0) -
-                  (priorityOrder[aPriority as keyof typeof priorityOrder] || 0);
-          }
-
-          if (sortBy === "title") {
-            return sortDirection === "asc"
-              ? a.title.localeCompare(b.title)
-              : b.title.localeCompare(a.title);
-          }
-
-          // Default sort by createdAt
-          return sortDirection === "asc"
-            ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-            : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        });
-
-      setFilteredTasks(filtered);
+    // Filter by status
+    if (filterStatus === "completed") {
+      filtered = filtered.filter(
+        (task) => task.completed || task.completionPercentage === 100
+      );
+    } else if (filterStatus === "incomplete") {
+      filtered = filtered.filter(
+        (task) => !task.completed && task.completionPercentage < 100
+      );
     }
+
+    // Filter by priority
+    if (filterPriority !== "all") {
+      filtered = filtered.filter((task) => task.priority === filterPriority);
+    }
+
+    // Filter by category
+    if (filterCategory !== "all") {
+      filtered = filtered.filter((task) => task.category === filterCategory);
+    }
+
+    // Sort tasks
+    filtered.sort((a, b) => {
+      if (sortBy === "createdAt") {
+        return sortDirection === "asc"
+          ? a.createdAt.getTime() - b.createdAt.getTime()
+          : b.createdAt.getTime() - a.createdAt.getTime();
+      } else if (sortBy === "dueDate") {
+        // Handle null due dates (put them at the end)
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return sortDirection === "asc" ? 1 : -1;
+        if (!b.dueDate) return sortDirection === "asc" ? -1 : 1;
+
+        return sortDirection === "asc"
+          ? a.dueDate.getTime() - b.dueDate.getTime()
+          : b.dueDate.getTime() - a.dueDate.getTime();
+      } else if (sortBy === "priority") {
+        // Define priority order
+        const priorityOrder = {
+          urgent: 3,
+          high: 2,
+          medium: 1,
+          low: 0,
+          null: -1,
+        };
+        const aPriority = a.priority
+          ? priorityOrder[a.priority]
+          : priorityOrder.null;
+        const bPriority = b.priority
+          ? priorityOrder[b.priority]
+          : priorityOrder.null;
+
+        return sortDirection === "asc"
+          ? aPriority - bPriority
+          : bPriority - aPriority;
+      } else if (sortBy === "title") {
+        return sortDirection === "asc"
+          ? a.title.localeCompare(b.title)
+          : b.title.localeCompare(a.title);
+      }
+
+      return 0;
+    });
+
+    setFilteredTasks(filtered);
   }, [
     tasks,
-    currentFilter,
+    filterStatus,
     filterPriority,
     filterCategory,
     sortBy,
     sortDirection,
   ]);
-
-  // Toggle task completion
-  const toggleTaskCompletion = async (
-    taskId: string,
-    currentStatus: boolean
-  ) => {
-    try {
-      const result = await updateTask(taskId, {
-        completed: !currentStatus,
-        // If marking as complete, set to 100%, otherwise keep at current level
-        completionPercentage: !currentStatus ? 100 : undefined,
-      });
-
-      if (result.error) {
-        toast.error(`Error: ${result.error}`);
-        return;
-      }
-
-      if (result.data) {
-        // Convert the updated task to the correct type
-        const updatedTask: Task = {
-          ...result.data,
-          priority: result.data.priority as PriorityLevel | null,
-          category: result.data.category as TaskCategory | null,
-          dueDate: result.data.dueDate ? new Date(result.data.dueDate) : null,
-        };
-
-        // Update the tasks list
-        setTasks((prevTasks) =>
-          prevTasks.map((task) => (task.id === taskId ? updatedTask : task))
-        );
-
-        toast.success(
-          updatedTask.completed
-            ? "Task marked as completed"
-            : "Task marked as incomplete"
-        );
-
-        // Force a refresh to ensure all components reflect the changes
-        // window.location.reload();
-      }
-    } catch (error) {
-      console.error("Error toggling task completion:", error);
-      toast.error("Failed to update task status");
-    }
-  };
 
   // Calculate task counts for filters
   const taskCounts = {
@@ -252,8 +207,30 @@ export default function ProjectPage() {
       (task) => task.completed || task.completionPercentage === 100
     ).length,
     incomplete: tasks.filter(
-      (task) => !task.completed && task.completionPercentage !== 100
+      (task) => !task.completed && task.completionPercentage < 100
     ).length,
+  };
+
+  // Toggle task completion
+  const toggleTaskCompletion = async (
+    taskId: string,
+    currentStatus: boolean
+  ) => {
+    // Find the task
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    // Update the local state
+    const updatedTask = {
+      ...task,
+      completed: !currentStatus,
+      completionPercentage: !currentStatus ? 100 : task.completionPercentage,
+    };
+
+    // Update the tasks list
+    setTasks((prevTasks) =>
+      prevTasks.map((t) => (t.id === taskId ? updatedTask : t))
+    );
   };
 
   // Create a new task
@@ -272,6 +249,7 @@ export default function ProjectPage() {
         priority: taskPriority,
         category: taskCategory,
         projectId: projectId as string,
+        // Set completed status based on completion percentage
         completed: taskCompletionPercentage === 100,
         completionPercentage: taskCompletionPercentage,
       });
@@ -303,9 +281,6 @@ export default function ProjectPage() {
         setOpenTaskDialog(false);
 
         toast.success("Task created successfully");
-
-        // Force a refresh to ensure all components reflect the changes
-        // window.location.reload();
       }
     } catch (error) {
       console.error("Error creating task:", error);
@@ -313,28 +288,6 @@ export default function ProjectPage() {
     } finally {
       setIsCreatingTask(false);
     }
-  };
-
-  const handleTaskCreationSuccess = (newTask: any) => {
-    // Convert the new task to the correct type
-    const typedTask: Task = {
-      ...newTask,
-      priority: newTask.priority as PriorityLevel | null,
-      category: newTask.category as TaskCategory | null,
-      dueDate: newTask.dueDate ? new Date(newTask.dueDate) : null,
-    };
-
-    // Add the new task to the tasks list
-    setTasks((prevTasks) => [typedTask, ...prevTasks]);
-
-    // Reset form
-    setTaskTitle("");
-    setTaskDescription("");
-    setTaskDueDate(undefined);
-    setTaskPriority(null);
-    setTaskCategory(null);
-    setTaskCompletionPercentage(0);
-    setOpenTaskDialog(false);
   };
 
   // Handle task deletion
@@ -350,9 +303,6 @@ export default function ProjectPage() {
       // Remove the task from the list
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
       toast.success("Task deleted successfully");
-
-      // Force a refresh to ensure all components reflect the changes
-      // window.location.reload();
     } catch (error) {
       console.error("Error deleting task:", error);
       toast.error("Failed to delete task");
@@ -360,14 +310,6 @@ export default function ProjectPage() {
   };
 
   // Format date for display
-  const formatDate = (date?: Date | null) => {
-    if (!date) return null;
-
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   return (
     <div className="space-y-4">
