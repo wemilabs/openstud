@@ -11,11 +11,17 @@ import {
 import { getRecentActivity } from "@/actions/dashboard";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { CheckCircle, Clock, FileEdit, BarChart } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  CheckCircle,
+  Clock,
+  FileEdit,
+  BarChart,
+  AlertCircle,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/tasks/progress-bar";
 import { ScrollArea } from "../ui/scroll-area";
+import { useWorkspace } from "@/contexts/workspace-context";
 
 // Activity type
 interface Activity {
@@ -29,202 +35,165 @@ interface Activity {
   completionPercentage: number;
 }
 
-// Fallback data for when real data is not available
-const fallbackActivities: Activity[] = [
-  {
-    id: "1",
-    type: "created",
-    description: "Created task 'Literature Review' in Environmental Biology",
-    date: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    category: "reading",
-    projectName: "Environmental Biology",
-    taskTitle: "Literature Review",
-    completionPercentage: 0,
-  },
-  {
-    id: "2",
-    type: "progress",
-    description: "Updated progress to 50% on 'Math Assignment' in Calculus II",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    category: "assignment",
-    projectName: "Calculus II",
-    taskTitle: "Math Assignment",
-    completionPercentage: 50,
-  },
-  {
-    id: "3",
-    type: "completed",
-    description: "Completed task 'Physics Lab Report' in Physics 101",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 5), // 5 hours ago
-    category: "lab",
-    projectName: "Physics 101",
-    taskTitle: "Physics Lab Report",
-    completionPercentage: 100,
-  },
-];
-
 /**
  * Recent activity component for the dashboard
  */
 export function RecentActivity() {
+  const { currentWorkspace } = useWorkspace();
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Fetch recent activity data
   useEffect(() => {
-    const fetchRecentActivity = async () => {
+    const fetchActivities = async () => {
       try {
-        const result = await getRecentActivity();
+        setLoading(true);
+        setError(null);
+        setActivities([]);
+
+        // Pass the current workspace ID to get workspace-specific data
+        const result = await getRecentActivity(currentWorkspace.id);
+
         if (result.error) {
-          console.error("Error fetching recent activity:", result.error);
-          toast.error("Failed to load recent activity");
-          // Use fallback data if there's an error
-          setActivities(fallbackActivities);
-        } else if (result.data && result.data.length > 0) {
-          // Format the data
-          const formattedActivities: Activity[] = result.data.map(
-            (activity: any) => ({
-              ...activity,
-              date: new Date(activity.date),
-            })
-          );
+          setError(result.error);
+          toast.error(`Error: ${result.error}`);
+          return;
+        }
+
+        if (result.data && result.data.length > 0) {
+          // Convert dates from strings to Date objects
+          const formattedActivities = result.data.map((activity: any) => ({
+            ...activity,
+            date: new Date(activity.date),
+          }));
+
           setActivities(formattedActivities);
-        } else {
-          // Use fallback data if no real data is available
-          setActivities(fallbackActivities);
         }
       } catch (error) {
-        console.error("Error in fetchRecentActivity:", error);
-        toast.error("Failed to load recent activity");
-        // Use fallback data if there's an error
-        setActivities(fallbackActivities);
+        console.error("Failed to fetch recent activity:", error);
+        setError("Failed to fetch recent activity");
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    fetchRecentActivity();
-  }, []);
+    fetchActivities();
+  }, [currentWorkspace.id]); // Re-fetch when workspace changes
 
-  // Get icon based on activity type
+  // Format relative time (e.g., "2 hours ago")
+  const formatRelativeTime = (date: Date) => {
+    return formatDistanceToNow(date, { addSuffix: true });
+  };
+
+  // Get icon for activity type
   const getActivityIcon = (type: Activity["type"]) => {
     switch (type) {
       case "created":
         return <FileEdit className="h-4 w-4 text-blue-500" />;
       case "updated":
-        return <Clock className="h-4 w-4 text-yellow-500" />;
+        return <BarChart className="h-4 w-4 text-orange-500" />;
       case "completed":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
       case "progress":
-        return <BarChart className="h-4 w-4 text-purple-500" />;
+        return <Clock className="h-4 w-4 text-yellow-500" />;
       default:
-        return <Clock className="h-4 w-4 text-muted-foreground" />;
+        return <BarChart className="h-4 w-4" />;
     }
   };
 
-  // Get category badge color
-  const getCategoryColor = (category: string | null | undefined) => {
-    if (!category) return "bg-gray-200 text-gray-700";
-
-    switch (category.toLowerCase()) {
-      case "assignment":
-        return "bg-blue-100 text-blue-800";
-      case "exam":
-      case "quiz":
-        return "bg-red-100 text-red-800";
-      case "presentation":
-        return "bg-purple-100 text-purple-800";
-      case "lab":
-        return "bg-green-100 text-green-800";
-      case "reading":
-        return "bg-yellow-100 text-yellow-800";
-      case "project":
-        return "bg-indigo-100 text-indigo-800";
-      case "study":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  // Get color for progress bar based on completion percentage
+  const getProgressColor = (percentage: number) => {
+    if (percentage < 25) return "bg-red-500";
+    if (percentage < 50) return "bg-orange-500";
+    if (percentage < 75) return "bg-yellow-500";
+    return "bg-green-500";
   };
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-medium">Recent Activity</CardTitle>
-        <CardDescription>Your latest academic updates</CardDescription>
+      <CardHeader>
+        <CardTitle>Recent Activity</CardTitle>
+        <CardDescription>
+          Your latest actions in{" "}
+          {currentWorkspace.name === "Individual"
+            ? "your personal workspace"
+            : `the ${currentWorkspace.name} workspace`}
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <ScrollArea className="md:h-72 w-full">
-          {isLoading ? (
-            <div className="space-y-2">
-              <div className="h-14 bg-muted animate-pulse rounded-md" />
-              <div className="h-14 bg-muted animate-pulse rounded-md" />
-              <div className="h-14 bg-muted animate-pulse rounded-md" />
-            </div>
-          ) : (
+      <CardContent>
+        <ScrollArea className="h-[200px] lg:h-[300px]">
+          {loading ? (
             <div className="space-y-4">
-              {activities.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No recent activity
-                </p>
-              ) : (
-                activities.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="flex items-start space-x-3 rounded-md border p-3"
-                  >
-                    <div className="mt-0.5">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="space-y-1 w-full">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium leading-none">
-                          {activity.taskTitle}
-                        </p>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(activity.date, {
-                            addSuffix: true,
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {activity.projectName}
-                      </p>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-start space-x-4">
+                  <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+                    <div className="h-3 w-1/2 bg-muted rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center h-[300px] text-center">
+              <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+              <p className="text-muted-foreground">
+                Error loading activity data
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">{error}</p>
+            </div>
+          ) : activities.length > 0 ? (
+            <div className="space-y-8">
+              {activities.map((activity) => (
+                <div key={activity.id} className="flex items-start space-x-4">
+                  <div className="mt-1">{getActivityIcon(activity.type)}</div>
+                  <div className="space-y-1 flex-1">
+                    <p className="text-sm font-medium leading-none">
+                      {activity.description}
+                    </p>
+                    <div className="flex items-center pt-2">
                       {activity.category && (
                         <Badge
-                          variant="outline"
-                          className={cn(
-                            "text-xs font-normal",
-                            getCategoryColor(activity.category)
-                          )}
+                          variant="secondary"
+                          className="mr-2 px-1 py-0 text-xs"
                         >
-                          {activity.category.charAt(0).toUpperCase() +
-                            activity.category.slice(1)}
+                          {activity.category}
                         </Badge>
                       )}
-                      {activity.type === "progress" && (
-                        <div className="w-full mt-2">
-                          <div className="flex justify-between text-xs mb-1">
-                            <span>Progress</span>
-                            <span>{activity.completionPercentage}%</span>
-                          </div>
-                          <ProgressBar
-                            value={activity.completionPercentage}
-                            indicatorClassName={
-                              activity.completionPercentage < 25
-                                ? "bg-red-500"
-                                : activity.completionPercentage < 50
-                                ? "bg-orange-500"
-                                : activity.completionPercentage < 75
-                                ? "bg-yellow-500"
-                                : "bg-green-500"
-                            }
-                          />
-                        </div>
-                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {formatRelativeTime(activity.date)}
+                      </span>
                     </div>
+                    {activity.type === "progress" && (
+                      <div className="pt-2">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span>Progress</span>
+                          <span>{activity.completionPercentage}%</span>
+                        </div>
+                        <ProgressBar
+                          value={activity.completionPercentage}
+                          indicatorClassName={getProgressColor(
+                            activity.completionPercentage
+                          )}
+                        />
+                      </div>
+                    )}
                   </div>
-                ))
-              )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[300px] text-center">
+              <Clock className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                No recent activity to display
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {currentWorkspace.name === "Individual"
+                  ? "Your activity will appear here as you work on tasks"
+                  : `Activities in the ${currentWorkspace.name} workspace will appear here`}
+              </p>
             </div>
           )}
         </ScrollArea>

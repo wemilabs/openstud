@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, TeamRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 
@@ -408,5 +408,80 @@ export async function getWorkspaceProjectTaskStats(workspaceId: string): Promise
   } catch (error) {
     console.error("Error getting workspace project task stats:", error);
     return { error: "Failed to get workspace project task statistics" };
+  }
+}
+
+/**
+ * Deletes a project by ID
+ */
+export async function deleteProject(projectId: string) {
+  try {
+    const session = await auth();
+    
+    if (!session?.user?.id) {
+      return { error: "Unauthorized" };
+    }
+    
+    const userId = session.user.id;
+    
+    // Get the project with its team
+    const project = await prisma.project.findUnique({
+      where: {
+        id: projectId,
+      },
+      include: {
+        team: true,
+      },
+    });
+    
+    if (!project) {
+      return { error: "Project not found" };
+    }
+    
+    // For individual projects, check if the user is the owner
+    if (project.teamId === null && project.userId !== userId) {
+      return { error: "You don't have permission to delete this project" };
+    }
+    
+    // For team projects, check if user is a team member with appropriate permissions
+    if (project.teamId) {
+      const teamMember = await prisma.teamMember.findFirst({
+        where: {
+          teamId: project.teamId,
+          userId,
+        },
+      });
+      
+      if (!teamMember) {
+        return { error: "You don't have access to this team" };
+      }
+      
+      // Implement role-based permission check
+      // Only allow owners and admins to delete projects
+      if (teamMember.role !== TeamRole.OWNER && teamMember.role !== TeamRole.ADMIN) {
+        return { error: "You don't have permission to delete this project" };
+      }
+    }
+    
+    // Delete all tasks associated with the project first
+    await prisma.task.deleteMany({
+      where: {
+        projectId,
+      },
+    });
+    
+    // Delete the project
+    await prisma.project.delete({
+      where: {
+        id: projectId,
+      },
+    });
+    
+    revalidatePath("/dashboard");
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    return { error: "Failed to delete project" };
   }
 }

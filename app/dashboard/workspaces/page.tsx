@@ -1,8 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useWorkspace, INDIVIDUAL_WORKSPACE } from "@/contexts/workspace-context";
-import { getWorkspaceMembers, addWorkspaceMember, removeWorkspaceMember, updateWorkspaceMemberRole, deleteWorkspace } from "@/actions/workspaces";
+import {
+  useWorkspace,
+  INDIVIDUAL_WORKSPACE,
+} from "@/contexts/workspace-context";
+import {
+  getWorkspaceMembers,
+  addWorkspaceMember,
+  removeWorkspaceMember,
+  updateWorkspaceMemberRole,
+  deleteWorkspace,
+} from "@/actions/workspaces";
 import { TeamRole } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,18 +69,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DashboardHeader } from "@/components/dashboard/header";
-import { DashboardShell } from "@/components/dashboard/shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Crown, 
-  MoreHorizontal, 
-  Shield, 
-  Trash, 
-  User, 
-  UserPlus, 
-  Users 
+import {
+  Crown,
+  MoreHorizontal,
+  Shield,
+  Trash,
+  User,
+  UserPlus,
+  Users,
 } from "lucide-react";
 
 type Member = {
@@ -86,7 +93,12 @@ type Member = {
 };
 
 export default function WorkspacesPage() {
-  const { workspaces, currentWorkspace, setCurrentWorkspace, refreshWorkspaces } = useWorkspace();
+  const {
+    workspaces,
+    currentWorkspace,
+    setCurrentWorkspace,
+    refreshWorkspaces,
+  } = useWorkspace();
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState("");
@@ -98,12 +110,14 @@ export default function WorkspacesPage() {
   const [workspaceToDeleteId, setWorkspaceToDeleteId] = useState("");
 
   // Skip individual workspace
-  const teamWorkspaces = workspaces.filter(w => w.id !== INDIVIDUAL_WORKSPACE.id);
+  const teamWorkspaces = workspaces.filter(
+    (w) => w.id !== INDIVIDUAL_WORKSPACE.id
+  );
 
   // Fetch workspace members
   const fetchMembers = useCallback(async () => {
     if (currentWorkspace.id === INDIVIDUAL_WORKSPACE.id) return;
-    
+
     setIsLoadingMembers(true);
     try {
       const result = await getWorkspaceMembers(currentWorkspace.id);
@@ -111,7 +125,7 @@ export default function WorkspacesPage() {
         toast.error(result.error);
         return;
       }
-      
+
       setMembers(result.data || []);
     } catch (error) {
       console.error("Error fetching workspace members:", error);
@@ -135,20 +149,20 @@ export default function WorkspacesPage() {
       toast.error("Email is required");
       return;
     }
-    
+
     setIsAddingMember(true);
     try {
       const result = await addWorkspaceMember(
-        currentWorkspace.id, 
-        newMemberEmail.trim(), 
+        currentWorkspace.id,
+        newMemberEmail.trim(),
         newMemberRole
       );
-      
+
       if (result.error) {
         toast.error(result.error);
         return;
       }
-      
+
       toast.success("Member added successfully");
       setNewMemberEmail("");
       setNewMemberRole(TeamRole.MEMBER);
@@ -165,12 +179,12 @@ export default function WorkspacesPage() {
   const handleRemoveMember = async (memberId: string) => {
     try {
       const result = await removeWorkspaceMember(currentWorkspace.id, memberId);
-      
+
       if (result.error) {
         toast.error(result.error);
         return;
       }
-      
+
       toast.success("Member removed successfully");
       fetchMembers();
     } catch (error) {
@@ -179,15 +193,22 @@ export default function WorkspacesPage() {
     }
   };
 
-  const handleUpdateMemberRole = async (memberId: string, newRole: TeamRole) => {
+  const handleUpdateMemberRole = async (
+    memberId: string,
+    newRole: TeamRole
+  ) => {
     try {
-      const result = await updateWorkspaceMemberRole(currentWorkspace.id, memberId, newRole);
-      
+      const result = await updateWorkspaceMemberRole(
+        currentWorkspace.id,
+        memberId,
+        newRole
+      );
+
       if (result.error) {
         toast.error(result.error);
         return;
       }
-      
+
       toast.success("Member role updated successfully");
       fetchMembers();
     } catch (error) {
@@ -198,37 +219,39 @@ export default function WorkspacesPage() {
 
   const handleDeleteWorkspace = async () => {
     // The workspace to delete is the one that was clicked on, not necessarily the current workspace
-    const workspaceToDelete = workspaces.find(w => w.id === workspaceToDeleteId);
-    
+    const workspaceToDelete = workspaces.find(
+      (w) => w.id === workspaceToDeleteId
+    );
+
     if (!workspaceToDelete) {
       toast.error("Workspace not found");
       setIsDeleteDialogOpen(false);
       return;
     }
-    
+
     if (workspaceToDelete.id === INDIVIDUAL_WORKSPACE.id) {
       toast.error("You cannot delete your individual workspace");
       setIsDeleteDialogOpen(false);
       return;
     }
-    
+
     setIsDeleting(true);
     try {
       const result = await deleteWorkspace(workspaceToDelete.id);
-      
+
       if (result.error) {
         toast.error(result.error);
         return;
       }
-      
+
       toast.success("Workspace deleted successfully");
       setIsDeleteDialogOpen(false);
-      
+
       // If we deleted the current workspace, switch to individual workspace
       if (currentWorkspace.id === workspaceToDelete.id) {
         setCurrentWorkspace(INDIVIDUAL_WORKSPACE);
       }
-      
+
       await refreshWorkspaces();
     } catch (error) {
       console.error("Error deleting workspace:", error);
@@ -276,11 +299,17 @@ export default function WorkspacesPage() {
             <TabsTrigger value="members">Members</TabsTrigger>
           )}
         </TabsList>
-        
+
         <TabsContent value="workspaces" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Individual Workspace Card */}
-            <Card className={currentWorkspace.id === INDIVIDUAL_WORKSPACE.id ? "border-primary" : ""}>
+            <Card
+              className={
+                currentWorkspace.id === INDIVIDUAL_WORKSPACE.id
+                  ? "border-primary"
+                  : ""
+              }
+            >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
@@ -290,23 +319,35 @@ export default function WorkspacesPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  This is your personal workspace for individual study and tasks.
+                  This is your personal workspace for individual study and
+                  tasks.
                 </p>
               </CardContent>
               <CardFooter>
-                <Button 
-                  variant={currentWorkspace.id === INDIVIDUAL_WORKSPACE.id ? "secondary" : "outline"}
+                <Button
+                  variant={
+                    currentWorkspace.id === INDIVIDUAL_WORKSPACE.id
+                      ? "secondary"
+                      : "outline"
+                  }
                   className="w-full"
                   onClick={() => setCurrentWorkspace(INDIVIDUAL_WORKSPACE)}
                 >
-                  {currentWorkspace.id === INDIVIDUAL_WORKSPACE.id ? "Current" : "Switch"}
+                  {currentWorkspace.id === INDIVIDUAL_WORKSPACE.id
+                    ? "Current"
+                    : "Switch"}
                 </Button>
               </CardFooter>
             </Card>
 
             {/* Team Workspaces Cards */}
             {teamWorkspaces.map((workspace) => (
-              <Card key={workspace.id} className={currentWorkspace.id === workspace.id ? "border-primary" : ""}>
+              <Card
+                key={workspace.id}
+                className={
+                  currentWorkspace.id === workspace.id ? "border-primary" : ""
+                }
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
@@ -324,14 +365,17 @@ export default function WorkspacesPage() {
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           {workspace.id !== INDIVIDUAL_WORKSPACE.id && (
-                            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                            <AlertDialog
+                              open={isDeleteDialogOpen}
+                              onOpenChange={setIsDeleteDialogOpen}
+                            >
                               <AlertDialogTrigger asChild>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   onSelect={(e) => {
                                     e.preventDefault();
                                     setWorkspaceToDeleteId(workspace.id);
                                     setIsDeleteDialogOpen(true);
-                                  }} 
+                                  }}
                                   className="text-destructive"
                                 >
                                   <Trash className="mr-2 h-4 w-4" />
@@ -340,18 +384,21 @@ export default function WorkspacesPage() {
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogTitle>
+                                    Are you absolutely sure?
+                                  </AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete the
-                                    workspace and all associated data.
+                                    This action cannot be undone. This will
+                                    permanently delete the workspace and all
+                                    associated data.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
+                                  <AlertDialogAction
                                     onClick={handleDeleteWorkspace}
                                     disabled={isDeleting}
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    className="bg-destructive text-muted dark:text-primary hover:bg-destructive/90"
                                   >
                                     {isDeleting ? "Deleting..." : "Delete"}
                                   </AlertDialogAction>
@@ -364,41 +411,52 @@ export default function WorkspacesPage() {
                     )}
                   </div>
                   <CardDescription>
-                    {workspace.role === TeamRole.OWNER 
-                      ? "You are the owner" 
-                      : workspace.role === TeamRole.ADMIN 
-                        ? "You are an admin" 
-                        : "You are a member"}
+                    {workspace.role === TeamRole.OWNER
+                      ? "You are the owner"
+                      : workspace.role === TeamRole.ADMIN
+                      ? "You are an admin"
+                      : "You are a member"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Collaborate with your team members on shared projects and assignments.
+                    Collaborate with your team members on shared projects and
+                    assignments.
                   </p>
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    variant={currentWorkspace.id === workspace.id ? "secondary" : "outline"}
+                  <Button
+                    variant={
+                      currentWorkspace.id === workspace.id
+                        ? "secondary"
+                        : "outline"
+                    }
                     className="w-full"
                     onClick={() => setCurrentWorkspace(workspace)}
                   >
-                    {currentWorkspace.id === workspace.id ? "Current" : "Switch"}
+                    {currentWorkspace.id === workspace.id
+                      ? "Current"
+                      : "Switch"}
                   </Button>
                 </CardFooter>
               </Card>
             ))}
           </div>
         </TabsContent>
-        
+
         {currentWorkspace.id !== INDIVIDUAL_WORKSPACE.id && (
           <TabsContent value="members" className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">
                 {currentWorkspace.name} - Members
               </h2>
-              
-              {(currentWorkspace.role === TeamRole.OWNER || currentWorkspace.role === TeamRole.ADMIN) && (
-                <Dialog open={openAddMemberDialog} onOpenChange={setOpenAddMemberDialog}>
+
+              {(currentWorkspace.role === TeamRole.OWNER ||
+                currentWorkspace.role === TeamRole.ADMIN) && (
+                <Dialog
+                  open={openAddMemberDialog}
+                  onOpenChange={setOpenAddMemberDialog}
+                >
                   <DialogTrigger asChild>
                     <Button>
                       <UserPlus className="mr-2 h-4 w-4" />
@@ -423,21 +481,29 @@ export default function WorkspacesPage() {
                           onChange={(e) => setNewMemberEmail(e.target.value)}
                         />
                       </div>
-                      
+
                       {currentWorkspace.role === TeamRole.OWNER && (
                         <div className="grid gap-2">
                           <Label htmlFor="role">Role</Label>
                           <Select
                             value={newMemberRole}
-                            onValueChange={(value) => setNewMemberRole(value as TeamRole)}
+                            onValueChange={(value) =>
+                              setNewMemberRole(value as TeamRole)
+                            }
                           >
                             <SelectTrigger id="role">
                               <SelectValue placeholder="Select a role" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value={TeamRole.MEMBER}>Member</SelectItem>
-                              <SelectItem value={TeamRole.ADMIN}>Admin</SelectItem>
-                              <SelectItem value={TeamRole.OWNER}>Owner</SelectItem>
+                              <SelectItem value={TeamRole.MEMBER}>
+                                Member
+                              </SelectItem>
+                              <SelectItem value={TeamRole.ADMIN}>
+                                Admin
+                              </SelectItem>
+                              <SelectItem value={TeamRole.OWNER}>
+                                Owner
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -450,7 +516,7 @@ export default function WorkspacesPage() {
                       >
                         Cancel
                       </Button>
-                      <Button 
+                      <Button
                         onClick={handleAddMember}
                         disabled={isAddingMember || !newMemberEmail.trim()}
                       >
@@ -461,9 +527,9 @@ export default function WorkspacesPage() {
                 </Dialog>
               )}
             </div>
-            
+
             <Separator />
-            
+
             {isLoadingMembers ? (
               <div className="flex justify-center p-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -478,7 +544,8 @@ export default function WorkspacesPage() {
                   <TableRow>
                     <TableHead>Member</TableHead>
                     <TableHead>Role</TableHead>
-                    {(currentWorkspace.role === TeamRole.OWNER || currentWorkspace.role === TeamRole.ADMIN) && (
+                    {(currentWorkspace.role === TeamRole.OWNER ||
+                      currentWorkspace.role === TeamRole.ADMIN) && (
                       <TableHead className="text-right">Actions</TableHead>
                     )}
                   </TableRow>
@@ -489,7 +556,10 @@ export default function WorkspacesPage() {
                       <TableCell className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
                           {member.user.image ? (
-                            <AvatarImage src={member.user.image} alt={member.user.name || ""} />
+                            <AvatarImage
+                              src={member.user.image}
+                              alt={member.user.name || ""}
+                            />
                           ) : (
                             <AvatarFallback>
                               {getUserInitials(member.user.name)}
@@ -498,7 +568,9 @@ export default function WorkspacesPage() {
                         </Avatar>
                         <div>
                           <p className="font-medium">{member.user.name}</p>
-                          <p className="text-xs text-muted-foreground">{member.user.email}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {member.user.email}
+                          </p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -507,7 +579,8 @@ export default function WorkspacesPage() {
                           <span>{member.role}</span>
                         </div>
                       </TableCell>
-                      {(currentWorkspace.role === TeamRole.OWNER || currentWorkspace.role === TeamRole.ADMIN) && (
+                      {(currentWorkspace.role === TeamRole.OWNER ||
+                        currentWorkspace.role === TeamRole.ADMIN) && (
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -518,27 +591,42 @@ export default function WorkspacesPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              
+
                               {/* Role management (owners only) */}
                               {currentWorkspace.role === TeamRole.OWNER && (
                                 <>
                                   <DropdownMenuItem
                                     disabled={member.role === TeamRole.OWNER}
-                                    onClick={() => handleUpdateMemberRole(member.id, TeamRole.OWNER)}
+                                    onClick={() =>
+                                      handleUpdateMemberRole(
+                                        member.id,
+                                        TeamRole.OWNER
+                                      )
+                                    }
                                   >
                                     <Crown className="mr-2 h-4 w-4" />
                                     Make Owner
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     disabled={member.role === TeamRole.ADMIN}
-                                    onClick={() => handleUpdateMemberRole(member.id, TeamRole.ADMIN)}
+                                    onClick={() =>
+                                      handleUpdateMemberRole(
+                                        member.id,
+                                        TeamRole.ADMIN
+                                      )
+                                    }
                                   >
                                     <Shield className="mr-2 h-4 w-4" />
                                     Make Admin
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     disabled={member.role === TeamRole.MEMBER}
-                                    onClick={() => handleUpdateMemberRole(member.id, TeamRole.MEMBER)}
+                                    onClick={() =>
+                                      handleUpdateMemberRole(
+                                        member.id,
+                                        TeamRole.MEMBER
+                                      )
+                                    }
                                   >
                                     <User className="mr-2 h-4 w-4" />
                                     Make Member
@@ -546,10 +634,11 @@ export default function WorkspacesPage() {
                                   <DropdownMenuSeparator />
                                 </>
                               )}
-                              
+
                               {/* Remove member (owners can remove anyone, admins can remove members) */}
-                              {(currentWorkspace.role === TeamRole.OWNER || 
-                                (currentWorkspace.role === TeamRole.ADMIN && member.role === TeamRole.MEMBER)) && (
+                              {(currentWorkspace.role === TeamRole.OWNER ||
+                                (currentWorkspace.role === TeamRole.ADMIN &&
+                                  member.role === TeamRole.MEMBER)) && (
                                 <DropdownMenuItem
                                   className="text-destructive"
                                   onClick={() => handleRemoveMember(member.id)}

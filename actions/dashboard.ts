@@ -4,9 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
 /**
- * Fetches task completion statistics by category for the current user
+ * Fetches task completion statistics by category for the specified workspace
+ * @param workspaceId The ID of the workspace to fetch statistics for. If not provided, fetches for all user's workspaces.
  */
-export async function getTaskStatsByCategory() {
+export async function getTaskStatsByCategory(workspaceId?: string) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -15,8 +16,8 @@ export async function getTaskStatsByCategory() {
       return { error: "Unauthorized" };
     }
     
-    // Get all projects for the user (both individual and team projects)
-    const userProjects = await prisma.project.findMany({
+    // Get projects based on workspace filter
+    let projectsQuery: any = {
       where: {
         OR: [
           // Individual projects
@@ -38,8 +39,25 @@ export async function getTaskStatsByCategory() {
       select: {
         id: true,
       }
-    });
+    };
     
+    // If a specific workspace is provided, filter projects by that workspace
+    if (workspaceId) {
+      if (workspaceId === 'individual') {
+        // For individual workspace, only include projects with userId
+        projectsQuery.where = {
+          userId,
+          teamId: null
+        };
+      } else {
+        // For team workspace, only include projects with that teamId
+        projectsQuery.where = {
+          teamId: workspaceId
+        };
+      }
+    }
+    
+    const userProjects = await prisma.project.findMany(projectsQuery);
     const projectIds = userProjects.map(project => project.id);
     
     // Get task statistics by category with average completion percentage
@@ -59,113 +77,141 @@ export async function getTaskStatsByCategory() {
     });
     
     // Transform the data for the chart
-    const chartData = taskStats.map(stat => {
-      const category = stat.category || 'other';
-      const total = stat._count.id;
-      const avgCompletion = Math.round(stat._avg.completionPercentage || 0);
-      
-      return {
-        name: category.charAt(0).toUpperCase() + category.slice(1),
-        total: avgCompletion,
-      };
-    });
+    const formattedStats = taskStats.map(stat => ({
+      name: stat.category || 'Uncategorized',
+      total: Math.round(stat._avg.completionPercentage || 0),
+      count: stat._count.id
+    }));
     
-    return { data: chartData };
+    return { data: formattedStats };
   } catch (error) {
-    console.error("Error fetching task stats:", error);
+    console.error("Error fetching task statistics:", error);
     return { error: "Failed to fetch task statistics" };
   }
 }
 
 /**
- * Fetches recent activity for the current user
+ * Fetches recent activity for the specified workspace
+ * @param workspaceId The ID of the workspace to fetch activity for. If not provided, fetches for all user's workspaces.
  */
-export async function getRecentActivity() {
+export async function getRecentActivity(workspaceId?: string) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return { error: "Not authenticated" };
+    const userId = session?.user?.id;
+    
+    if (!userId) {
+      return { error: "Unauthorized" };
     }
-
-    const userId = session.user.id;
-
-    // Get all projects the user has access to
-    const userProjects = await prisma.project.findMany({
+    
+    // Get projects based on workspace filter
+    let projectsQuery: any = {
       where: {
         OR: [
-          { userId: userId }, // User's own projects
+          // Individual projects
+          {
+            userId,
+          },
+          // Team projects where user is a member
           {
             team: {
               members: {
                 some: {
-                  userId: userId
+                  userId,
                 }
               }
             }
-          } // Team projects where user is a member
+          }
         ]
       },
       select: {
-        id: true
+        id: true,
+        name: true,
       }
-    });
+    };
     
+    // If a specific workspace is provided, filter projects by that workspace
+    if (workspaceId) {
+      if (workspaceId === 'individual') {
+        // For individual workspace, only include projects with userId
+        projectsQuery.where = {
+          userId,
+          teamId: null
+        };
+      } else {
+        // For team workspace, only include projects with that teamId
+        projectsQuery.where = {
+          teamId: workspaceId
+        };
+      }
+    }
+    
+    const userProjects = await prisma.project.findMany(projectsQuery);
     const projectIds = userProjects.map(project => project.id);
+    const projectNames = userProjects.reduce((acc, project) => {
+      acc[project.id] = project.name;
+      return acc;
+    }, {} as Record<string, string>);
     
-    // Get recent tasks with their project names
+    // Get recent tasks with updates
     const recentTasks = await prisma.task.findMany({
       where: {
         projectId: {
           in: projectIds
         }
       },
-      include: {
-        project: {
-          select: {
-            name: true
-          }
-        },
-      },
       orderBy: {
         updatedAt: 'desc'
       },
-      take: 5
+      take: 10,
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        completionPercentage: true,
+        completed: true,
+        createdAt: true,
+        updatedAt: true,
+        projectId: true
+      }
     });
     
-    // Format the activity data
-    const activityData = recentTasks.map(task => {
-      // Determine activity type based on task properties
-      let activityType = "updated";
-      let description = "";
+    // Transform the data for the activity feed
+    const activities = recentTasks.map(task => {
+      // Determine activity type based on task state
+      let type: 'created' | 'updated' | 'completed' | 'progress' = 'updated';
+      let description = '';
       
-      if (new Date(task.createdAt).getTime() === new Date(task.updatedAt).getTime()) {
-        activityType = "created";
-        description = `Created task "${task.title}" in ${task.project.name}`;
+      // If created and updated at are close, it's a new task
+      const isNewTask = Math.abs(task.createdAt.getTime() - task.updatedAt.getTime()) < 1000 * 60; // 1 minute
+      
+      if (isNewTask) {
+        type = 'created';
+        description = `Created task '${task.title}' in ${projectNames[task.projectId]}`;
       } else if (task.completed) {
-        activityType = "completed";
-        description = `Completed task "${task.title}" in ${task.project.name}`;
+        type = 'completed';
+        description = `Completed task '${task.title}' in ${projectNames[task.projectId]}`;
       } else if (task.completionPercentage > 0) {
-        activityType = "progress";
-        description = `Updated progress to ${task.completionPercentage}% on "${task.title}" in ${task.project.name}`;
+        type = 'progress';
+        description = `Updated progress to ${task.completionPercentage}% on '${task.title}' in ${projectNames[task.projectId]}`;
       } else {
-        description = `Updated task "${task.title}" in ${task.project.name}`;
+        description = `Updated task '${task.title}' in ${projectNames[task.projectId]}`;
       }
       
       return {
         id: task.id,
-        type: activityType,
+        type,
         description,
         date: task.updatedAt,
         category: task.category,
-        projectName: task.project.name,
+        projectName: projectNames[task.projectId],
         taskTitle: task.title,
         completionPercentage: task.completionPercentage
       };
     });
     
-    return { data: activityData };
+    return { data: activities };
   } catch (error) {
-    console.error("Error getting recent activity:", error);
-    return { error: "Failed to get recent activity" };
+    console.error("Error fetching recent activity:", error);
+    return { error: "Failed to fetch recent activity" };
   }
 }

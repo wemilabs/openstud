@@ -23,7 +23,7 @@ export default function WorkspacesError({
       </div>
       <h2 className="text-2xl font-bold">Something went wrong!</h2>
       <p className="text-muted-foreground">
-        There was an error loading the workspaces.
+        There was an error loading this workspace.
       </p>
       <Button onClick={reset} variant="default">
         Try again

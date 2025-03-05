@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useWorkspace } from "@/contexts/workspace-context";
 import { INDIVIDUAL_WORKSPACE } from "@/contexts/workspace-context";
 import {
@@ -10,13 +11,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Users, FileText, Calendar, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  PlusCircle,
+  Users,
+  FileText,
+  Calendar,
+  Settings,
+  Trash2,
+} from "lucide-react";
 import { ProjectDialog } from "./project-dialog";
 import { ProjectCard } from "./project-card";
 import { getProjects, getWorkspaceProjectTaskStats } from "@/actions/projects";
 import { toast } from "sonner";
+import { updateWorkspace, deleteWorkspace } from "@/actions/workspaces";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
 
 // Project type definition
 type Project = {
@@ -33,7 +62,8 @@ type Project = {
  * Workspace content component that displays different content based on the selected workspace
  */
 export function WorkspaceContent() {
-  const { currentWorkspace } = useWorkspace();
+  const router = useRouter();
+  const { currentWorkspace, refreshWorkspaces } = useWorkspace();
   const [openProjectDialog, setOpenProjectDialog] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [taskStats, setTaskStats] = useState<
@@ -47,6 +77,11 @@ export function WorkspaceContent() {
     >
   >({});
   const [isLoading, setIsLoading] = useState(false);
+  const [editWorkspaceName, setEditWorkspaceName] = useState("");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Check if this is the individual workspace or a team workspace
   const isIndividual = currentWorkspace.id === INDIVIDUAL_WORKSPACE.id;
@@ -118,6 +153,77 @@ export function WorkspaceContent() {
       month: "short",
       day: "numeric",
     });
+  };
+
+  // Handle workspace name update
+  const handleEditWorkspace = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editWorkspaceName.trim()) {
+      toast.error("Workspace name cannot be empty");
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      const result = await updateWorkspace(currentWorkspace.id, {
+        name: editWorkspaceName.trim(),
+      });
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        // Update was successful
+        toast.success("Workspace updated successfully");
+        setIsEditDialogOpen(false);
+
+        // Refresh workspaces to get the updated workspace name
+        await refreshWorkspaces();
+
+        // Force a router refresh to ensure all components update
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error("Failed to update workspace");
+      console.error(error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Handle workspace deletion
+  const handleDeleteWorkspace = async () => {
+    setIsDeleting(true);
+
+    try {
+      const result = await deleteWorkspace(currentWorkspace.id);
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Workspace deleted successfully");
+
+        // Refresh workspaces to update the context
+        await refreshWorkspaces();
+
+        // Redirect to dashboard after deletion
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error("Failed to delete workspace");
+      console.error(error);
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  // Open edit dialog and set current workspace name
+  const openEditDialog = () => {
+    setEditWorkspaceName(currentWorkspace.name);
+    setIsEditDialogOpen(true);
   };
 
   return (
@@ -214,6 +320,7 @@ export function WorkspaceContent() {
                       updatedAt={new Date(project.updatedAt)}
                       teamId={project.teamId}
                       taskStats={taskStats[project.id]}
+                      onProjectDeleted={fetchProjects}
                     />
                   ))
                 ) : (
@@ -305,7 +412,11 @@ export function WorkspaceContent() {
                     <div className="flex items-center gap-2">
                       <p className="text-sm">{currentWorkspace.name}</p>
                       {currentWorkspace.role === "OWNER" && (
-                        <Button variant="outline" size="sm">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={openEditDialog}
+                        >
                           <Settings className="h-4 w-4 mr-2" />
                           Edit
                         </Button>
@@ -320,7 +431,13 @@ export function WorkspaceContent() {
 
                   {currentWorkspace.role === "OWNER" && (
                     <div className="grid gap-2 pt-4">
-                      <Button variant="destructive" size="sm" className="w-fit">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="w-fit"
+                        onClick={() => setIsDeleteDialogOpen(true)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
                         Delete Workspace
                       </Button>
                     </div>
@@ -331,6 +448,71 @@ export function WorkspaceContent() {
           </TabsContent>
         )}
       </Tabs>
+
+      {/* Edit Workspace Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Workspace</DialogTitle>
+            <DialogDescription>
+              Update your workspace name. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditWorkspace}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Workspace Name</Label>
+                <Input
+                  id="name"
+                  value={editWorkspaceName}
+                  onChange={(e) => setEditWorkspaceName(e.target.value)}
+                  placeholder="Enter workspace name"
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isUpdating}>
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Workspace Confirmation Dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              workspace "{currentWorkspace?.name}" and all of its projects and
+              tasks.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteWorkspace}
+              disabled={isDeleting}
+              className="bg-destructive text-muted dark:text-primary hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete Workspace"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
