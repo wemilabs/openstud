@@ -46,6 +46,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import { WorkspaceCalendar } from "./workspace-calendar";
 
 // Project type definition
 type Project = {
@@ -383,14 +384,7 @@ export function WorkspaceContent() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px] flex items-center justify-center border rounded-md bg-muted/20">
-                <div className="text-center">
-                  <Calendar className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Calendar view coming soon
-                  </p>
-                </div>
-              </div>
+              <WorkspaceCalendar workspaceId={currentWorkspace.id} />
             </CardContent>
           </Card>
         </TabsContent>
