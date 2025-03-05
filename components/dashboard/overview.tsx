@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -6,15 +8,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { OverviewChart } from "./overview-chart";
+import { useWorkspace } from "@/contexts/workspace-context";
 
 export function Overview() {
+  const { currentWorkspace } = useWorkspace();
+  
+  // Determine title and description based on workspace type
+  const isIndividual = currentWorkspace.id === 'individual';
+  const title = isIndividual 
+    ? "Personal Academic Progress" 
+    : `${currentWorkspace.name} Team Progress`;
+  
+  const description = isIndividual
+    ? "Your individual performance overview for this semester"
+    : `Collaborative performance overview for the ${currentWorkspace.name} workspace`;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Academic Progress</CardTitle>
-        <CardDescription>
-          Your performance overview for this semester
-        </CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="pl-2">
         <OverviewChart />

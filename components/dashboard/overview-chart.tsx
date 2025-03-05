@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -7,32 +8,116 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  TooltipProps,
 } from "recharts";
+import { getTaskStatsByCategory } from "@/actions/dashboard";
+import { toast } from "sonner";
+import { useWorkspace } from "@/contexts/workspace-context";
+import { BarChart as BarChartIcon } from "lucide-react";
 
-const data = [
-  {
-    name: "Math",
-    total: 85,
-  },
-  {
-    name: "Physics",
-    total: 78,
-  },
-  {
-    name: "Chemistry",
-    total: 92,
-  },
-  {
-    name: "Biology",
-    total: 88,
-  },
-  {
-    name: "English",
-    total: 95,
-  },
-];
+// Chart data type
+interface ChartData {
+  name: string;
+  total: number;
+}
+
+// Custom tooltip component for better dark mode support
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: TooltipProps<number, string>) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-background border border-border p-2 rounded-md shadow-md text-foreground">
+        <p className="font-medium">{label}</p>
+        <p className="text-sm">
+          <span className="text-primary font-medium">{payload[0].value}%</span>{" "}
+          Avg. Completion
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 export function OverviewChart() {
+  const { currentWorkspace } = useWorkspace();
+  const [data, setData] = useState<ChartData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        setData([]);
+
+        // Pass the current workspace ID to get workspace-specific data
+        const result = await getTaskStatsByCategory(currentWorkspace.id);
+
+        if (result.error) {
+          setError(result.error);
+          toast.error(`Error: ${result.error}`);
+          return;
+        }
+
+        if (result.data && result.data.length > 0) {
+          setData(result.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch task statistics:", error);
+        setError("Failed to fetch task statistics");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [currentWorkspace.id]); // Re-fetch when workspace changes
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[350px]">
+        <div className="w-full max-w-md space-y-4">
+          <div className="h-4 bg-muted rounded animate-pulse w-3/4 mx-auto" />
+          <div className="h-[200px] bg-muted rounded animate-pulse w-full" />
+          <div className="h-4 bg-muted rounded animate-pulse w-1/2 mx-auto" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[350px] text-center">
+        <div className="rounded-full bg-red-100 p-3 mb-4">
+          <BarChartIcon className="h-10 w-10 text-red-500" />
+        </div>
+        <p className="text-muted-foreground">Error loading statistics</p>
+        <p className="text-xs text-muted-foreground mt-1">{error}</p>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[350px] text-center">
+        <div className="rounded-full bg-muted p-3 mb-4">
+          <BarChartIcon className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <p className="text-muted-foreground">No task statistics available</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          {currentWorkspace.name === "Individual"
+            ? "Create and update tasks to see your statistics"
+            : `Create and update tasks in the ${currentWorkspace.name} workspace to see statistics`}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>
@@ -51,16 +136,15 @@ export function OverviewChart() {
           tickFormatter={(value) => `${value}%`}
         />
         <Tooltip
-          cursor={{ fill: "var(--muted)" }}
-          contentStyle={{
-            backgroundColor: "var(--background)",
-            border: "1px solid var(--border)",
-            borderRadius: "6px",
-            boxShadow: "var(--shadow)",
-          }}
-          labelStyle={{ color: "var(--foreground)" }}
+          content={<CustomTooltip />}
+          cursor={{ fill: "rgba(128, 128, 128, 0.1)" }}
         />
-        <Bar dataKey="total" radius={[6, 6, 0, 0]} className="fill-[#155DFC]" />
+        <Bar
+          dataKey="total"
+          fill="currentColor"
+          radius={[10, 10, 0, 0]}
+          className="fill-[#155DFC]"
+        />
       </BarChart>
     </ResponsiveContainer>
   );

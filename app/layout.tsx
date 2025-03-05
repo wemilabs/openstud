@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
-import { AuthProvider } from "@/components/providers/auth-provider";
-import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Providers } from "@/components/providers/providers";
 import { Toaster } from "sonner";
 
 const geist = Geist({
@@ -80,16 +79,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geist.className} antialiased`}>
-        <AuthProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </AuthProvider>
+        <Providers>{children}</Providers>
         <Toaster closeButton richColors />
       </body>
     </html>

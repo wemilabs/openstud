@@ -5,7 +5,14 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Bell, Check, ChevronsUpDown, LogOut, Settings } from "lucide-react";
+import {
+  Bell,
+  Check,
+  ChevronsUpDown,
+  LogOut,
+  Plus,
+  Settings,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Logo } from "@/components/layout/logo";
@@ -24,6 +31,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -34,25 +42,22 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { RightSideMenu } from "@/components/dashboard/right-side-menu";
 import { Icons } from "@/components/icons";
-
-const teams = [
-  {
-    value: "individual",
-    label: "Individual",
-  },
-  {
-    value: "group-one",
-    label: "Group 1",
-  },
-  {
-    value: "group-four",
-    label: "Group 4",
-  },
-  {
-    value: "group-nine",
-    label: "Group 9",
-  },
-];
+import {
+  useWorkspace,
+  INDIVIDUAL_WORKSPACE,
+} from "@/contexts/workspace-context";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { createWorkspace } from "@/actions/workspaces";
+import { toast } from "sonner";
 
 const academicYears = [
   {
@@ -106,10 +111,21 @@ export function DashboardHeader() {
   const [openTeam, setOpenTeam] = useState(false);
   const [openAcademicYear, setOpenAcademicYear] = useState(false);
   const [openSemester, setOpenSemester] = useState(false);
+  const [openCreateWorkspace, setOpenCreateWorkspace] = useState(false);
+  const [newWorkspaceName, setNewWorkspaceName] = useState("");
+  const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
 
   const [academicYearValue, setAcademicYearValue] = useState("");
-  const [teamValue, setTeamValue] = useState("");
   const [semesterValue, setSemesterValue] = useState("");
+
+  // Use the workspace context
+  const {
+    workspaces,
+    currentWorkspace,
+    setCurrentWorkspace,
+    refreshWorkspaces,
+    isLoading,
+  } = useWorkspace();
 
   const handleSignOut = async () => {
     try {
@@ -119,6 +135,48 @@ export function DashboardHeader() {
     }
   };
 
+  const handleCreateWorkspace = async () => {
+    if (!newWorkspaceName.trim()) {
+      toast.error("Workspace name cannot be empty");
+      return;
+    }
+
+    setIsCreatingWorkspace(true);
+    try {
+      const result = await createWorkspace({ name: newWorkspaceName.trim() });
+
+      if (result.error) {
+        toast.error(`Error: ${result.error}`);
+        return;
+      }
+
+      if (result.data) {
+        toast.success("Workspace created successfully");
+        setNewWorkspaceName("");
+        // Only close the dialog after successful creation
+        setTimeout(() => {
+          setOpenCreateWorkspace(false);
+          // Refresh workspaces after dialog is closed
+          setTimeout(() => {
+            refreshWorkspaces();
+          }, 100);
+        }, 500);
+      } else {
+        toast.error("Failed to create workspace: No response data");
+      }
+    } catch (error) {
+      let errorMessage = "Failed to create workspace";
+      if (error instanceof Error) {
+        errorMessage += `: ${error.message}`;
+      }
+
+      toast.error(errorMessage);
+    } finally {
+      setIsCreatingWorkspace(false);
+    }
+  };
+
+  // Get initials from user name for avatar fallback
   const userInitials = user?.name
     ? user.name
         .split(" ")
@@ -126,6 +184,19 @@ export function DashboardHeader() {
         .join("")
         .toUpperCase()
     : "?";
+
+  // Get badge text for current workspace
+  const getWorkspaceBadge = (workspace: typeof currentWorkspace) => {
+    if (workspace.id === INDIVIDUAL_WORKSPACE.id) {
+      return "Ind";
+    }
+    // Get first letter of each word in workspace name
+    return workspace.name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -143,7 +214,7 @@ export function DashboardHeader() {
             /
           </span>
 
-          {/* Team selector */}
+          {/* Workspace selector */}
           <Popover open={openTeam} onOpenChange={setOpenTeam}>
             <PopoverTrigger asChild className="hidden md:flex">
               <Button
@@ -156,36 +227,35 @@ export function DashboardHeader() {
                   variant="outline"
                   className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-md px-1.5"
                 >
-                  Ind
+                  {getWorkspaceBadge(currentWorkspace)}
                 </Badge>
-                {teamValue
-                  ? teams.find((team) => team.value === teamValue)?.label
-                  : "Individual"}
+                {currentWorkspace.name}
                 <ChevronsUpDown className="opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
+            <PopoverContent className="w-[250px] p-0">
               <Command>
-                <CommandInput placeholder="Search team..." className="h-9" />
+                <CommandInput
+                  placeholder="Search workspace..."
+                  className="h-9"
+                />
                 <CommandList>
-                  <CommandEmpty>No team found.</CommandEmpty>
-                  <CommandGroup>
-                    {teams.map((team) => (
+                  <CommandEmpty>No workspace found.</CommandEmpty>
+                  <CommandGroup heading="Your Workspaces">
+                    {workspaces.map((workspace) => (
                       <CommandItem
-                        key={team.value}
-                        value={team.value}
-                        onSelect={(currentValue) => {
-                          setTeamValue(
-                            currentValue === teamValue ? "" : currentValue
-                          );
+                        key={workspace.id}
+                        value={workspace.id}
+                        onSelect={() => {
+                          setCurrentWorkspace(workspace);
                           setOpenTeam(false);
                         }}
                       >
-                        {team.label}
+                        {workspace.name}
                         <Check
                           className={cn(
                             "ml-auto",
-                            team.value === teamValue
+                            workspace.id === currentWorkspace.id
                               ? "opacity-100"
                               : "opacity-0"
                           )}
@@ -193,10 +263,111 @@ export function DashboardHeader() {
                       </CommandItem>
                     ))}
                   </CommandGroup>
+                  <CommandSeparator />
+                  <CommandGroup>
+                    <CommandItem
+                      onSelect={() => {
+                        // Close the team popover first
+                        setOpenTeam(false);
+
+                        // Use setTimeout to ensure the team popover is fully closed
+                        setTimeout(() => {
+                          // Then open the create workspace dialog
+                          setOpenCreateWorkspace(true);
+                        }, 150);
+                      }}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create New Workspace
+                    </CommandItem>
+                  </CommandGroup>
                 </CommandList>
               </Command>
             </PopoverContent>
           </Popover>
+
+          {/* Separate Dialog for creating workspace */}
+          <Dialog
+            open={openCreateWorkspace}
+            onOpenChange={(open) => {
+              // Only allow closing if we're not in the middle of creating a workspace
+              if (!isCreatingWorkspace || !open) {
+                setOpenCreateWorkspace(open);
+              }
+            }}
+          >
+            <DialogContent
+              onPointerDownOutside={(e) => {
+                // Prevent closing when clicking outside if creating workspace
+                if (isCreatingWorkspace) {
+                  e.preventDefault();
+                }
+              }}
+              onInteractOutside={(e) => {
+                // Prevent any outside interaction while creating
+                if (isCreatingWorkspace) {
+                  e.preventDefault();
+                }
+              }}
+              className="sm:max-w-[425px]"
+            >
+              <DialogHeader>
+                <DialogTitle>Create New Workspace</DialogTitle>
+                <DialogDescription>
+                  Create a new workspace for your team or project.
+                </DialogDescription>
+              </DialogHeader>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!isCreatingWorkspace && newWorkspaceName.trim()) {
+                    handleCreateWorkspace();
+                  }
+                }}
+              >
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Workspace Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="Enter workspace name"
+                      value={newWorkspaceName}
+                      onChange={(e) => setNewWorkspaceName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "Enter" &&
+                          !isCreatingWorkspace &&
+                          newWorkspaceName.trim()
+                        ) {
+                          e.preventDefault();
+                          handleCreateWorkspace();
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setOpenCreateWorkspace(false);
+                    }}
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isCreatingWorkspace || !newWorkspaceName.trim()}
+                  >
+                    {isCreatingWorkspace ? "Creating..." : "Create Workspace"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
 
           {/* Divider slash */}
           <span className="hidden md:block font-thin text-2xl text-muted-foreground">
