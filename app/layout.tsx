@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     siteName: "Openstud",
     images: [
       {
-        url: "https://openstud.vercel.app/openstud-logo.png",
+        url: "https://ubrw5iu3hw.ufs.sh/f/TFsxjrtdWsEInUPMKAOEIDuzH5b7GCZJAm6yxdUfM3FlWXR1",
         width: 1200,
         height: 630,
         alt: "Openstud",
@@ -66,7 +66,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Openstud",
     description: "The Ultimate Place for Smarter Learning",
-    images: ["https://openstud.vercel.app/openstud-logo.png"],
+    images: [
+      "https://ubrw5iu3hw.ufs.sh/f/TFsxjrtdWsEInUPMKAOEIDuzH5b7GCZJAm6yxdUfM3FlWXR1",
+    ],
     creator: "@DorianTho5",
   },
 };
