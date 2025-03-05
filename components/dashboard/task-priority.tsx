@@ -12,6 +12,39 @@ import { cn } from "@/lib/utils";
 
 export type PriorityLevel = "low" | "medium" | "high" | "urgent";
 
+// Priority configuration
+const priorityConfig: Record<PriorityLevel, { label: string; color: string; bgColor: string }> = {
+  low: { 
+    label: "Low", 
+    color: "text-green-500",
+    bgColor: "bg-green-100" 
+  },
+  medium: { 
+    label: "Medium", 
+    color: "text-blue-500",
+    bgColor: "bg-blue-100"
+  },
+  high: { 
+    label: "High", 
+    color: "text-amber-500",
+    bgColor: "bg-amber-100" 
+  },
+  urgent: { 
+    label: "Urgent", 
+    color: "text-red-500",
+    bgColor: "bg-red-100"
+  },
+};
+
+/**
+ * Get task priority information (label, color)
+ * @param priority The task priority level
+ * @returns Priority information object
+ */
+export function getTaskPriorityInfo(priority: PriorityLevel) {
+  return priorityConfig[priority];
+}
+
 interface TaskPriorityProps {
   priority?: PriorityLevel | null;
   onPriorityChange?: (priority: PriorityLevel | null) => void;
@@ -22,30 +55,10 @@ interface TaskPriorityProps {
  * Task priority component for displaying and changing task priority
  */
 export function TaskPriority({ priority, onPriorityChange, disabled = false }: TaskPriorityProps) {
-  // Priority configuration
-  const priorities: Record<PriorityLevel, { label: string; color: string }> = {
-    low: { 
-      label: "Low", 
-      color: "text-green-500" 
-    },
-    medium: { 
-      label: "Medium", 
-      color: "text-blue-500" 
-    },
-    high: { 
-      label: "High", 
-      color: "text-amber-500" 
-    },
-    urgent: { 
-      label: "Urgent", 
-      color: "text-red-500" 
-    },
-  };
-  
   // Get priority details
   const getPriorityDetails = (p: PriorityLevel | null | undefined) => {
     if (!p) return { label: "No Priority", color: "text-muted-foreground" };
-    return priorities[p];
+    return priorityConfig[p];
   };
   
   const currentPriority = getPriorityDetails(priority);
@@ -86,7 +99,7 @@ export function TaskPriority({ priority, onPriorityChange, disabled = false }: T
           <span>No Priority</span>
         </DropdownMenuItem>
         
-        {Object.entries(priorities).map(([key, { label, color }]) => (
+        {Object.entries(priorityConfig).map(([key, { label, color }]) => (
           <DropdownMenuItem 
             key={key}
             className="gap-2"
@@ -105,31 +118,7 @@ export function TaskPriority({ priority, onPriorityChange, disabled = false }: T
  * Task priority badge component for displaying task priority in a compact way
  */
 export function TaskPriorityBadge({ priority }: { priority: PriorityLevel }) {
-  // Priority configuration
-  const priorities: Record<PriorityLevel, { label: string; color: string; bgColor: string }> = {
-    low: { 
-      label: "Low", 
-      color: "text-green-500",
-      bgColor: "bg-green-100" 
-    },
-    medium: { 
-      label: "Medium", 
-      color: "text-blue-500",
-      bgColor: "bg-blue-100"
-    },
-    high: { 
-      label: "High", 
-      color: "text-amber-500",
-      bgColor: "bg-amber-100" 
-    },
-    urgent: { 
-      label: "Urgent", 
-      color: "text-red-500",
-      bgColor: "bg-red-100"
-    },
-  };
-  
-  const { label, color, bgColor } = priorities[priority];
+  const { label, color, bgColor } = priorityConfig[priority];
   
   return (
     <Badge variant="outline" className={cn("px-2 py-0 h-5 text-xs font-normal", color, bgColor)}>
