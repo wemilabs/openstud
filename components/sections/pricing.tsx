@@ -58,7 +58,19 @@ export function Pricing() {
             Choose the perfect plan for your study needs
           </p>
         </div>
-        <div className="isolate mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-y-8 sm:gap-8 lg:grid-cols-3">
+        <div className="isolate mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-y-8 sm:gap-8 lg:grid-cols-3 relative">
+          <div className="absolute inset-0 backdrop-blur-sm bg-background/70 z-10 flex items-center justify-center">
+            <div className="text-center px-6 py-12 rounded-xl bg-background/80 shadow-lg">
+              <h3 className="text-xl font-bold mb-2">Coming Soon</h3>
+              <p className="text-muted-foreground">
+                Our pricing plans are being finalized and will be available
+                shortly.
+              </p>
+              <Button className="mt-4" variant="outline">
+                Get Notified
+              </Button>
+            </div>
+          </div>
           {plans.map((plan) => (
             <div
               key={plan.name}
