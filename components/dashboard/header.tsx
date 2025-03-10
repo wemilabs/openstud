@@ -370,12 +370,12 @@ export function DashboardHeader() {
           </Dialog>
 
           {/* Divider slash */}
-          <span className="hidden md:block font-thin text-2xl text-muted-foreground">
+          {/* <span className="hidden md:block font-thin text-2xl text-muted-foreground">
             /
-          </span>
+          </span> */}
 
           {/* Academic year selector */}
-          <Popover open={openAcademicYear} onOpenChange={setOpenAcademicYear}>
+          {/* <Popover open={openAcademicYear} onOpenChange={setOpenAcademicYear}>
             <PopoverTrigger asChild className="hidden md:flex">
               <Button
                 variant="outline"
@@ -434,15 +434,15 @@ export function DashboardHeader() {
                 </CommandList>
               </Command>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
 
           {/* Divider slash */}
-          <span className="hidden md:block font-thin text-2xl text-muted-foreground">
+          {/* <span className="hidden md:block font-thin text-2xl text-muted-foreground">
             /
-          </span>
+          </span> */}
 
           {/* Semester selector */}
-          <Popover open={openSemester} onOpenChange={setOpenSemester}>
+          {/* <Popover open={openSemester} onOpenChange={setOpenSemester}>
             <PopoverTrigger asChild className="hidden md:flex">
               <Button
                 variant="outline"
@@ -499,7 +499,7 @@ export function DashboardHeader() {
                 </CommandList>
               </Command>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
         </div>
 
         {/* Right side controls */}

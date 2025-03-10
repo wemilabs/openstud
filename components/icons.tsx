@@ -3,6 +3,7 @@ import type { SVGProps } from "react";
 import {
   AlertTriangle,
   ArrowRight,
+  Bot,
   ChartNoAxesColumn,
   Book,
   Calendar,
@@ -61,6 +62,7 @@ export const Icons = {
   calendar: Calendar,
   chartNoAxesColumn: ChartNoAxesColumn,
   check: Check,
+  bot: Bot,
 } as const;
 
 export const GoogleIcon = (props: SVGProps<SVGSVGElement>) => (

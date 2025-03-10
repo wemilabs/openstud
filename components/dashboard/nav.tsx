@@ -29,6 +29,11 @@ const navItems: NavItem[] = [
     icon: "book",
   },
   {
+    title: "Ask Clever",
+    href: "/dashboard/ai-tutor",
+    icon: "bot",
+  },
+  {
     title: "Assignments",
     href: "/dashboard/assignments",
     icon: "pencil",
