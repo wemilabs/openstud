@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export default auth(async (req) => {
-  // Check authentication
-  const session = await auth();
-  const isLoggedIn = !!session;
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const isLoggedIn = !!token;
 
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
   const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
@@ -41,7 +41,7 @@ export default auth(async (req) => {
   });
 
   return response;
-});
+}
 
 // Protect dashboard and auth routes while applying security headers to all routes
 export const config = {
