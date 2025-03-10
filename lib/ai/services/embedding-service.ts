@@ -6,6 +6,7 @@
 
 import { aiConfig } from '../config';
 import * as OpenAIProvider from '../providers/openai/embeddings';
+import * as GrokProvider from '../providers/grok/embeddings';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 
@@ -40,7 +41,8 @@ export async function generateEmbedding(text: string): Promise<EmbeddingVector> 
   switch (aiConfig.provider) {
     case 'openai':
       return OpenAIProvider.generateEmbedding(text);
-    // Add other providers here as they are implemented
+    case 'grok':
+      return GrokProvider.generateEmbedding(text);
     default:
       throw new Error(`Embedding provider ${aiConfig.provider} not supported`);
   }

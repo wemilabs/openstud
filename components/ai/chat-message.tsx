@@ -8,9 +8,13 @@ import { useSession } from "next-auth/react";
 
 interface ChatMessageProps {
   message: ChatMessageType;
+  isStreaming?: boolean;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  isStreaming = false,
+}: ChatMessageProps) {
   const { data: session } = useSession();
   const isUser = message.role === "user";
 
@@ -21,23 +25,21 @@ export function ChatMessage({ message }: ChatMessageProps) {
         isUser ? "flex-row-reverse" : ""
       )}
     >
-      {/* Avatar */}
       {isUser ? (
         <Avatar>
           <AvatarImage src={session?.user?.image || ""} />
           <AvatarFallback>
-            <User className="h-5 w-5" />
+            <User className="size-5" />
           </AvatarFallback>
         </Avatar>
       ) : (
         <Avatar>
           <AvatarFallback className="bg-primary text-primary-foreground">
-            <Bot className="h-5 w-5" />
+            <Bot className="size-5" />
           </AvatarFallback>
         </Avatar>
       )}
 
-      {/* Message content */}
       <div
         className={cn(
           "rounded-lg px-4 py-3 max-w-[80%]",
@@ -50,6 +52,16 @@ export function ChatMessage({ message }: ChatMessageProps) {
               {line}
             </p>
           ))}
+          {isStreaming && (
+            <div className="flex items-center mt-2">
+              <div className="size-2 bg-primary rounded-full animate-pulse"></div>
+              <div className="size-2 bg-primary rounded-full animate-pulse delay-150 mx-1"></div>
+              <div className="size-2 bg-primary rounded-full animate-pulse delay-300"></div>
+              <span className="text-xs text-muted-foreground ml-2">
+                Generating...
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

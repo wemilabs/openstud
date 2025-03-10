@@ -13,3 +13,4 @@ export * from './services/embedding-service';
 
 // Export provider-specific implementations for direct access if needed
 export * as OpenAIProvider from './providers/openai';
+export * as GrokProvider from './providers/grok';
