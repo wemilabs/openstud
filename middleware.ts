@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-// import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 
-// export default async (req: NextRequest) => ({
 export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET! });
-  const isLoggedIn = !!token;
-
-  // const session = await auth();
-  // const isLoggedIn = !!session;
+  // Use the modern auth() approach from NextAuth v5
+  const session = await auth();
+  const isLoggedIn = !!session;
 
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
   const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
@@ -32,9 +28,11 @@ export async function middleware(req: NextRequest) {
   headers.set("X-Frame-Options", "SAMEORIGIN");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  
+  // Update CSP to be more permissive for auth providers
   headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self' data:;"
+    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com; connect-src 'self' https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self' data:; frame-src 'self' https://accounts.google.com;"
   );
   headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
