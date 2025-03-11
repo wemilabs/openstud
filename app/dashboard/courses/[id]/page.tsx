@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { getCourseById } from "@/actions/courses";
 import { getNotesByCourseId } from "@/actions/notes";
 import { NoteList } from "@/components/notes/note-list";
@@ -6,7 +7,6 @@ import { CreateNote } from "@/components/notes/create-note";
 import { notFound } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 
 export const metadata = {
   title: "Course Details - OpenStud",

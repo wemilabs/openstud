@@ -1,19 +1,21 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { GoogleIcon, Icons } from "../icons";
+import { GoogleIcon, Icons } from "@/components/icons";
+import { toast } from "sonner";
 
 export function UserAuthForm() {
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function loginWithGoogle() {
     setIsLoading(true);
     try {
       await signIn("google", { callbackUrl: "/dashboard" });
     } catch (error) {
-      // Handle error
+      console.error("Login error:", error);
+      toast.error("Failed to login");
     } finally {
       setIsLoading(false);
     }

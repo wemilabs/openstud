@@ -1,13 +1,24 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { Overview } from "@/components/dashboard/overview";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { WorkspaceContent } from "@/components/dashboard/workspace-content";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const session = await auth();
+  if (!session?.user) {
+    return redirect("/login");
+  }
+
   return (
     <>
       <div className="grid gap-1 mb-4">
         <h1 className="text-xl font-medium tracking-tight">
-          Welcome to OpenStud
+          🎉 Hey, you're welcome{" "}
+          <span className="text-foreground font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+            {session?.user?.name}
+          </span>
+          !
         </h1>
         <p className="text-sm text-muted-foreground">
           Your collaborative space for academic success

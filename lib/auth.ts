@@ -10,7 +10,7 @@ export const {
   signOut,
 } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET!,
   session: {
     strategy: "jwt",
   },
@@ -34,13 +34,13 @@ export const {
       }
       return session;
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account }) {
       if (account && user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.picture = user.image;
-        
+
         // First time sign in
         await prisma.user.upsert({
           where: { email: token.email! },

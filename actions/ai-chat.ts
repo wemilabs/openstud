@@ -1,9 +1,3 @@
-/**
- * AI Chat Actions
- * 
- * Server actions for interacting with the AI chat system
- */
-
 "use server";
 
 import { auth } from "@/lib/auth";
@@ -69,7 +63,7 @@ export async function sendMessageStream(
 
   // Extract userId to ensure TypeScript knows it's defined
   const userId = session.user.id;
-  
+
   // Variable to store the conversation ID (either existing or new)
   let resultConversationId = conversationId;
 
@@ -77,57 +71,57 @@ export async function sendMessageStream(
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        let fullResponse = '';
-        
+        let fullResponse = "";
+
         // Create a callback function to handle chunks
         const handleChunk = (chunk: string) => {
           // Encode the chunk as a Uint8Array
           const encoder = new TextEncoder();
           const encoded = encoder.encode(chunk);
-          
+
           // Add the chunk to the stream
           controller.enqueue(encoded);
-          
+
           // Accumulate the full response
           fullResponse += chunk;
         };
-        
+
         // Generate the streaming response
         const result = await generateStreamingChatResponse(
           messages,
           handleChunk,
           {
             userId, // Now TypeScript knows this is defined
-            conversationId, 
+            conversationId,
             stream: true,
           }
         );
-        
+
         // Store the conversation ID for the response headers
         if (result.conversationId) {
           resultConversationId = result.conversationId;
         }
-        
+
         // Add the conversation ID as the last chunk in a special format
         // that the client can parse
         const metadataChunk = JSON.stringify({
           __metadata: {
-            conversationId: resultConversationId
-          }
+            conversationId: resultConversationId,
+          },
         });
         const encoder = new TextEncoder();
         controller.enqueue(encoder.encode(`\n${metadataChunk}`));
-        
+
         // Close the stream when done
         controller.close();
-        
+
         // Revalidate the path
         revalidatePath("/dashboard/ai-tutor");
       } catch (error) {
         console.error("Error in sendMessageStream:", error);
         controller.error(error);
       }
-    }
+    },
   });
 
   return stream;
@@ -178,7 +172,7 @@ export async function getAllConversations() {
 
 /**
  * Delete a conversation
- * 
+ *
  * @param conversationId Conversation ID to delete
  * @returns Success or error message
  */
@@ -191,7 +185,7 @@ export async function deleteConversationById(conversationId: string) {
 
   try {
     const success = await deleteConversation(conversationId, session.user.id);
-    
+
     if (success) {
       revalidatePath("/dashboard/ai-tutor");
       return { success: true };
@@ -206,7 +200,7 @@ export async function deleteConversationById(conversationId: string) {
 
 /**
  * Cancel an ongoing chat stream
- * 
+ *
  * @param conversationId Conversation ID with the active stream
  * @returns Success or error message
  */
@@ -219,7 +213,7 @@ export async function cancelChatStreamById(conversationId: string) {
 
   try {
     const success = await cancelChatStream(conversationId);
-    
+
     if (success) {
       return { success: true };
     } else {

@@ -59,64 +59,64 @@ import { Label } from "@/components/ui/label";
 import { createWorkspace } from "@/actions/workspaces";
 import { toast } from "sonner";
 
-const academicYears = [
-  {
-    value: "2024-2025",
-    label: "2024-2025",
-  },
-  {
-    value: "2025-2026",
-    label: "2025-2026",
-  },
-  {
-    value: "2026-2027",
-    label: "2026-2027",
-  },
-  {
-    value: "2027-2028",
-    label: "2027-2028",
-  },
-];
+// const academicYears = [
+//   {
+//     value: "2024-2025",
+//     label: "2024-2025",
+//   },
+//   {
+//     value: "2025-2026",
+//     label: "2025-2026",
+//   },
+//   {
+//     value: "2026-2027",
+//     label: "2026-2027",
+//   },
+//   {
+//     value: "2027-2028",
+//     label: "2027-2028",
+//   },
+// ];
 
-const semesters = [
-  {
-    value: "semester-one",
-    label: "Semester 1",
-  },
-  {
-    value: "semester-two",
-    label: "Semester 2",
-  },
-  {
-    value: "semester-three",
-    label: "Semester 3",
-  },
-  {
-    value: "semester-four",
-    label: "Semester 4",
-  },
-  {
-    value: "semester-five",
-    label: "Semester 5",
-  },
-  {
-    value: "semester-six",
-    label: "Semester 6",
-  },
-];
+// const semesters = [
+//   {
+//     value: "semester-one",
+//     label: "Semester 1",
+//   },
+//   {
+//     value: "semester-two",
+//     label: "Semester 2",
+//   },
+//   {
+//     value: "semester-three",
+//     label: "Semester 3",
+//   },
+//   {
+//     value: "semester-four",
+//     label: "Semester 4",
+//   },
+//   {
+//     value: "semester-five",
+//     label: "Semester 5",
+//   },
+//   {
+//     value: "semester-six",
+//     label: "Semester 6",
+//   },
+// ];
 
 export function DashboardHeader() {
   const { data: session } = useSession();
   const user = session?.user;
-  const [openTeam, setOpenTeam] = useState(false);
-  const [openAcademicYear, setOpenAcademicYear] = useState(false);
-  const [openSemester, setOpenSemester] = useState(false);
+  const [openWorkspace, setOpenWorkspace] = useState(false);
+  // const [openAcademicYear, setOpenAcademicYear] = useState(false);
+  // const [openSemester, setOpenSemester] = useState(false);
   const [openCreateWorkspace, setOpenCreateWorkspace] = useState(false);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
 
-  const [academicYearValue, setAcademicYearValue] = useState("");
-  const [semesterValue, setSemesterValue] = useState("");
+  // const [academicYearValue, setAcademicYearValue] = useState("");
+  // const [semesterValue, setSemesterValue] = useState("");
 
   // Use the workspace context
   const {
@@ -124,14 +124,15 @@ export function DashboardHeader() {
     currentWorkspace,
     setCurrentWorkspace,
     refreshWorkspaces,
-    isLoading,
   } = useWorkspace();
 
   const handleSignOut = async () => {
     try {
       await signOut({ redirect: true, callbackUrl: "/" });
+      toast.success("You have been signed out");
     } catch (error) {
       console.error("Sign out error:", error);
+      toast.error("Failed to sign out");
     }
   };
 
@@ -215,12 +216,12 @@ export function DashboardHeader() {
           </span>
 
           {/* Workspace selector */}
-          <Popover open={openTeam} onOpenChange={setOpenTeam}>
+          <Popover open={openWorkspace} onOpenChange={setOpenWorkspace}>
             <PopoverTrigger asChild className="hidden md:flex">
               <Button
                 variant="outline"
                 role="combobox"
-                aria-expanded={openTeam}
+                aria-expanded={openWorkspace}
                 className="justify-between border-none shadow-none"
               >
                 <Badge
@@ -248,7 +249,7 @@ export function DashboardHeader() {
                         value={workspace.id}
                         onSelect={() => {
                           setCurrentWorkspace(workspace);
-                          setOpenTeam(false);
+                          setOpenWorkspace(false);
                         }}
                       >
                         {workspace.name}
@@ -267,17 +268,17 @@ export function DashboardHeader() {
                   <CommandGroup>
                     <CommandItem
                       onSelect={() => {
-                        // Close the team popover first
-                        setOpenTeam(false);
+                        // Close the workspace popover first
+                        setOpenWorkspace(false);
 
-                        // Use setTimeout to ensure the team popover is fully closed
+                        // Use setTimeout to ensure the workspace popover is fully closed
                         setTimeout(() => {
                           // Then open the create workspace dialog
                           setOpenCreateWorkspace(true);
                         }, 150);
                       }}
                     >
-                      <Plus className="mr-2 h-4 w-4" />
+                      <Plus className="mr-2 size-4" />
                       Create New Workspace
                     </CommandItem>
                   </CommandGroup>
@@ -314,7 +315,7 @@ export function DashboardHeader() {
               <DialogHeader>
                 <DialogTitle>Create New Workspace</DialogTitle>
                 <DialogDescription>
-                  Create a new workspace for your team or project.
+                  Create a new workspace for your work / projects.
                 </DialogDescription>
               </DialogHeader>
               <form

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { getAllConversations } from "@/actions/ai-chat";
 import { ChatInterface } from "@/components/ai/chat-interface";
 import { ChatListButton } from "@/components/ai/chat-list-button";
@@ -13,14 +13,14 @@ export const metadata: Metadata = {
 };
 
 export default async function AITutorPage() {
+  // Check authentication first
   const session = await auth();
-
   if (!session?.user) {
     redirect("/login");
   }
 
   // Get all conversations for the user
-  const { conversations, error } = await getAllConversations();
+  const { conversations } = await getAllConversations();
 
   return (
     <div className="flex flex-col">

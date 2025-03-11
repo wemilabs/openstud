@@ -2,10 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Send, StopCircle } from "lucide-react";
+import { Loader, Send, StopCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMessage } from "@/components/ai/chat-message";
 import {
   sendMessageStream,
@@ -14,7 +13,6 @@ import {
 } from "@/actions/ai-chat";
 import { type ChatMessage as ChatMessageType } from "@/lib/ai";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 export function ChatInterface() {
   const router = useRouter();
@@ -39,40 +37,43 @@ export function ChatInterface() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // Load a conversation by ID
-  const loadConversation = useCallback(async (id: string) => {
-    setIsLoadingConversation(true);
-    try {
-      const { conversation, error } = await getConversationById(id);
+  const loadConversation = useCallback(
+    async (id: string) => {
+      setIsLoadingConversation(true);
+      try {
+        const { conversation, error } = await getConversationById(id);
 
-      if (error || !conversation) {
+        if (error || !conversation) {
+          console.error("Error loading conversation:", error);
+          toast.error("Failed to load conversation");
+          // Redirect to new conversation if the requested one doesn't exist
+          router.push("/dashboard/ai-tutor");
+          return;
+        }
+
+        // Reset messages and add conversation messages
+        setMessages([
+          {
+            role: "system",
+            content:
+              "You are Clever, a helpful AI tutor for OpenStud. You help students understand concepts, explain topics, suggest exercises, and assist with their academic needs. You can also create study plans and manage their academic progress, understand their needs, and provide guidance based on their goals.",
+          },
+          ...conversation.messages.map((msg: any) => ({
+            role: msg.role as "user" | "assistant" | "system",
+            content: msg.content,
+          })),
+        ]);
+      } catch (error) {
         console.error("Error loading conversation:", error);
         toast.error("Failed to load conversation");
-        // Redirect to new conversation if the requested one doesn't exist
+        // Redirect to new conversation if there's an error
         router.push("/dashboard/ai-tutor");
-        return;
+      } finally {
+        setIsLoadingConversation(false);
       }
-
-      // Reset messages and add conversation messages
-      setMessages([
-        {
-          role: "system",
-          content:
-            "You are Clever, a helpful AI tutor for OpenStud. You help students understand concepts, explain topics, suggest exercises, and assist with their academic needs. You can also create study plans and manage their academic progress, understand their needs, and provide guidance based on their goals.",
-        },
-        ...conversation.messages.map((msg: any) => ({
-          role: msg.role as "user" | "assistant" | "system",
-          content: msg.content,
-        })),
-      ]);
-    } catch (error) {
-      console.error("Error loading conversation:", error);
-      toast.error("Failed to load conversation");
-      // Redirect to new conversation if there's an error
-      router.push("/dashboard/ai-tutor");
-    } finally {
-      setIsLoadingConversation(false);
-    }
-  }, [router]);
+    },
+    [router]
+  );
 
   useEffect(() => {
     if (conversationId) {
@@ -284,8 +285,13 @@ export function ChatInterface() {
 
   if (isLoadingConversation) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center h-[calc(100vh-340px)]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader className="size-8 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
+            Loading conversation...
+          </p>
+        </div>
       </div>
     );
   }

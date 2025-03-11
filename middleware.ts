@@ -1,10 +1,14 @@
-import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+// import { auth } from "@/lib/auth";
 
+// export default async (req: NextRequest) => ({
 export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET! });
   const isLoggedIn = !!token;
+
+  // const session = await auth();
+  // const isLoggedIn = !!session;
 
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
   const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
