@@ -13,7 +13,9 @@ export function Hero() {
             className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-full px-3 py-2 text-sm leading-6 tracking-wide border-none shadow-none"
           >
             v0.4.11 - Introducing{" "}
-            <span className="font-bold">Clever, your personal AI Tutor</span>
+            <span className="font-bold">
+              Cleverness, your personal AI Tutor
+            </span>
           </Badge>
           <h1 className="text-4xl font-extrabold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1] bg-gradient-to-r from-primary/10 via-primary to-primary/65 bg-clip-text text-transparent mt-2">
             The Ultimate Place for Smarter Learning
