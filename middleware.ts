@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 export async function middleware(req: NextRequest) {
-  // Use the modern auth() approach from NextAuth v5
+  // Check if logged in using auth() session
   const session = await auth();
   const isLoggedIn = !!session;
 
@@ -28,7 +28,7 @@ export async function middleware(req: NextRequest) {
   headers.set("X-Frame-Options", "SAMEORIGIN");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  
+
   // Update CSP to be more permissive for auth providers
   headers.set(
     "Content-Security-Policy",
