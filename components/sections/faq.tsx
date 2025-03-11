@@ -7,19 +7,14 @@ import {
 
 const faqs = [
   {
-    question: "What is OpenStud?",
+    question: "What is Clever?",
     answer:
-      "OpenStud is a comprehensive study management platform designed to help students organize their learning process, track progress, and improve their academic performance through smart features and analytics.",
+      "Clever is our AI-powered study assistant designed to be your personal tutor. It can explain complex concepts, help with homework, and provide personalized study plans. P.S.: Please, Clever should be used as a supplement to your own study, not a replacement. Don't use Clever for everything, but use it when you really need help. Some policies will soon be added to prevent plagiarism, cheating, and other forms of academic dishonesty.",
   },
   {
     question: "How does the free trial work?",
     answer:
       "You can try OpenStud free for 14 days with full access to all Pro features. No credit card required. At the end of the trial, you can choose to upgrade or continue with the free plan.",
-  },
-  {
-    question: "Can I use OpenStud for multiple subjects?",
-    answer:
-      "Yes! The free plan allows up to 3 subjects, while Pro and Team plans offer unlimited subjects. Each subject can have its own study plan, resources, and progress tracking.",
   },
   {
     question: "Is my data secure?",
@@ -34,7 +29,7 @@ const faqs = [
   {
     question: "How do I get started?",
     answer:
-      "Simply sign up for a free account, choose your subjects, and start organizing your study materials. Our onboarding process will guide you through setting up your first study plan.",
+      "Simply sign up for a free account. We made the app simple and intuitive so you can start using it right away. No bunch of garbage functionalities. Only the best and essential. No need for any tutorials. You can navigate the app as you think.",
   },
 ];
 

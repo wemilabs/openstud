@@ -33,7 +33,7 @@ export function Hero() {
             <Button
               variant="outline"
               size="lg"
-              className="shadow-xs shadow-blue-500 hover:bg-blue-100 transition duration-200 dark:hover:text-muted"
+              className="shadow-xs shadow-blue-500 hover:bg-blue-100 transition duration-200 dark:hover:text-muted cursor-not-allowed"
             >
               Documentation
             </Button>

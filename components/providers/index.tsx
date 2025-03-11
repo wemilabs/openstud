@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TaskChangesProvider } from "@/contexts/task-changes-context";

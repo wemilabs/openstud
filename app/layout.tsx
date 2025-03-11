@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
-import { Providers } from "@/components/providers/providers";
+import { Providers } from "@/components/providers/index";
 import { Toaster } from "sonner";
 
 const geist = Geist({

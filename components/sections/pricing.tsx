@@ -67,7 +67,7 @@ export function Pricing() {
                 shortly.
               </p>
               <Button className="mt-4" variant="outline">
-                Get Notified
+                You'll get notified soon!
               </Button>
             </div>
           </div>
