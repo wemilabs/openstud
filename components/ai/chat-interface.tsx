@@ -94,7 +94,13 @@ export function ChatInterface() {
 
   // Scroll to bottom when messages change or streaming message updates
   useEffect(() => {
-    scrollToBottom();
+    // Use a small timeout to ensure the DOM has updated before scrolling
+    // This helps ensure the scroll happens after the content is rendered
+    const scrollTimer = setTimeout(() => {
+      scrollToBottom();
+    }, 10);
+
+    return () => clearTimeout(scrollTimer);
   }, [messages, streamingMessage]);
 
   // Clean up abort controller on unmount
@@ -157,9 +163,8 @@ export function ChatInterface() {
       // Reset streaming message
       setStreamingMessage("");
 
-      // Buffer to accumulate text that might contain metadata
-      let metadataBuffer = "";
       let newConversationId: string | undefined;
+      let accumulatedContent = ""; // Track full response content
 
       while (true) {
         const { done, value } = await reader.read();
@@ -171,30 +176,36 @@ export function ChatInterface() {
         // Decode the chunk
         const chunk = decoder.decode(value, { stream: true });
 
-        // Check if the chunk contains metadata (at the end of the stream)
+        // Add to accumulated content
+        accumulatedContent += chunk;
+
+        // Check if chunk contains metadata (conversation ID)
         if (chunk.includes('{"__metadata":')) {
-          // Extract the metadata part
-          const metadataParts = chunk.split("\n");
+          try {
+            // Extract the metadata part
+            const metadataStr = chunk.substring(
+              chunk.indexOf('{"__metadata":'),
+              chunk.length
+            );
+            const metadata = JSON.parse(metadataStr);
 
-          // The last part should contain our metadata
-          for (const part of metadataParts) {
-            if (part.includes('{"__metadata":')) {
-              try {
-                const metadata = JSON.parse(part);
-                if (metadata.__metadata?.conversationId) {
-                  newConversationId = metadata.__metadata.conversationId;
-                }
-                // Don't add this part to the streaming message
-                continue;
-              } catch (e) {
-                console.error("Error parsing metadata:", e);
-              }
+            // Extract conversation ID
+            if (metadata.__metadata?.conversationId) {
+              newConversationId = metadata.__metadata.conversationId;
             }
 
-            // Add non-metadata parts to the streaming message
-            if (part.trim()) {
-              setStreamingMessage((prev) => prev + part);
+            // Don't add this part to the streaming message
+            const contentPart = chunk.substring(
+              0,
+              chunk.indexOf('{"__metadata":')
+            );
+            if (contentPart.trim()) {
+              setStreamingMessage((prev) => prev + contentPart);
             }
+          } catch (e) {
+            console.error("Error parsing metadata:", e);
+            // If parsing fails, just treat it as regular content
+            setStreamingMessage((prev) => prev + chunk);
           }
         } else {
           // Regular content chunk, add to the streaming message
@@ -202,25 +213,45 @@ export function ChatInterface() {
         }
       }
 
-      // When stream is complete, add the final message to the chat
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: streamingMessage,
-        },
-      ]);
+      // When stream is complete, ensure we add the final message to the chat history
+      if (accumulatedContent.trim()) {
+        // Clean metadata from the accumulated content
+        let finalContent = accumulatedContent;
+        if (finalContent.includes('{"__metadata":')) {
+          finalContent = finalContent.substring(
+            0,
+            finalContent.indexOf('{"__metadata":')
+          );
+        }
 
-      // Clear the streaming message after updating messages
-      setStreamingMessage("");
+        // Only add the message if there's actual content
+        if (finalContent.trim()) {
+          // Update the messages state with the final assistant response
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            {
+              role: "assistant",
+              content: finalContent.trim(),
+            },
+          ]);
+        }
 
-      // Update the URL if we have a new conversation ID
+        // Clear streaming message after adding to chat history
+        setStreamingMessage("");
+      }
+
+      // Update the URL if we have a new conversation ID - using a setTimeout to avoid reload
       if (newConversationId && !currentConversationId) {
         setCurrentConversationId(newConversationId);
-        // Use replace instead of push to avoid refreshing the page
-        router.replace(`/dashboard/ai-tutor?id=${newConversationId}`, {
-          scroll: false,
-        });
+        
+        // Use setTimeout to defer the URL update until after the state updates have been processed
+        setTimeout(() => {
+          window.history.replaceState(
+            {},
+            "",
+            `/dashboard/ai-tutor?id=${newConversationId}`
+          );
+        }, 0);
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
@@ -241,13 +272,18 @@ export function ChatInterface() {
 
     // Add user message to the chat
     const userMessage: ChatMessageType = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+
+    // Use callback form to ensure we're working with the latest state
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+
+    // Clear input and set loading state
     setInput("");
     setIsLoading(true);
     setStreamingMessage(""); // Reset streaming message
 
     try {
       // Prepare messages to send (including system message)
+      // Important: Use the current messages state plus the new user message
       const messagesToSend = [...messages, userMessage];
 
       // Create a new AbortController for this request
@@ -264,8 +300,10 @@ export function ChatInterface() {
       await processStream(response);
     } catch (error) {
       console.error("Error in handleSendMessage:", error);
-      setMessages((prev) => [
-        ...prev,
+
+      // Use callback form to ensure we're working with the latest state
+      setMessages((prevMessages) => [
+        ...prevMessages,
         {
           role: "assistant",
           content: "Sorry, I encountered an error. Please try again.",
@@ -298,14 +336,17 @@ export function ChatInterface() {
 
   // Check if this is a new conversation with only the system message
   const isNewConversation =
-    messages.length === 1 && messages[0].role === "system";
+    messages.length === 1 &&
+    messages[0].role === "system" &&
+    !streamingMessage &&
+    !isLoading;
 
   return (
     <div className="flex flex-col h-full">
       {isNewConversation && (
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] md:min-h-[calc(100vh-340px)] gap-8">
           <h1 className="text-3xl font-bold text-center">
-            What do you have to learn about today?
+            What can I help with?
           </h1>
           <div className="w-full max-w-xl px-4">
             <div className="relative">
@@ -345,7 +386,7 @@ export function ChatInterface() {
         </div>
       )}
 
-      {(!isNewConversation || isLoading) && (
+      {(!isNewConversation || streamingMessage || isLoading) && (
         <>
           <div className="h-[calc(100vh-200px)] overflow-y-auto pb-32">
             <div className="max-w-3xl mx-auto">

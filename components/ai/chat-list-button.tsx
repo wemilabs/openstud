@@ -69,7 +69,18 @@ export function ChatListButton({ conversations }: ChatListButtonProps) {
 
       if (result.success) {
         toast.success("Conversation deleted");
-        router.refresh(); // Refresh to update the list
+        
+        // Check if the current URL contains the deleted conversation's ID
+        const searchParams = new URLSearchParams(window.location.search);
+        const currentConversationId = searchParams.get('id');
+        
+        if (currentConversationId === conversationToDelete) {
+          // If we're deleting the current conversation, redirect to base AI tutor page
+          router.push('/dashboard/ai-tutor');
+        } else {
+          // Otherwise just refresh to update the list
+          router.refresh();
+        }
       } else {
         toast.error(result.error || "Failed to delete conversation");
       }

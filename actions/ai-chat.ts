@@ -114,9 +114,6 @@ export async function sendMessageStream(
 
         // Close the stream when done
         controller.close();
-
-        // Revalidate the path
-        revalidatePath("/dashboard/ai-tutor");
       } catch (error) {
         console.error("Error in sendMessageStream:", error);
         controller.error(error);
