@@ -7,9 +7,9 @@ import { ChatListButton } from "@/components/ai/chat-list-button";
 import { NewChatButton } from "@/components/ai/new-chat-button";
 
 export const metadata: Metadata = {
-  title: "Chat with Cleverness | OpenStud",
+  title: "Chat with Clever | OpenStud",
   description:
-    "Get personalized help with your studies from the OpenStud AI Tutor, Cleverness",
+    "Get personalized help with your studies from the OpenStud AI Tutor, Clever",
 };
 
 export default async function AITutorPage() {

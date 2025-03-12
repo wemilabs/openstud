@@ -7,9 +7,9 @@ import {
 
 const faqs = [
   {
-    question: "What is Cleverness?",
+    question: "What is Clever?",
     answer:
-      "Cleverness is our AI-powered study assistant designed to be your personal tutor. It can explain complex concepts, help with homework, and provide personalized study plans. P.S.: Please, Cleverness should be used as a supplement to your own study, not a replacement. Don't use Cleverness for everything, but use it when you really need help. Some policies will soon be added to prevent plagiarism, cheating, and other forms of academic dishonesty.",
+      "Clever is our AI-powered study assistant designed to be your personal tutor. It can explain complex concepts, help with homework, and provide personalized study plans. P.S.: Please, Clever should be used as a supplement to your own study, not a replacement. Don't use Clever for everything, but use it when you really need help. Some policies will soon be added to prevent plagiarism, cheating, and other forms of academic dishonesty.",
   },
   {
     question: "How does the free trial work?",

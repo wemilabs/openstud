@@ -23,7 +23,7 @@ export function ChatInterface() {
     {
       role: "system",
       content:
-        "You are Cleverness, a helpful AI tutor for OpenStud. You help students understand concepts, explain topics, suggest exercises, and assist with their academic needs. You can also create study plans and manage their academic progress, understand their needs, and provide guidance based on their goals.",
+        "You are Clever, a helpful AI tutor for OpenStud. You help students understand concepts, explain topics, suggest exercises, and assist with their academic needs. You can also create study plans and manage their academic progress, understand their needs, and provide guidance based on their goals.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -56,7 +56,7 @@ export function ChatInterface() {
           {
             role: "system",
             content:
-              "You are Cleverness, a helpful AI tutor for OpenStud. You help students understand concepts, explain topics, suggest exercises, and assist with their academic needs. You can also create study plans and manage their academic progress, understand their needs, and provide guidance based on their goals.",
+              "You are Clever, a helpful AI tutor for OpenStud. You help students understand concepts, explain topics, suggest exercises, and assist with their academic needs. You can also create study plans and manage their academic progress, understand their needs, and provide guidance based on their goals.",
           },
           ...conversation.messages.map((msg: any) => ({
             role: msg.role as "user" | "assistant" | "system",
@@ -85,7 +85,7 @@ export function ChatInterface() {
         {
           role: "system",
           content:
-            "You are Cleverness, a helpful AI tutor for OpenStud. You help students understand concepts, explain topics, suggest exercises, and assist with their academic needs. You can also create study plans and manage their academic progress, understand their needs, and provide guidance based on their goals.",
+            "You are Clever, a helpful AI tutor for OpenStud. You help students understand concepts, explain topics, suggest exercises, and assist with their academic needs. You can also create study plans and manage their academic progress, understand their needs, and provide guidance based on their goals.",
         },
       ]);
       setCurrentConversationId(null);
