@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { getWorkspaceInvitations, deleteWorkspaceInvitation } from "@/actions/workspace-invitations";
+import {
+  getWorkspaceInvitations,
+  deleteWorkspaceInvitation,
+} from "@/actions/workspace-invitations";
 
 import {
   Card,
@@ -86,7 +89,7 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
   // Handle invitation deletion
   const handleDelete = async () => {
     if (!deleteId) return;
-    
+
     setIsDeleting(true);
     try {
       const result = await deleteWorkspaceInvitation(deleteId);
@@ -109,12 +112,12 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
   // Handle copying invite link to clipboard
   const copyToClipboard = async (token: string) => {
     const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${token}`;
-    
+
     try {
       await navigator.clipboard.writeText(inviteLink);
       setCopiedMap((prev) => ({ ...prev, [token]: true }));
       toast.success("Invitation link copied to clipboard");
-      
+
       // Reset copied state after 2 seconds
       setTimeout(() => {
         setCopiedMap((prev) => ({ ...prev, [token]: false }));
@@ -162,9 +165,7 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
     <Card>
       <CardHeader>
         <CardTitle>Pending Invitations</CardTitle>
-        <CardDescription>
-          Manage invitations to your workspace
-        </CardDescription>
+        <CardDescription>Manage invitations to your workspace</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -181,17 +182,24 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
               <TableRow key={invitation.id}>
                 <TableCell>
                   <Badge variant={getRoleBadgeVariant(invitation.role)}>
-                    {invitation.role.charAt(0) + invitation.role.slice(1).toLowerCase()}
+                    {invitation.role.charAt(0) +
+                      invitation.role.slice(1).toLowerCase()}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {formatDistanceToNow(new Date(invitation.expires), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(invitation.expires), {
+                    addSuffix: true,
+                  })}
                 </TableCell>
                 <TableCell>
                   {invitation.maxUses === null ? (
-                    <span className="text-sm text-muted-foreground">Unlimited</span>
+                    <span className="text-sm text-muted-foreground">
+                      Unlimited
+                    </span>
                   ) : (
-                    <span className="text-sm">{invitation.usedCount} / {invitation.maxUses}</span>
+                    <span className="text-sm">
+                      {invitation.usedCount} / {invitation.maxUses}
+                    </span>
                   )}
                 </TableCell>
                 <TableCell className="text-right">
@@ -207,7 +215,7 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
                         <Copy className="h-4 w-4" />
                       )}
                     </Button>
-                    
+
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -223,7 +231,8 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Invitation</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete this invitation? This action cannot be undone.
+                            Are you sure you want to delete this invitation?
+                            This action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -231,9 +240,11 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
                           <AlertDialogAction
                             onClick={handleDelete}
                             disabled={isDeleting}
-                            className="bg-destructive hover:bg-destructive/90"
+                            className="bg-destructive text-muted dark:text-primary hover:bg-destructive/90"
                           >
-                            {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isDeleting && (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            )}
                             Delete
                           </AlertDialogAction>
                         </AlertDialogFooter>

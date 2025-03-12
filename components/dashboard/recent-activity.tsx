@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProgressBar } from "@/components/tasks/progress-bar";
 import { ScrollArea } from "../ui/scroll-area";
 import { useWorkspace } from "@/contexts/workspace-context";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 // Activity type
 interface Activity {
@@ -33,11 +34,15 @@ interface Activity {
   projectName: string;
   taskTitle: string;
   completionPercentage: number;
+  user: {
+    id: string;
+    name: string | null;
+    email: string | null;
+    image: string | null;
+  } | null;
+  isTeamActivity: boolean;
 }
 
-/**
- * Recent activity component for the dashboard
- */
 export function RecentActivity() {
   const { currentWorkspace } = useWorkspace();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -90,15 +95,15 @@ export function RecentActivity() {
   const getActivityIcon = (type: Activity["type"]) => {
     switch (type) {
       case "created":
-        return <FileEdit className="h-4 w-4 text-blue-500" />;
+        return <FileEdit className="size-4 text-blue-500" />;
       case "updated":
-        return <BarChart className="h-4 w-4 text-orange-500" />;
+        return <BarChart className="size-4 text-orange-500" />;
       case "completed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="size-4 text-green-500" />;
       case "progress":
-        return <Clock className="h-4 w-4 text-yellow-500" />;
+        return <Clock className="size-4 text-yellow-500" />;
       default:
-        return <BarChart className="h-4 w-4" />;
+        return <BarChart className="size-4" />;
     }
   };
 
@@ -108,6 +113,20 @@ export function RecentActivity() {
     if (percentage < 50) return "bg-orange-500";
     if (percentage < 75) return "bg-yellow-500";
     return "bg-green-500";
+  };
+
+  // Get user initials for avatar fallback
+  const getUserInitials = (name: string | null): string => {
+    if (!name) return "?";
+
+    // Split the name by spaces and get the first letter of each part
+    const parts = name.split(" ");
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+
+    // First and last name initials
+    return (
+      parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
   };
 
   return (
@@ -147,11 +166,41 @@ export function RecentActivity() {
             <div className="space-y-8">
               {activities.map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-4">
-                  <div className="mt-1">{getActivityIcon(activity.type)}</div>
+                  {/* Show user avatar instead of icon when user info is available */}
+                  {activity.user ? (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={activity.user.image || undefined}
+                        alt={activity.user.name || "User"}
+                      />
+                      <AvatarFallback>
+                        {getUserInitials(activity.user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <div className="mt-1">{getActivityIcon(activity.type)}</div>
+                  )}
+
                   <div className="space-y-1 flex-1">
-                    <p className="text-sm font-medium leading-none">
-                      {activity.description}
-                    </p>
+                    {/* Show who performed the action */}
+                    {activity.isTeamActivity && activity.user && (
+                      <p className="text-sm font-medium leading-none">
+                        <span className="font-semibold">
+                          {activity.user.name ||
+                            activity.user.email?.split("@")[0] ||
+                            "User"}
+                        </span>{" "}
+                        {activity.description}
+                      </p>
+                    )}
+
+                    {/* For individual activities or when user info is not available */}
+                    {(!activity.isTeamActivity || !activity.user) && (
+                      <p className="text-sm font-medium leading-none">
+                        {activity.description}
+                      </p>
+                    )}
+
                     <div className="flex items-center pt-2">
                       {activity.category && (
                         <Badge

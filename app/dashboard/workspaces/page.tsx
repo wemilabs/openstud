@@ -13,8 +13,6 @@ import {
 } from "@/actions/workspaces";
 import { TeamRole } from "@prisma/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   Card,
@@ -25,15 +23,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -41,13 +30,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -504,7 +486,9 @@ export default function WorkspacesPage() {
                                   {currentWorkspace.role === TeamRole.OWNER && (
                                     <>
                                       <DropdownMenuItem
-                                        disabled={member.role === TeamRole.OWNER}
+                                        disabled={
+                                          member.role === TeamRole.OWNER
+                                        }
                                         onClick={() =>
                                           handleUpdateMemberRole(
                                             member.id,
@@ -516,7 +500,9 @@ export default function WorkspacesPage() {
                                         Make Owner
                                       </DropdownMenuItem>
                                       <DropdownMenuItem
-                                        disabled={member.role === TeamRole.ADMIN}
+                                        disabled={
+                                          member.role === TeamRole.ADMIN
+                                        }
                                         onClick={() =>
                                           handleUpdateMemberRole(
                                             member.id,
@@ -528,7 +514,9 @@ export default function WorkspacesPage() {
                                         Make Admin
                                       </DropdownMenuItem>
                                       <DropdownMenuItem
-                                        disabled={member.role === TeamRole.MEMBER}
+                                        disabled={
+                                          member.role === TeamRole.MEMBER
+                                        }
                                         onClick={() =>
                                           handleUpdateMemberRole(
                                             member.id,
@@ -549,7 +537,9 @@ export default function WorkspacesPage() {
                                       member.role === TeamRole.MEMBER)) && (
                                     <DropdownMenuItem
                                       className="text-destructive"
-                                      onClick={() => handleRemoveMember(member.id)}
+                                      onClick={() =>
+                                        handleRemoveMember(member.id)
+                                      }
                                     >
                                       <Trash className="mr-2 h-4 w-4" />
                                       Remove
