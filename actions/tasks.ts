@@ -38,7 +38,9 @@ export async function createTask(input: TaskInput) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    
+
+    console.log("Creating task with user ID:", userId);
+
     if (!userId) {
       return { error: "Unauthorized" };
     }
@@ -87,6 +89,7 @@ export async function createTask(input: TaskInput) {
           projectId: validatedData.projectId,
           priority: validatedData.priority,
           category: validatedData.category,
+          createdById: userId, // Store who created the task
         },
       });
       
@@ -119,6 +122,7 @@ export async function createTask(input: TaskInput) {
         projectId: validatedData.projectId,
         priority: validatedData.priority,
         category: validatedData.category,
+        createdById: userId, // Add user ID to track who created the task in team projects
       },
     });
     
@@ -160,6 +164,11 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
 
     if (!task) {
       return { error: "Task not found" };
+    }
+    
+    // Check if user is the task creator
+    if (task.createdById && task.createdById !== userId) {
+      return { error: "Only the task creator can edit this task" };
     }
 
     // Special case for individual workspace
@@ -266,18 +275,19 @@ export async function deleteTask(taskId: string) {
         return { error: "You don't have access to this project" };
       }
       
-      // Delete task directly
-      await prisma.task.delete({
+      // Project owner can delete any task
+      const deletedTask = await prisma.task.delete({
         where: {
           id: taskId,
         },
       });
       
       revalidatePath(`/dashboard/projects/${task.projectId}`);
-      return { success: true };
+      return { data: deletedTask };
     }
 
-    // Check if user is a member of the team
+    // For team workspace
+    // Check if user is a member of the team with appropriate role
     const teamMember = await prisma.teamMember.findUnique({
       where: {
         teamId_userId: {
@@ -288,18 +298,28 @@ export async function deleteTask(taskId: string) {
     });
 
     if (!teamMember) {
-      return { error: "You are not a member of this task's workspace" };
+      return { error: "You are not a member of this project's workspace" };
+    }
+
+    // Check if user is either:
+    // 1. The task creator
+    // 2. Team owner/admin who can delete any task
+    const isTaskCreator = task.createdById === userId;
+    const isTeamOwnerOrAdmin = ['OWNER', 'ADMIN'].includes(teamMember.role);
+    
+    if (!isTaskCreator && !isTeamOwnerOrAdmin) {
+      return { error: "Only task creators and workspace owners/admins can delete tasks" };
     }
 
     // Delete the task
-    await prisma.task.delete({
+    const deletedTask = await prisma.task.delete({
       where: {
         id: taskId,
       },
     });
     
     revalidatePath(`/dashboard/projects/${task.projectId}`);
-    return { success: true };
+    return { data: deletedTask };
   } catch (error) {
     return { error: "Failed to delete task: " + (error instanceof Error ? error.message : "Unknown error") };
   }

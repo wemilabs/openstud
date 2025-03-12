@@ -186,7 +186,7 @@ export async function getRecentActivity(workspaceId?: string) {
       return acc;
     }, {} as Record<string, string>);
     
-    // Store project owners/creators for attribution
+    // Create a map of project owners for future reference
     const projectOwners = userProjects.reduce((acc, project) => {
       if (project.user) {
         acc[project.id] = {
@@ -199,34 +199,21 @@ export async function getRecentActivity(workspaceId?: string) {
       return acc;
     }, {} as Record<string, {id: string, name: string | null, email: string | null, image: string | null}>);
     
-    // Get team members for each project
-    const teamMembers = new Map<string, Array<{
+    // Get team members for each project to ensure we have current user info
+    const teamUsers = new Map<string, {
       id: string;
       name: string | null;
       email: string | null;
       image: string | null;
-      role: string;
-    }>>();
+    }>();
     
+    // Get all team members for projects we have access to
     for (const project of userProjects) {
       if (project.teamId) {
-        // Define the type for team member
-        interface TeamMemberWithUser {
-          userId: string;
-          role: string;
-          user: {
-            id: string;
-            name: string | null;
-            email: string | null;
-            image: string | null;
-          };
-        }
-        
         const members = await prisma.teamMember.findMany({
           where: { teamId: project.teamId },
           select: {
             userId: true,
-            role: true,
             user: {
               select: {
                 id: true,
@@ -236,19 +223,22 @@ export async function getRecentActivity(workspaceId?: string) {
               }
             }
           }
-        }) as TeamMemberWithUser[];
+        });
         
-        teamMembers.set(project.id, members.map((m: TeamMemberWithUser) => ({
-          id: m.user.id,
-          name: m.user.name,
-          email: m.user.email,
-          image: m.user.image,
-          role: m.role
-        })));
+        for (const member of members) {
+          if (member.user) {
+            teamUsers.set(member.userId, {
+              id: member.user.id,
+              name: member.user.name,
+              email: member.user.email,
+              image: member.user.image
+            });
+          }
+        }
       }
     }
     
-    // Get recent tasks with updates
+    // Get recent tasks with updates - include createdById and creator info
     const recentTasks = await prisma.task.findMany({
       where: {
         projectId: {
@@ -259,24 +249,33 @@ export async function getRecentActivity(workspaceId?: string) {
         updatedAt: 'desc'
       },
       take: 10,
-      select: {
-        id: true,
-        title: true,
-        category: true,
-        completionPercentage: true,
-        completed: true,
-        createdAt: true,
-        updatedAt: true,
-        projectId: true
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        }
       }
     });
     
-    // Get task history from audit log or activity tracking
-    // This is a simplified version - in a real implementation, you would fetch from a proper audit log
-    // For now, we'll simulate by using the project owner for created tasks 
-    // and a random team member for updates in team projects
+    // Debug - Check if createdBy information is being fetched correctly
+    console.log("Tasks with creator info:", JSON.stringify(recentTasks.map(task => ({
+      id: task.id,
+      title: task.title,
+      createdById: task.createdById, 
+      createdBy: task.createdBy,
+      hasUser: !!task.createdBy,
+      userName: task.createdBy?.name,
+      userEmail: task.createdBy?.email
+    })), null, 2));
     
-    // Transform the data for the activity feed
+    // Debug the full task data from prisma
+    console.log("Raw task data:", JSON.stringify(recentTasks[0], null, 2));
+    
+    // Transform the data for the activity feed using the task creator information
     const activities = recentTasks.map(task => {
       // Determine activity type based on task state
       let type: 'created' | 'updated' | 'completed' | 'progress' = 'updated';
@@ -288,23 +287,26 @@ export async function getRecentActivity(workspaceId?: string) {
       // If created and updated at are close, it's a new task
       const isNewTask = Math.abs(task.createdAt.getTime() - task.updatedAt.getTime()) < 1000 * 60; // 1 minute
       
-      // Determine who performed the action
-      let activityUser = projectOwners[task.projectId] || null;
+      // Get a user object to show from various sources
+      // 1. From the task's createdBy relation if it exists
+      let activityUser = task.createdBy || null;
       
-      // For team projects, if it's not a new task, assign to a team member other than owner when possible
-      if (isTeamProject && !isNewTask) {
-        const members = teamMembers.get(task.projectId) || [];
-        if (members.length > 0) {
-          // Try to find a different user than the project owner for variety
-          const otherMembers = members.filter(m => m.id !== activityUser?.id);
-          if (otherMembers.length > 0) {
-            // Use a deterministic but seemingly random selection based on task ID
-            const memberIndex = task.id.charCodeAt(0) % otherMembers.length;
-            activityUser = otherMembers[memberIndex];
-          } else {
-            activityUser = members[0];
-          }
-        }
+      // 2. Fallback to project owner if no creator info
+      if (!activityUser && projectOwners[task.projectId]) {
+        activityUser = projectOwners[task.projectId];
+        
+        // For logging only
+        console.log(`Task ${task.id} has no creator, using project owner: ${activityUser?.name || 'unknown'}`);
+      }
+      
+      // 3. Create a placeholder user object if we still don't have one
+      if (!activityUser) {
+        activityUser = {
+          id: 'system',
+          name: session?.user?.name || 'System',  // Use the current user's name for legacy tasks
+          email: session?.user?.email || null,
+          image: session?.user?.image || null
+        };
       }
       
       if (isNewTask) {
@@ -329,9 +331,7 @@ export async function getRecentActivity(workspaceId?: string) {
         projectName: projectNames[task.projectId],
         taskTitle: task.title,
         completionPercentage: task.completionPercentage,
-        // Include user information
         user: activityUser,
-        // Flag to determine if it's a team activity
         isTeamActivity: isTeamProject
       };
     });
