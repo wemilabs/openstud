@@ -92,6 +92,7 @@ model Team {
   name        String
   members     TeamMember[]
   projects    Project[]
+  invitations TeamInvitation[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
@@ -108,6 +109,24 @@ model TeamMember {
 
   @@unique([teamId, userId])
   @@index([userId])
+}
+
+// Workspace invitation model
+model TeamInvitation {
+  id          String    @id @default(cuid())
+  teamId      String
+  team        Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  role        TeamRole  @default(MEMBER)
+  token       String    @unique
+  expires     DateTime
+  maxUses     Int?      // null means unlimited uses
+  usedCount   Int       @default(0)
+  createdBy   String    // User ID who created the invitation
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([teamId])
+  @@index([token])
 }
 
 enum Plan {

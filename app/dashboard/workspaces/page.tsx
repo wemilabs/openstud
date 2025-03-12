@@ -7,7 +7,6 @@ import {
 } from "@/contexts/workspace-context";
 import {
   getWorkspaceMembers,
-  addWorkspaceMember,
   removeWorkspaceMember,
   updateWorkspaceMemberRole,
   deleteWorkspace,
@@ -77,9 +76,10 @@ import {
   Shield,
   Trash,
   User,
-  UserPlus,
   Users,
 } from "lucide-react";
+import { InviteMemberDialog } from "@/components/workspace/invite-member-dialog";
+import { PendingInvitations } from "@/components/workspace/pending-invitations";
 
 type Member = {
   id: string;
@@ -101,12 +101,8 @@ export default function WorkspacesPage() {
   } = useWorkspace();
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
-  const [newMemberEmail, setNewMemberEmail] = useState("");
-  const [newMemberRole, setNewMemberRole] = useState<TeamRole>(TeamRole.MEMBER);
-  const [isAddingMember, setIsAddingMember] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [openAddMemberDialog, setOpenAddMemberDialog] = useState(false);
   const [workspaceToDeleteId, setWorkspaceToDeleteId] = useState("");
 
   // Skip individual workspace
@@ -143,38 +139,6 @@ export default function WorkspacesPage() {
       setMembers([]);
     }
   }, [currentWorkspace.id, fetchMembers]);
-
-  const handleAddMember = async () => {
-    if (!newMemberEmail.trim()) {
-      toast.error("Email is required");
-      return;
-    }
-
-    setIsAddingMember(true);
-    try {
-      const result = await addWorkspaceMember(
-        currentWorkspace.id,
-        newMemberEmail.trim(),
-        newMemberRole
-      );
-
-      if (result.error) {
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success("Member added successfully");
-      setNewMemberEmail("");
-      setNewMemberRole(TeamRole.MEMBER);
-      setOpenAddMemberDialog(false);
-      fetchMembers();
-    } catch (error) {
-      console.error("Error adding member:", error);
-      toast.error("Failed to add member");
-    } finally {
-      setIsAddingMember(false);
-    }
-  };
 
   const handleRemoveMember = async (memberId: string) => {
     try {
@@ -445,7 +409,7 @@ export default function WorkspacesPage() {
         </TabsContent>
 
         {currentWorkspace.id !== INDIVIDUAL_WORKSPACE.id && (
-          <TabsContent value="members" className="space-y-4">
+          <TabsContent value="members" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">
                 {currentWorkspace.name} - Members
@@ -453,209 +417,155 @@ export default function WorkspacesPage() {
 
               {(currentWorkspace.role === TeamRole.OWNER ||
                 currentWorkspace.role === TeamRole.ADMIN) && (
-                <Dialog
-                  open={openAddMemberDialog}
-                  onOpenChange={setOpenAddMemberDialog}
-                >
-                  <DialogTrigger asChild>
-                    <Button>
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      Add Member
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add Team Member</DialogTitle>
-                      <DialogDescription>
-                        Invite a new member to join your workspace.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                          id="email"
-                          placeholder="Enter email address"
-                          type="email"
-                          value={newMemberEmail}
-                          onChange={(e) => setNewMemberEmail(e.target.value)}
-                        />
-                      </div>
-
-                      {currentWorkspace.role === TeamRole.OWNER && (
-                        <div className="grid gap-2">
-                          <Label htmlFor="role">Role</Label>
-                          <Select
-                            value={newMemberRole}
-                            onValueChange={(value) =>
-                              setNewMemberRole(value as TeamRole)
-                            }
-                          >
-                            <SelectTrigger id="role">
-                              <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value={TeamRole.MEMBER}>
-                                Member
-                              </SelectItem>
-                              <SelectItem value={TeamRole.ADMIN}>
-                                Admin
-                              </SelectItem>
-                              <SelectItem value={TeamRole.OWNER}>
-                                Owner
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => setOpenAddMemberDialog(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={handleAddMember}
-                        disabled={isAddingMember || !newMemberEmail.trim()}
-                      >
-                        {isAddingMember ? "Adding..." : "Add Member"}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <InviteMemberDialog teamId={currentWorkspace.id} />
               )}
             </div>
 
             <Separator />
 
-            {isLoadingMembers ? (
-              <div className="flex justify-center p-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : members.length === 0 ? (
-              <div className="text-center p-4">
-                <p className="text-muted-foreground">No members found</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Member</TableHead>
-                    <TableHead>Role</TableHead>
-                    {(currentWorkspace.role === TeamRole.OWNER ||
-                      currentWorkspace.role === TeamRole.ADMIN) && (
-                      <TableHead className="text-right">Actions</TableHead>
-                    )}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {members.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          {member.user.image ? (
-                            <AvatarImage
-                              src={member.user.image}
-                              alt={member.user.name || ""}
-                            />
-                          ) : (
-                            <AvatarFallback>
-                              {getUserInitials(member.user.name)}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{member.user.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {member.user.email}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          {getRoleIcon(member.role)}
-                          <span>{member.role}</span>
-                        </div>
-                      </TableCell>
-                      {(currentWorkspace.role === TeamRole.OWNER ||
-                        currentWorkspace.role === TeamRole.ADMIN) && (
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-
-                              {/* Role management (owners only) */}
-                              {currentWorkspace.role === TeamRole.OWNER && (
-                                <>
-                                  <DropdownMenuItem
-                                    disabled={member.role === TeamRole.OWNER}
-                                    onClick={() =>
-                                      handleUpdateMemberRole(
-                                        member.id,
-                                        TeamRole.OWNER
-                                      )
-                                    }
-                                  >
-                                    <Crown className="mr-2 h-4 w-4" />
-                                    Make Owner
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    disabled={member.role === TeamRole.ADMIN}
-                                    onClick={() =>
-                                      handleUpdateMemberRole(
-                                        member.id,
-                                        TeamRole.ADMIN
-                                      )
-                                    }
-                                  >
-                                    <Shield className="mr-2 h-4 w-4" />
-                                    Make Admin
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    disabled={member.role === TeamRole.MEMBER}
-                                    onClick={() =>
-                                      handleUpdateMemberRole(
-                                        member.id,
-                                        TeamRole.MEMBER
-                                      )
-                                    }
-                                  >
-                                    <User className="mr-2 h-4 w-4" />
-                                    Make Member
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                </>
-                              )}
-
-                              {/* Remove member (owners can remove anyone, admins can remove members) */}
-                              {(currentWorkspace.role === TeamRole.OWNER ||
-                                (currentWorkspace.role === TeamRole.ADMIN &&
-                                  member.role === TeamRole.MEMBER)) && (
-                                <DropdownMenuItem
-                                  className="text-destructive"
-                                  onClick={() => handleRemoveMember(member.id)}
-                                >
-                                  <Trash className="mr-2 h-4 w-4" />
-                                  Remove
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            {/* Pending Invitations Section */}
+            {(currentWorkspace.role === TeamRole.OWNER ||
+              currentWorkspace.role === TeamRole.ADMIN) && (
+              <PendingInvitations teamId={currentWorkspace.id} />
             )}
+
+            {/* Current Members Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Members</CardTitle>
+                <CardDescription>
+                  People with access to this workspace
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingMembers ? (
+                  <div className="flex justify-center p-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : members.length === 0 ? (
+                  <div className="text-center p-4">
+                    <p className="text-muted-foreground">No members found</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Member</TableHead>
+                        <TableHead>Role</TableHead>
+                        {(currentWorkspace.role === TeamRole.OWNER ||
+                          currentWorkspace.role === TeamRole.ADMIN) && (
+                          <TableHead className="text-right">Actions</TableHead>
+                        )}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {members.map((member) => (
+                        <TableRow key={member.id}>
+                          <TableCell className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8">
+                              {member.user.image ? (
+                                <AvatarImage
+                                  src={member.user.image}
+                                  alt={member.user.name || ""}
+                                />
+                              ) : (
+                                <AvatarFallback>
+                                  {getUserInitials(member.user.name)}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{member.user.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {member.user.email}
+                              </p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              {getRoleIcon(member.role)}
+                              <span>{member.role}</span>
+                            </div>
+                          </TableCell>
+                          {(currentWorkspace.role === TeamRole.OWNER ||
+                            currentWorkspace.role === TeamRole.ADMIN) && (
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+
+                                  {/* Role management (owners only) */}
+                                  {currentWorkspace.role === TeamRole.OWNER && (
+                                    <>
+                                      <DropdownMenuItem
+                                        disabled={member.role === TeamRole.OWNER}
+                                        onClick={() =>
+                                          handleUpdateMemberRole(
+                                            member.id,
+                                            TeamRole.OWNER
+                                          )
+                                        }
+                                      >
+                                        <Crown className="mr-2 h-4 w-4" />
+                                        Make Owner
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        disabled={member.role === TeamRole.ADMIN}
+                                        onClick={() =>
+                                          handleUpdateMemberRole(
+                                            member.id,
+                                            TeamRole.ADMIN
+                                          )
+                                        }
+                                      >
+                                        <Shield className="mr-2 h-4 w-4" />
+                                        Make Admin
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        disabled={member.role === TeamRole.MEMBER}
+                                        onClick={() =>
+                                          handleUpdateMemberRole(
+                                            member.id,
+                                            TeamRole.MEMBER
+                                          )
+                                        }
+                                      >
+                                        <User className="mr-2 h-4 w-4" />
+                                        Make Member
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                    </>
+                                  )}
+
+                                  {/* Remove member (owners can remove anyone, admins can remove members) */}
+                                  {(currentWorkspace.role === TeamRole.OWNER ||
+                                    (currentWorkspace.role === TeamRole.ADMIN &&
+                                      member.role === TeamRole.MEMBER)) && (
+                                    <DropdownMenuItem
+                                      className="text-destructive"
+                                      onClick={() => handleRemoveMember(member.id)}
+                                    >
+                                      <Trash className="mr-2 h-4 w-4" />
+                                      Remove
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         )}
       </Tabs>

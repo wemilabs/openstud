@@ -243,7 +243,7 @@ export function ChatInterface() {
       // Update the URL if we have a new conversation ID - using a setTimeout to avoid reload
       if (newConversationId && !currentConversationId) {
         setCurrentConversationId(newConversationId);
-        
+
         // Use setTimeout to defer the URL update until after the state updates have been processed
         setTimeout(() => {
           window.history.replaceState(
@@ -346,7 +346,7 @@ export function ChatInterface() {
       {isNewConversation && (
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] md:min-h-[calc(100vh-340px)] gap-8">
           <h1 className="text-3xl font-bold text-center">
-            What can I help with?
+            What do you have to learn today?
           </h1>
           <div className="w-full max-w-xl px-4">
             <div className="relative">
