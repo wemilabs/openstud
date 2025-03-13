@@ -1,44 +1,70 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { validateInvitationToken, acceptWorkspaceInvitation } from "@/actions/workspace-invitations";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  validateInvitationToken,
+  acceptWorkspaceInvitation,
+} from "@/actions/workspace-invitations";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Loader2, CheckCircle, XCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 
-/**
- * Client component that handles the invitation acceptance UI and logic
- */
 export function InvitationClient({ token }: { token: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [isAccepting, setIsAccepting] = useState(false);
   const [invitation, setInvitation] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [validatedInvitation, setValidatedInvitation] = useState(false);
 
-  // Validate the invitation token when the page loads
+  // Check if we're returning from login
+  const fromLogin = searchParams.get("fromLogin") === "true";
+
+  // Handle the authentication flow
   useEffect(() => {
-    const validateToken = async () => {
-      setIsLoading(true);
-      try {
-        const result = await validateInvitationToken(token);
-        if (result.error) {
-          setError(result.error);
-        } else if (result.data) {
-          setInvitation(result.data);
-        }
-      } catch (err) {
-        setError("An unexpected error occurred");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // If user is not authenticated, redirect to login page
+    if (status === "unauthenticated") {
+      // Encode the callback URL for the login page to redirect back to this invitation
+      const callbackUrl = encodeURIComponent(`/invite/${token}?fromLogin=true`);
+      router.push(`/api/auth/signin?callbackUrl=${callbackUrl}`);
+      return;
+    }
 
-    validateToken();
-  }, [token]);
+    // If authenticated, validate the token
+    if (status === "authenticated") {
+      const validateToken = async () => {
+        setIsLoading(true);
+        try {
+          const result = await validateInvitationToken(token);
+          if (result.error) {
+            setError(result.error);
+          } else if (result.data) {
+            setInvitation(result.data);
+          }
+        } catch (err) {
+          setError("An unexpected error occurred");
+          console.error(err);
+        } finally {
+          setIsLoading(false);
+          setValidatedInvitation(true);
+        }
+      };
+
+      validateToken();
+    }
+  }, [status, token, router, fromLogin]);
 
   // Handle accepting the invitation
   const handleAccept = async () => {
@@ -60,14 +86,14 @@ export function InvitationClient({ token }: { token: string }) {
     }
   };
 
-  // Loading state
-  if (isLoading) {
+  // If still checking authentication status or still loading invitation data, show loading
+  if (status === "loading" || (status === "authenticated" && !validatedInvitation)) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle>Workspace Invitation</CardTitle>
-            <CardDescription>Validating your invitation...</CardDescription>
+            <CardDescription>Checking authentication...</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center py-6">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -97,43 +123,63 @@ export function InvitationClient({ token }: { token: string }) {
     );
   }
 
-  // Success state - show invitation details and accept button
+  // Only show the acceptance UI when we have validated invitation data
+  if (invitation && !isLoading && validatedInvitation) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CheckCircle className="mx-auto h-12 w-12 text-primary" />
+            <CardTitle className="mt-4">Join Workspace</CardTitle>
+            <CardDescription>
+              You've been invited to join{" "}
+              <span className="font-medium">{invitation?.team?.name}</span> as a{" "}
+              {invitation?.invitation?.role.charAt(0) +
+                invitation?.invitation?.role.slice(1).toLowerCase()}
+            </CardDescription>
+          </CardHeader>
+          <CardFooter className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push("/dashboard")}
+            >
+              Decline
+            </Button>
+            <Button
+              className="w-full"
+              onClick={handleAccept}
+              disabled={isAccepting}
+            >
+              {isAccepting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Accepting...
+                </>
+              ) : (
+                <>
+                  Accept Invitation
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  // Fallback loader - this should only appear briefly during transitions
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CheckCircle className="mx-auto h-12 w-12 text-primary" />
-          <CardTitle className="mt-4">Join Workspace</CardTitle>
-          <CardDescription>
-            You've been invited to join <span className="font-medium">{invitation?.team?.name}</span> as a {invitation?.invitation?.role.charAt(0) + invitation?.invitation?.role.slice(1).toLowerCase()}
-          </CardDescription>
+          <CardTitle>Workspace Invitation</CardTitle>
+          <CardDescription>Loading invitation details...</CardDescription>
         </CardHeader>
-        <CardFooter className="flex flex-col gap-2 sm:flex-row">
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => router.push("/dashboard")}
-          >
-            Go to Dashboard
-          </Button>
-          <Button 
-            className="w-full"
-            onClick={handleAccept}
-            disabled={isAccepting}
-          >
-            {isAccepting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Accepting...
-              </>
-            ) : (
-              <>
-                Accept Invitation
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
-        </CardFooter>
+        <CardContent className="flex justify-center py-6">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </CardContent>
       </Card>
     </div>
   );

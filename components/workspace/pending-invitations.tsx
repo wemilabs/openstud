@@ -111,7 +111,9 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
 
   // Handle copying invite link to clipboard
   const copyToClipboard = async (token: string) => {
-    const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${token}`;
+    const inviteLink = `${
+      process.env.NEXT_PUBLIC_APP_URL! || "http://localhost:3000"
+    }/invite/${token}`;
 
     try {
       await navigator.clipboard.writeText(inviteLink);

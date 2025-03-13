@@ -11,10 +11,9 @@ import { randomBytes } from "crypto";
 const InvitationSchema = z.object({
   role: z.nativeEnum(TeamRole).default(TeamRole.MEMBER),
   expiresInDays: z.number().int().min(1).max(30).default(7),
-  maxUses: z.union([
-    z.number().int().min(1).max(100),
-    z.literal(null)
-  ]).default(null),
+  maxUses: z
+    .union([z.number().int().min(1).max(100), z.literal(null)])
+    .default(null),
 });
 
 export type InvitationInput = z.infer<typeof InvitationSchema>;
@@ -30,11 +29,14 @@ const generateInvitationToken = (): string => {
  * Creates a new workspace invitation link that can be shared with multiple users
  * Only owners and admins can create invitations
  */
-export async function createWorkspaceInvitation(teamId: string, input: InvitationInput) {
+export async function createWorkspaceInvitation(
+  teamId: string,
+  input: InvitationInput
+) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    
+
     if (!userId) {
       return { error: "Unauthorized" };
     }
@@ -63,8 +65,13 @@ export async function createWorkspaceInvitation(teamId: string, input: Invitatio
       return { error: "Workspace not found or you don't have access to it" };
     }
 
-    if (teamMember.role !== TeamRole.OWNER && teamMember.role !== TeamRole.ADMIN) {
-      return { error: "You don't have permission to invite members to this workspace" };
+    if (
+      teamMember.role !== TeamRole.OWNER &&
+      teamMember.role !== TeamRole.ADMIN
+    ) {
+      return {
+        error: "You don't have permission to invite members to this workspace",
+      };
     }
 
     // Generate token and expiration date
@@ -86,9 +93,11 @@ export async function createWorkspaceInvitation(teamId: string, input: Invitatio
     });
 
     revalidatePath("/dashboard");
-    return { 
+    return {
       data: invitation,
-      inviteLink: `${process.env.NEXT_PUBLIC_APP_URL}/invite/${token}`
+      inviteLink: `${
+        process.env.NEXT_PUBLIC_APP_URL! || "http://localhost:3000"
+      }/invite/${token}`,
     };
   } catch (error) {
     console.error("Error creating workspace invitation:", error);
@@ -104,7 +113,7 @@ export async function getWorkspaceInvitations(teamId: string) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    
+
     if (!userId) {
       return { error: "Unauthorized" };
     }
@@ -123,8 +132,14 @@ export async function getWorkspaceInvitations(teamId: string) {
       return { error: "Workspace not found or you don't have access to it" };
     }
 
-    if (teamMember.role !== TeamRole.OWNER && teamMember.role !== TeamRole.ADMIN) {
-      return { error: "You don't have permission to view invitations for this workspace" };
+    if (
+      teamMember.role !== TeamRole.OWNER &&
+      teamMember.role !== TeamRole.ADMIN
+    ) {
+      return {
+        error:
+          "You don't have permission to view invitations for this workspace",
+      };
     }
 
     // Get all pending invitations
@@ -155,7 +170,7 @@ export async function deleteWorkspaceInvitation(invitationId: string) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    
+
     if (!userId) {
       return { error: "Unauthorized" };
     }
@@ -188,8 +203,14 @@ export async function deleteWorkspaceInvitation(invitationId: string) {
       return { error: "You don't have access to this workspace" };
     }
 
-    if (teamMember.role !== TeamRole.OWNER && teamMember.role !== TeamRole.ADMIN) {
-      return { error: "You don't have permission to delete invitations for this workspace" };
+    if (
+      teamMember.role !== TeamRole.OWNER &&
+      teamMember.role !== TeamRole.ADMIN
+    ) {
+      return {
+        error:
+          "You don't have permission to delete invitations for this workspace",
+      };
     }
 
     // Delete the invitation
@@ -215,7 +236,7 @@ export async function validateInvitationToken(token: string) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    
+
     if (!userId) {
       return { error: "You must be logged in to accept an invitation" };
     }
@@ -251,7 +272,10 @@ export async function validateInvitationToken(token: string) {
     }
 
     // Check if the invitation has been used up
-    if (invitation.maxUses !== null && invitation.usedCount >= invitation.maxUses) {
+    if (
+      invitation.maxUses !== null &&
+      invitation.usedCount >= invitation.maxUses
+    ) {
       return { error: "This invitation has already been used up" };
     }
 
@@ -269,11 +293,11 @@ export async function validateInvitationToken(token: string) {
       return { error: "You are already a member of this workspace" };
     }
 
-    return { 
+    return {
       data: {
         invitation,
         team: invitation.team,
-      }
+      },
     };
   } catch (error) {
     console.error("Error validating invitation token:", error);
@@ -288,7 +312,7 @@ export async function acceptWorkspaceInvitation(token: string) {
   try {
     // First validate the token
     const validation = await validateInvitationToken(token);
-    
+
     if (validation.error) {
       return { error: validation.error };
     }
@@ -323,10 +347,10 @@ export async function acceptWorkspaceInvitation(token: string) {
     });
 
     revalidatePath("/dashboard");
-    return { 
+    return {
       success: true,
       teamId: invitation.teamId,
-      teamName: team.name
+      teamName: team.name,
     };
   } catch (error) {
     console.error("Error accepting workspace invitation:", error);

@@ -5,14 +5,20 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { GoogleIcon, Icons } from "@/components/icons";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 export function UserAuthForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
 
   async function loginWithGoogle() {
     setIsLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/dashboard" });
+      // If there's a callbackUrl in search params, use it; otherwise default to dashboard
+      await signIn("google", { 
+        callbackUrl: callbackUrl || "/dashboard" 
+      });
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Failed to login");

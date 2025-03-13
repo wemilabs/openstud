@@ -169,7 +169,7 @@ export function RecentActivity({
   // Placeholder for error state
   if (error) {
     return (
-      <Card>
+      <Card className="h-[350px] lg:h-full">
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
           <CardDescription>
@@ -179,14 +179,12 @@ export function RecentActivity({
               : `the ${currentWorkspace?.name} workspace`}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center h-[200px] lg:h-[330px] xl:h-[350px] text-center">
-            <div className="rounded-full bg-red-100 p-3 mb-4">
-              <ClockIcon className="h-10 w-10 text-red-500" />
-            </div>
-            <p className="text-muted-foreground">Error loading activities</p>
-            <p className="text-xs text-muted-foreground mt-1">{error}</p>
+        <CardContent className="flex flex-col items-center justify-center text-center h-full">
+          <div className="rounded-full bg-red-100 p-3 mb-4">
+            <ClockIcon className="h-10 w-10 text-red-500" />
           </div>
+          <p className="text-muted-foreground">Error loading activities</p>
+          <p className="text-xs text-muted-foreground mt-1">{error}</p>
         </CardContent>
       </Card>
     );
@@ -194,7 +192,7 @@ export function RecentActivity({
   // Placeholder for empty state
   if (!showLoading && (!activities || activities.length === 0)) {
     return (
-      <Card>
+      <Card className="h-[350px] lg:h-full">
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
           <CardDescription>
@@ -204,21 +202,19 @@ export function RecentActivity({
               : `the ${currentWorkspace?.name} workspace`}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center h-[200px] lg:h-[330px] xl:h-[350px] text-center">
-            <div className="text-4xl mb-2">📋</div>
-            <h3 className="text-muted-foreground">No recent activity</h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              Your recent actions will appear here
-            </p>
-          </div>
+        <CardContent className="flex flex-col items-center justify-center text-center h-full">
+          <div className="text-4xl mb-2">📋</div>
+          <h3 className="text-muted-foreground">No recent activity</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Your recent actions will appear here
+          </p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
+    <Card className="h-[350px] lg:h-full">
       <CardHeader>
         <CardTitle>Recent Activity</CardTitle>
         <CardDescription>
@@ -229,10 +225,10 @@ export function RecentActivity({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[200px] lg:h-[330px]">
+        <ScrollArea className="h-[220px] lg:h-[300px]">
           {showLoading ? (
             <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="flex items-start space-x-4">
                   <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
                   <div className="flex-1 space-y-2">

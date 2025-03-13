@@ -41,10 +41,9 @@ import { Loader2, Plus, Copy, Check } from "lucide-react";
 const inviteFormSchema = z.object({
   role: z.nativeEnum(TeamRole).default(TeamRole.MEMBER),
   expiresInDays: z.number().int().min(1).max(30).default(7),
-  maxUses: z.union([
-    z.number().int().min(1).max(100),
-    z.literal(null)
-  ]).default(null),
+  maxUses: z
+    .union([z.number().int().min(1).max(100), z.literal(null)])
+    .default(null),
 });
 
 type InviteFormValues = z.infer<typeof inviteFormSchema>;
@@ -54,7 +53,10 @@ interface InviteMemberDialogProps {
   trigger?: React.ReactNode;
 }
 
-export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps) {
+export function InviteMemberDialog({
+  teamId,
+  trigger,
+}: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
@@ -75,18 +77,22 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
     setIsLoading(true);
     try {
       const result = await createWorkspaceInvitation(teamId, data);
-      
+
       if (result.error) {
         toast.error(result.error);
         return;
       }
-      
+
       if (result.inviteLink) {
         setInviteLink(result.inviteLink);
         toast.success("Invitation created successfully");
       } else if (result.data) {
         // If we have data but no inviteLink, construct it
-        setInviteLink(`${process.env.NEXT_PUBLIC_APP_URL}/invite/${result.data.token}`);
+        setInviteLink(
+          `${
+            process.env.NEXT_PUBLIC_APP_URL! || "http://localhost:3000"
+          }/invite/${result.data.token}`
+        );
         toast.success("Invitation created successfully");
       }
     } catch (error) {
@@ -100,12 +106,12 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
   // Handle copying invite link to clipboard
   const copyToClipboard = async () => {
     if (!inviteLink) return;
-    
+
     try {
       await navigator.clipboard.writeText(inviteLink);
       setCopied(true);
       toast.success("Invitation link copied to clipboard");
-      
+
       // Reset copied state after 2 seconds
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -137,10 +143,11 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
         <DialogHeader>
           <DialogTitle>Create universal invitation link</DialogTitle>
           <DialogDescription>
-            Generate a link that can be shared with anyone to join your workspace.
+            Generate a link that can be shared with anyone to join your
+            workspace.
           </DialogDescription>
         </DialogHeader>
-        
+
         {!inviteLink ? (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -173,7 +180,7 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="expiresInDays"
@@ -181,12 +188,14 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
                   <FormItem>
                     <FormLabel>Expires in (days)</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         min={1}
                         max={30}
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value))
+                        }
                         disabled={isLoading}
                       />
                     </FormControl>
@@ -197,7 +206,7 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="maxUses"
@@ -205,8 +214,8 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
                   <FormItem>
                     <FormLabel>Max uses</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         min={1}
                         max={100}
                         placeholder="Unlimited"
@@ -214,23 +223,29 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
                         value={field.value === null ? "" : field.value}
                         onChange={(e) => {
                           // Convert empty string back to null, or parse as integer
-                          const value = e.target.value === "" ? null : parseInt(e.target.value);
+                          const value =
+                            e.target.value === ""
+                              ? null
+                              : parseInt(e.target.value);
                           field.onChange(value);
                         }}
                         disabled={isLoading}
                       />
                     </FormControl>
                     <FormDescription>
-                      Leave empty for unlimited uses or set a specific number of times the invitation can be used.
+                      Leave empty for unlimited uses or set a specific number of
+                      times the invitation can be used.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Generate Invitation
                 </Button>
               </DialogFooter>
@@ -246,7 +261,7 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
                   readOnly
                   className="font-mono text-xs"
                 />
-                <Button 
+                <Button
                   size="icon"
                   variant="outline"
                   onClick={copyToClipboard}
@@ -260,13 +275,14 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground">
-                Share this link with the person you want to invite. They will need to be logged in to accept the invitation.
+                Share this link with the person you want to invite. They will
+                need to be logged in to accept the invitation.
               </p>
             </div>
-            
+
             <DialogFooter>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   setInviteLink(null);
                   form.reset();
@@ -274,9 +290,7 @@ export function InviteMemberDialog({ teamId, trigger }: InviteMemberDialogProps)
               >
                 Create Another
               </Button>
-              <Button onClick={() => setOpen(false)}>
-                Done
-              </Button>
+              <Button onClick={() => setOpen(false)}>Done</Button>
             </DialogFooter>
           </div>
         )}
