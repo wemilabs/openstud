@@ -8,6 +8,7 @@ import { WorkspaceProvider } from "@/contexts/workspace-context";
 export const metadata: Metadata = {
   title: "Dashboard - Openstud",
   description: "Manage your study process with ease using Openstud.",
+  keywords: ["openstud", "dashboard", "study process", "full management"],
 };
 
 export default function DashboardLayout({
