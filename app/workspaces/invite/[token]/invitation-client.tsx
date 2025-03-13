@@ -37,7 +37,9 @@ export function InvitationClient({ token }: { token: string }) {
     // If user is not authenticated, redirect to login page
     if (status === "unauthenticated") {
       // Encode the callback URL for the login page to redirect back to this invitation
-      const callbackUrl = encodeURIComponent(`/invite/${token}?fromLogin=true`);
+      const callbackUrl = encodeURIComponent(
+        `/workspaces/invite/${token}?fromLogin=true`
+      );
       router.push(`/api/auth/signin?callbackUrl=${callbackUrl}`);
       return;
     }
@@ -87,7 +89,10 @@ export function InvitationClient({ token }: { token: string }) {
   };
 
   // If still checking authentication status or still loading invitation data, show loading
-  if (status === "loading" || (status === "authenticated" && !validatedInvitation)) {
+  if (
+    status === "loading" ||
+    (status === "authenticated" && !validatedInvitation)
+  ) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Card className="w-full max-w-md">

@@ -113,7 +113,7 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
   const copyToClipboard = async (token: string) => {
     const inviteLink = `${
       process.env.NEXT_PUBLIC_APP_URL! || "http://localhost:3000"
-    }/invite/${token}`;
+    }/workspaces/invite/${token}`;
 
     try {
       await navigator.clipboard.writeText(inviteLink);

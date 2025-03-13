@@ -47,7 +47,7 @@ model User {
   courses       Course[]
   teams         TeamMember[]
   projects      Project[]
-  tasks         Task[]    // User's created tasks
+  tasks         Task[]
   plan          Plan      @default(FREE)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

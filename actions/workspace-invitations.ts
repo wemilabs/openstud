@@ -97,7 +97,7 @@ export async function createWorkspaceInvitation(
       data: invitation,
       inviteLink: `${
         process.env.NEXT_PUBLIC_APP_URL! || "http://localhost:3000"
-      }/invite/${token}`,
+      }/workspaces/invite/${token}`,
     };
   } catch (error) {
     console.error("Error creating workspace invitation:", error);

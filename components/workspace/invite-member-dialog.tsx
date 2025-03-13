@@ -91,7 +91,7 @@ export function InviteMemberDialog({
         setInviteLink(
           `${
             process.env.NEXT_PUBLIC_APP_URL! || "http://localhost:3000"
-          }/invite/${result.data.token}`
+          }/workspaces/invite/${result.data.token}`
         );
         toast.success("Invitation created successfully");
       }

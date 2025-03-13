@@ -1,6 +1,6 @@
 {
   "name": "openstud",
-  "version": "0.5.8",
+  "version": "0.5.16",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
