@@ -5,14 +5,6 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import {
-  Bell,
-  Check,
-  ChevronsUpDown,
-  LogOut,
-  Plus,
-  Settings,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Logo } from "@/components/layout/logo";
@@ -231,7 +223,7 @@ export function DashboardHeader() {
                   {getWorkspaceBadge(currentWorkspace)}
                 </Badge>
                 {currentWorkspace.name}
-                <ChevronsUpDown className="opacity-50" />
+                <Icons.chevronsUpDown className="opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[250px] p-0">
@@ -253,7 +245,7 @@ export function DashboardHeader() {
                         }}
                       >
                         {workspace.name}
-                        <Check
+                        <Icons.check
                           className={cn(
                             "ml-auto",
                             workspace.id === currentWorkspace.id
@@ -278,7 +270,7 @@ export function DashboardHeader() {
                         }, 150);
                       }}
                     >
-                      <Plus className="mr-2 size-4" />
+                      <Icons.add className="mr-2 size-4" />
                       Create New Workspace
                     </CommandItem>
                   </CommandGroup>
@@ -510,7 +502,7 @@ export function DashboardHeader() {
             size="icon"
             className="relative cursor-pointer"
           >
-            <Bell className="size-4" />
+            <Icons.bell className="size-4" />
             {/* <Badge
               variant="secondary"
               className="absolute right-1 top-0 h-4 w-4 p-0"
@@ -562,13 +554,13 @@ export function DashboardHeader() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings" className="flex items-center">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                <Link href="/dashboard/profile" className="flex items-center">
+                  <Icons.user className="mr-2 size-4" />
+                  <span>Profile</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
+                <Icons.logout className="mr-2 size-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
