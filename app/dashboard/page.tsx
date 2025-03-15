@@ -3,12 +3,23 @@ import { redirect } from "next/navigation";
 import { Overview } from "@/components/dashboard/overview";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { WorkspaceContent } from "@/components/dashboard/workspace-content";
+import { prisma } from "@/lib/prisma";
 
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user) {
     return redirect("/login");
   }
+  // const username = session?.user?.name
+  //   ? prisma.user.findUnique({
+  //       where: {
+  //         email: session?.user?.email,
+  //       },
+  //       select: {
+  //         username: true,
+  //       },
+  //     })
+  //   : null;
 
   return (
     <>
