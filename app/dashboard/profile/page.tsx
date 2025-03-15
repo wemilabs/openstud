@@ -24,7 +24,7 @@ export default async function ProfilePage() {
           username: true,
           bio: true,
           school: true,
-          schoolRegNumber: true,
+          studentId: true,
           schoolEmail: true,
           createdAt: true,
         },
@@ -35,7 +35,7 @@ export default async function ProfilePage() {
   const username = dbUser?.username || "";
   const bio = dbUser?.bio || "";
   const school = dbUser?.school || "";
-  const schoolRegNumber = dbUser?.schoolRegNumber || "";
+  const studentId = dbUser?.studentId || "";
   const schoolEmail = dbUser?.schoolEmail || "";
 
   // Format the user's plan for display
@@ -92,7 +92,7 @@ export default async function ProfilePage() {
             email={user.email}
             bio={bio}
             school={school}
-            schoolRegNumber={schoolRegNumber}
+            studentId={studentId}
             schoolEmail={schoolEmail}
           />
         </Card>

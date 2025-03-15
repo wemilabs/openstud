@@ -15,7 +15,7 @@ interface ProfileFormProps {
   bio: string | null | undefined;
   email: string | null | undefined;
   school: string | null | undefined;
-  schoolRegNumber: string | null | undefined;
+  studentId: string | null | undefined;
   schoolEmail: string | null | undefined;
 }
 
@@ -24,7 +24,7 @@ export function ProfileForm({
   bio,
   email,
   school,
-  schoolRegNumber,
+  studentId,
   schoolEmail,
 }: ProfileFormProps) {
   const [isPending, startTransition] = useTransition();
@@ -35,7 +35,7 @@ export function ProfileForm({
       const formUsername = formData.get("username") as string;
       const formBio = formData.get("bio") as string;
       const formSchool = formData.get("school") as string;
-      const formSchoolRegNumber = formData.get("schoolRegNumber") as string;
+      const formStudentId = formData.get("studentId") as string;
       const formSchoolEmail = formData.get("schoolEmail") as string;
 
       try {
@@ -43,7 +43,7 @@ export function ProfileForm({
           username: formUsername || undefined,
           bio: formBio || undefined,
           school: formSchool || undefined,
-          schoolRegNumber: formSchoolRegNumber || undefined,
+          studentId: formStudentId || undefined,
           schoolEmail: formSchoolEmail || undefined,
         });
 
@@ -90,16 +90,16 @@ export function ProfileForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="schoolRegNumber">School Registration Number</Label>
+          <Label htmlFor="studentId">Student ID</Label>
           <Input
-            id="schoolRegNumber"
-            name="schoolRegNumber"
-            placeholder="Enter your school registration number"
-            defaultValue={schoolRegNumber || ""}
+            id="studentId"
+            name="studentId"
+            placeholder="Enter your student ID"
+            defaultValue={studentId || ""}
           />
           <p className="text-xs text-muted-foreground">
-            Your school registration number must be 3-100 characters, depending
-            on your school's requirements.
+            Your student ID must be 3-100 characters, depending on your school's
+            requirements.
           </p>
         </div>
 

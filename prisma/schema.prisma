@@ -42,7 +42,7 @@ model User {
   username      String?   @unique
   bio           String?
   school        String?
-  schoolRegNumber String?
+  studentId     String?
   email         String?   @unique
   emailVerified DateTime?
   schoolEmail   String?

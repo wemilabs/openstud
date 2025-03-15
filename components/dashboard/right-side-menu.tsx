@@ -34,7 +34,7 @@ export function RightSideMenu({ className }: RightSideMenuProps) {
           <SheetDescription className="">
             You're currently using{" "}
             <code className="bg-muted font-semibold px-2 rounded-full">
-              v0.6.8
+              v0.6.9
             </code>{" "}
             of Openstud.
           </SheetDescription>
