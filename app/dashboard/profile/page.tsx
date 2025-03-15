@@ -16,17 +16,27 @@ export default async function ProfilePage() {
   const user = await requireAuth();
   const plan = (await getUserPlan()) || "FREE";
 
-  // Fetch the user from the database to get the username field
+  // Fetch the user from the database to get the username, bio, and school fields
   const dbUser = user.email
     ? await prisma.user.findUnique({
         where: { email: user.email },
-        select: { username: true, createdAt: true },
+        select: {
+          username: true,
+          bio: true,
+          school: true,
+          schoolRegNumber: true,
+          schoolEmail: true,
+          createdAt: true,
+        },
       })
     : null;
 
-  // Get display name and username
   const displayName = user.name || "";
   const username = dbUser?.username || "";
+  const bio = dbUser?.bio || "";
+  const school = dbUser?.school || "";
+  const schoolRegNumber = dbUser?.schoolRegNumber || "";
+  const schoolEmail = dbUser?.schoolEmail || "";
 
   // Format the user's plan for display
   const formattedPlan = plan.charAt(0) + plan.slice(1).toLowerCase();
@@ -45,7 +55,7 @@ export default async function ProfilePage() {
       <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>
 
       <div className="grid gap-8 md:grid-cols-[1fr_2fr]">
-        <Card>
+        <Card className="h-fit">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <Avatar className="size-24">
@@ -72,14 +82,19 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle>Update Profile</CardTitle>
-            <CardDescription>
-              Set your username and manage profile settings.
-            </CardDescription>
+            <CardDescription>Manage your profile settings.</CardDescription>
           </CardHeader>
-          <ProfileForm username={username} email={user.email} />
+          <ProfileForm
+            username={username}
+            email={user.email}
+            bio={bio}
+            school={school}
+            schoolRegNumber={schoolRegNumber}
+            schoolEmail={schoolEmail}
+          />
         </Card>
       </div>
     </div>

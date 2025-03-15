@@ -11,15 +11,34 @@ const profileSchema = z.object({
     .string()
     .min(3, "Username must be at least 3 characters")
     .max(30, "Username must be less than 30 characters")
-    .regex(/^[a-zA-Z0-9_-]+$/, "Username can only contain letters, numbers, underscore and dash")
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      "Username can only contain letters, numbers, underscore and dash"
+    )
+    .optional(),
+  bio: z
+    .string()
+    .min(10, "Bio must be at least 10 characters")
+    .max(1000, "Bio must not exceed 1000 characters")
+    .optional(),
+  school: z
+    .string()
+    .min(3, "School must be at least 3 characters")
+    .max(100, "School must not exceed 100 characters")
+    .optional(),
+  schoolRegNumber: z
+    .string()
+    .min(3, "School registration number must be at least 3 characters")
+    .max(100, "School registration number must not exceed 100 characters")
+    .optional(),
+  schoolEmail: z
+    .string()
+    .email("Please enter a valid email address")
     .optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-/**
- * Update the current user's profile information
- */
 export async function updateProfile(formData: ProfileFormData) {
   try {
     const user = await getCurrentUser();
@@ -30,7 +49,10 @@ export async function updateProfile(formData: ProfileFormData) {
     // Validate the input data
     const validatedData = profileSchema.safeParse(formData);
     if (!validatedData.success) {
-      return { success: false, error: validatedData.error.errors[0]?.message || "Invalid input" };
+      return {
+        success: false,
+        error: validatedData.error.errors[0]?.message || "Invalid input",
+      };
     }
 
     // Update the user data
@@ -38,6 +60,10 @@ export async function updateProfile(formData: ProfileFormData) {
       where: { email: user.email },
       data: {
         username: formData.username,
+        bio: formData.bio,
+        school: formData.school,
+        schoolRegNumber: formData.schoolRegNumber,
+        schoolEmail: formData.schoolEmail,
       },
     });
 
@@ -47,12 +73,12 @@ export async function updateProfile(formData: ProfileFormData) {
     return { success: true };
   } catch (error: any) {
     console.error("Error updating profile:", error);
-    
+
     // Check for unique constraint violation
-    if (error.code === 'P2002' && error.meta?.target?.includes('username')) {
+    if (error.code === "P2002" && error.meta?.target?.includes("username")) {
       return { success: false, error: "This username is already taken" };
     }
-    
+
     return { success: false, error: "Failed to update profile" };
   }
 }
