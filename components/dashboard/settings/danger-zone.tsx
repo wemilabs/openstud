@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Icons } from "@/components/icons";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { resetUserData, deleteAccount } from "@/actions/user";
 
 type DangerAction = {
   title: string;
@@ -48,6 +50,7 @@ export function DangerZone() {
       await action();
     } catch (error) {
       console.error("Action failed:", error);
+      toast.error("The action failed to complete. Please try again.");
     } finally {
       setIsLoading((prev) => ({ ...prev, [actionKey]: false }));
     }
@@ -65,7 +68,9 @@ export function DangerZone() {
       action: async () => {
         // Implementation would call an API endpoint to remove integrations
         console.log("Integration removal requested");
-        alert("Integration removal soon possible");
+        toast.info(
+          "Coming Soon: Integration removal will be available in a future update."
+        );
         // await removeAllIntegrations();
       },
     },
@@ -79,7 +84,9 @@ export function DangerZone() {
       action: async () => {
         // Implementation would call an API endpoint to delete project history
         console.log("Project history deletion requested");
-        alert("Project history deletion soon possible");
+        toast.info(
+          "Coming Soon: Project history deletion will be available in a future update."
+        );
         // await deleteProjectHistory();
       },
     },
@@ -91,10 +98,18 @@ export function DangerZone() {
       buttonText: "Reset Data",
       confirmText: "Yes, reset all data",
       action: async () => {
-        // Implementation would call an API endpoint to reset user data
-        console.log("Data reset requested");
-        alert("Data reset soon possible");
-        // await resetUserData();
+        const result = await resetUserData();
+
+        if (result.success) {
+          toast.success(
+            result.message || "Your data has been reset successfully."
+          );
+          window.location.href = "/dashboard";
+        } else {
+          toast.error(
+            result.error || "Failed to reset your data. Please try again."
+          );
+        }
       },
     },
 
@@ -106,10 +121,18 @@ export function DangerZone() {
       buttonText: "Delete Account",
       confirmText: "Yes, delete my account",
       action: async () => {
-        // Implementation would call an API endpoint to delete the account
-        console.log("Account deletion requested");
-        alert("Account deletion soon possible");
-        // await deleteAccount();
+        const result = await deleteAccount();
+
+        if (result.success) {
+          toast.success(
+            result.message || "Your account has been permanently deleted."
+          );
+          window.location.href = "/";
+        } else {
+          toast.error(
+            result.error || "Failed to delete your account. Please try again."
+          );
+        }
       },
     },
   ];
@@ -145,7 +168,14 @@ export function DangerZone() {
                     className="w-full"
                     disabled={isLoading[action.title]}
                   >
-                    {isLoading[action.title] ? "Loading..." : action.buttonText}
+                    {isLoading[action.title] ? (
+                      <div className="flex items-center gap-2">
+                        <Icons.spinner className="size-4 animate-spin" />
+                        <span>Processing...</span>
+                      </div>
+                    ) : (
+                      action.buttonText
+                    )}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
