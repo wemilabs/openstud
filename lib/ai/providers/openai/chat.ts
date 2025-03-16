@@ -18,6 +18,7 @@ export interface ChatOptions {
   maxTokens?: number;
   stream?: boolean;
   signal?: AbortSignal;
+  timeoutMs?: number; // Added timeout option
 }
 
 /**

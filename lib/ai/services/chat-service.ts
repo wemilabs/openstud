@@ -21,6 +21,7 @@ export interface ChatOptions {
   conversationId?: string;
   userId: string;
   signal?: AbortSignal;
+  timeoutMs?: number; 
 }
 
 // Track active streaming requests for cancellation
@@ -102,7 +103,10 @@ export async function generateStreamingChatResponse(
   // Collect the assistant's response to store after streaming
   let assistantResponse = '';
   const wrappedOnChunk = (chunk: string) => {
-    assistantResponse += chunk;
+    // Don't accumulate empty chunks (keepalives) or error messages into the response
+    if (chunk && !chunk.startsWith('\n\n[')) {
+      assistantResponse += chunk;
+    }
     // Only call the callback if it's provided
     if (onChunk) {
       onChunk(chunk);
@@ -110,6 +114,9 @@ export async function generateStreamingChatResponse(
   };
 
   try {
+    // Set timeout for streaming responses - default 90 seconds or user override
+    const timeoutMs = options.timeoutMs || 90000; // 90 seconds default timeout
+    
     // Use the appropriate provider based on configuration
     switch (aiConfig.provider) {
       case 'openai':
@@ -120,7 +127,8 @@ export async function generateStreamingChatResponse(
             temperature: options.temperature,
             maxTokens: options.maxTokens,
             stream: true,
-            signal: options.signal || abortController.signal 
+            signal: options.signal || abortController.signal,
+            timeoutMs
           }
         );
         break;
@@ -132,7 +140,8 @@ export async function generateStreamingChatResponse(
             temperature: options.temperature,
             maxTokens: options.maxTokens,
             stream: true,
-            signal: options.signal || abortController.signal 
+            signal: options.signal || abortController.signal,
+            timeoutMs
           }
         );
         break;
@@ -144,7 +153,8 @@ export async function generateStreamingChatResponse(
             temperature: options.temperature,
             maxTokens: options.maxTokens,
             stream: true,
-            signal: options.signal || abortController.signal 
+            signal: options.signal || abortController.signal,
+            timeoutMs
           }
         );
         break;
