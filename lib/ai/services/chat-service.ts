@@ -133,7 +133,7 @@ export async function generateStreamingChatResponse(
         );
         break;
       case 'grok':
-        await GrokProvider.generateStreamingChatCompletion(
+        await GrokProvider.generateStreamingChatResponse(
           messages, 
           wrappedOnChunk, 
           { 
