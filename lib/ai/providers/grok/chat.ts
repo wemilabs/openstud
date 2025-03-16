@@ -90,41 +90,20 @@ export async function generateStreamingChatCompletion(
   // If we haven't received content for this long, send keepalive
   const keepaliveThresholdMs = 10000; // 10 seconds
   
-  try {
-    const response = await grok.request('/chat/completions', {
-      method: 'POST',
-      body: JSON.stringify({
-        model: aiConfig.modelConfig.chatModel,
-        messages,
-        temperature: options.temperature ?? 0.7,
-        max_tokens: options.maxTokens,
-        stream: true,
-      }),
-      signal,
-    });
-
-    // Create a reader from the response body stream
-    const reader = response.body!.getReader();
-    const decoder = new TextDecoder();
-    
-    // Function to check if we need a keepalive
-    const checkKeepAlive = () => {
-      const now = Date.now();
-      if (now - lastContentTime > keepaliveThresholdMs) {
-        // Send empty keepalive to client to keep connection alive
-        onChunk('');
-        lastContentTime = now;
-      }
-    };
-    
-    // Set up keepalive interval
-    const keepaliveInterval = setInterval(checkKeepAlive, 5000); // Check every 5 seconds
-    
-    // Read the stream
+  // Maximum retries for transient errors
+  const MAX_RETRIES = 2;
+  let retryCount = 0;
+  let streamClosed = false;
+  
+  // Function to process chunks from the stream
+  const processStream = async (reader: ReadableStreamDefaultReader<Uint8Array>, decoder: TextDecoder) => {
     try {
-      while (true) {
+      while (!streamClosed) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          streamClosed = true;
+          break;
+        }
         
         // Update last content time
         lastContentTime = Date.now();
@@ -141,7 +120,10 @@ export async function generateStreamingChatCompletion(
             const data = line.slice(6);
             
             // Skip the [DONE] message
-            if (data === '[DONE]') continue;
+            if (data === '[DONE]') {
+              streamClosed = true;
+              continue;
+            }
             
             try {
               const parsedData = JSON.parse(data);
@@ -166,10 +148,89 @@ export async function generateStreamingChatCompletion(
           }, timeoutMs);
         }
       }
-    } finally {
-      // Clean up
-      clearInterval(keepaliveInterval);
-      clearTimeout(timeoutId);
+    } catch (error) {
+      // Handle stream processing errors
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw error; // Let the main try/catch handle abort errors
+      }
+      
+      // For other errors during stream processing, attempt to retry if we haven't hit max retries
+      if (retryCount < MAX_RETRIES) {
+        retryCount++;
+        onChunk(`\n\n[Connection interrupted. Retrying... (${retryCount}/${MAX_RETRIES})]`);
+        // Wait a moment before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        return false; // Signal to retry
+      } else {
+        throw error; // Let the main try/catch handle it after max retries
+      }
+    }
+    
+    return true; // Success - no need to retry
+  };
+  
+  // Main API call and stream processing loop
+  try {
+    // Function to check if we need a keepalive
+    const checkKeepAlive = () => {
+      const now = Date.now();
+      if (now - lastContentTime > keepaliveThresholdMs) {
+        // Send empty keepalive to client to keep connection alive
+        onChunk('');
+        lastContentTime = now;
+      }
+    };
+    
+    // Set up keepalive interval
+    const keepaliveInterval = setInterval(checkKeepAlive, 5000); // Check every 5 seconds
+    
+    let success = false;
+    while (!success && retryCount <= MAX_RETRIES) {
+      try {
+        // Make the API request for streaming
+        const response = await grok.request('/chat/completions', {
+          method: 'POST',
+          body: JSON.stringify({
+            model: aiConfig.modelConfig.chatModel,
+            messages,
+            temperature: options.temperature ?? 0.7,
+            max_tokens: options.maxTokens,
+            stream: true,
+          }),
+          signal,
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Error response from Grok API: ${response.status}`, errorText);
+          throw new Error(`Grok API error: ${response.status}`);
+        }
+        
+        // Create a reader from the response body stream
+        const reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        
+        // Process the stream
+        success = await processStream(reader, decoder);
+        
+        // If processing was successful, break the retry loop
+        if (success) break;
+      } catch (error) {
+        // If it's an abort error or we've hit max retries, throw
+        if (
+          (error instanceof DOMException && error.name === 'AbortError') || 
+          retryCount >= MAX_RETRIES
+        ) {
+          throw error;
+        }
+        
+        // Otherwise increment retry counter and try again
+        retryCount++;
+        const waitTime = 1000 * retryCount;
+        console.error(`Stream error, retrying (${retryCount}/${MAX_RETRIES}) after ${waitTime}ms:`, error);
+        onChunk(`\n\n[Connection error. Retrying... (${retryCount}/${MAX_RETRIES})]`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
     }
   } catch (error) {
     clearTimeout(timeoutId);
@@ -186,5 +247,8 @@ export async function generateStreamingChatCompletion(
     // For other errors, also try to notify the client
     onChunk('\n\n[Error occurred during generation. The response may be incomplete.]');
     throw new Error('Failed to generate streaming AI response');
+  } finally {
+    // Clean up
+    clearTimeout(timeoutId);
   }
 }

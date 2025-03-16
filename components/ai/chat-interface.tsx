@@ -36,6 +36,12 @@ export function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // Track stream activity to detect stalled streams
+  const lastActivityRef = useRef<number>(Date.now());
+  const streamTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const streamRetryCountRef = useRef<number>(0);
+  const MAX_STREAM_RETRIES = 2;
+
   // Load a conversation by ID
   const loadConversation = useCallback(
     async (id: string) => {
@@ -103,14 +109,88 @@ export function ChatInterface() {
     return () => clearTimeout(scrollTimer);
   }, [messages, streamingMessage]);
 
-  // Clean up abort controller on unmount
+  // Clean up abort controller and timeouts on unmount
   useEffect(() => {
     return () => {
+      // Clean up abort controller
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
+
+      // Clean up stream timeout
+      if (streamTimeoutRef.current) {
+        clearTimeout(streamTimeoutRef.current);
+      }
     };
   }, []);
+
+  // Setup stream activity monitoring
+  const setupStreamMonitoring = useCallback(() => {
+    // Clear any existing timeout
+    if (streamTimeoutRef.current) {
+      clearTimeout(streamTimeoutRef.current);
+      streamTimeoutRef.current = null;
+    }
+
+    // Reset activity timestamp
+    lastActivityRef.current = Date.now();
+
+    // Set up timeout to check for inactivity (30 seconds)
+    streamTimeoutRef.current = setTimeout(() => {
+      const inactiveTime = Date.now() - lastActivityRef.current;
+
+      // If no activity for 30 seconds and still loading, assume the stream is stalled
+      if (isLoading && inactiveTime > 30000) {
+        console.warn(`Stream appears stalled (inactive for ${inactiveTime}ms)`);
+
+        // Only retry if we haven't exceeded max retries
+        if (streamRetryCountRef.current < MAX_STREAM_RETRIES) {
+          streamRetryCountRef.current++;
+          setStreamingMessage((prev) =>
+            prev + `\n\n[Connection appears stalled. Attempting to recover... (${streamRetryCountRef.current}/${MAX_STREAM_RETRIES})]`
+          );
+
+          // Attempt to recover by finalizing what we have
+          finalizeStreamedMessage();
+        } else {
+          // Max retries exceeded, just finalize what we have
+          setStreamingMessage((prev) =>
+            prev + "\n\n[Connection lost. The response may be incomplete.]"
+          );
+          finalizeStreamedMessage();
+        }
+      }
+    }, 30000);
+  }, [isLoading]);
+
+  // Finalize the current streaming message and add it to chat history
+  const finalizeStreamedMessage = useCallback(() => {
+    if (streamingMessage.trim()) {
+      // Add the current streaming content as the final message
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: streamingMessage.trim(),
+        },
+      ]);
+
+      // Clear streaming state
+      setStreamingMessage("");
+      setIsLoading(false);
+
+      // Clean up
+      if (streamTimeoutRef.current) {
+        clearTimeout(streamTimeoutRef.current);
+        streamTimeoutRef.current = null;
+      }
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    }
+  }, [streamingMessage]);
 
   // Scroll to the bottom of the chat
   const scrollToBottom = () => {
@@ -163,54 +243,97 @@ export function ChatInterface() {
       // Reset streaming message
       setStreamingMessage("");
 
+      // Reset retry counter for this new stream
+      streamRetryCountRef.current = 0;
+
+      // Setup monitoring for this stream
+      setupStreamMonitoring();
+
       let newConversationId: string | undefined;
       let accumulatedContent = ""; // Track full response content
 
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) {
-          break;
+      // Set timeout for the entire stream (2 minutes)
+      const streamTimeout = setTimeout(() => {
+        if (isLoading) {
+          console.warn("Stream exceeded maximum time limit (2 minutes)");
+          // Add a message about the timeout
+          setStreamingMessage((prev) =>
+            prev + "\n\n[Response generation timed out after 2 minutes. The response may be incomplete.]"
+          );
+          // Finalize what we have
+          finalizeStreamedMessage();
         }
+      }, 120000);
 
-        // Decode the chunk
-        const chunk = decoder.decode(value, { stream: true });
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
 
-        // Add to accumulated content
-        accumulatedContent += chunk;
-
-        // Check if chunk contains metadata (conversation ID)
-        if (chunk.includes('{"__metadata":')) {
-          try {
-            // Extract the metadata part
-            const metadataStr = chunk.substring(
-              chunk.indexOf('{"__metadata":'),
-              chunk.length
-            );
-            const metadata = JSON.parse(metadataStr);
-
-            // Extract conversation ID
-            if (metadata.__metadata?.conversationId) {
-              newConversationId = metadata.__metadata.conversationId;
-            }
-
-            // Don't add this part to the streaming message
-            const contentPart = chunk.substring(
-              0,
-              chunk.indexOf('{"__metadata":')
-            );
-            if (contentPart.trim()) {
-              setStreamingMessage((prev) => prev + contentPart);
-            }
-          } catch (e) {
-            console.error("Error parsing metadata:", e);
-            // If parsing fails, just treat it as regular content
-            setStreamingMessage((prev) => prev + chunk);
+          if (done) {
+            break;
           }
-        } else {
-          // Regular content chunk, add to the streaming message
-          setStreamingMessage((prev) => prev + chunk);
+
+          // Update activity timestamp
+          lastActivityRef.current = Date.now();
+
+          // Decode the chunk
+          const chunk = decoder.decode(value, { stream: true });
+
+          // Don't add empty chunks (keepalives) to accumulated content
+          if (chunk.trim()) {
+            accumulatedContent += chunk;
+          }
+
+          // Check if chunk contains metadata (conversation ID)
+          if (chunk.includes('{"__metadata":')) {
+            try {
+              // Extract the metadata part
+              const metadataStr = chunk.substring(
+                chunk.indexOf('{"__metadata":'),
+                chunk.length
+              );
+              const metadata = JSON.parse(metadataStr);
+
+              // Extract conversation ID
+              if (metadata.__metadata?.conversationId) {
+                newConversationId = metadata.__metadata.conversationId;
+              }
+
+              // Don't add this part to the streaming message
+              const contentPart = chunk.substring(
+                0,
+                chunk.indexOf('{"__metadata":')
+              );
+              if (contentPart.trim()) {
+                setStreamingMessage((prev) => prev + contentPart);
+              }
+            } catch (e) {
+              console.error("Error parsing metadata:", e);
+              // If parsing fails, just treat it as regular content
+              setStreamingMessage((prev) => prev + chunk);
+            }
+          } else if (
+            chunk.includes('[Connection interrupted') ||
+            chunk.includes('[Connection error') ||
+            chunk.includes('[Generation interrupted') ||
+            chunk.includes('[Error occurred during generation')
+          ) {
+            // Special handling for error messages
+            setStreamingMessage((prev) => prev + chunk);
+            // Reset the stream monitoring since we've received an update
+            setupStreamMonitoring();
+          } else if (chunk.trim()) {
+            // Regular content chunk, add to the streaming message
+            setStreamingMessage((prev) => prev + chunk);
+            // Reset the stream monitoring since we've received an update
+            setupStreamMonitoring();
+          } else {
+            // Empty chunk (keepalive) - just update the activity timestamp
+            // No need to update UI
+          }
         }
+      } finally {
+        clearTimeout(streamTimeout);
       }
 
       // When stream is complete, ensure we add the final message to the chat history
@@ -258,11 +381,27 @@ export function ChatInterface() {
         console.log("Stream reading was aborted");
       } else {
         console.error("Error processing stream:", error);
-        toast.error("Error processing response");
+        setStreamingMessage((prev) =>
+          prev + "\n\n[Error processing response. The response may be incomplete.]"
+        );
+
+        // If we have partial content, finalize it even on error
+        if (streamingMessage.trim()) {
+          finalizeStreamedMessage();
+        } else {
+          toast.error("Error processing response");
+          setIsLoading(false);
+        }
       }
     } finally {
+      // Clean up resources
       setIsLoading(false);
       abortControllerRef.current = null;
+
+      if (streamTimeoutRef.current) {
+        clearTimeout(streamTimeoutRef.current);
+        streamTimeoutRef.current = null;
+      }
     }
   };
 
