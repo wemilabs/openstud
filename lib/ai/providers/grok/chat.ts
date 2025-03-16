@@ -42,6 +42,7 @@ export async function generateChatCompletion(
         stream: false,
       }),
       signal: options.signal,
+      timeoutMs: options.timeoutMs || 60000,
     });
 
     const data = await response.json();
@@ -57,19 +58,74 @@ export async function generateChatCompletion(
 }
 
 /**
+ * Split long messages for better streaming performance with Grok
+ * Grok can sometimes have issues with very long messages
+ */
+function preprocessMessages(messages: ChatMessage[]): ChatMessage[] {
+  const MAX_MESSAGE_LENGTH = 6000; // Characters per message chunk
+  
+  return messages.map(message => {
+    // Only process long user or system messages
+    if ((message.role === 'user' || message.role === 'system') && 
+        message.content.length > MAX_MESSAGE_LENGTH) {
+      
+      // Split the message content into reasonable chunks
+      const chunks = [];
+      let content = message.content;
+      
+      while (content.length > 0) {
+        // Find a good breaking point (sentence or paragraph end)
+        let breakPoint = Math.min(MAX_MESSAGE_LENGTH, content.length);
+        
+        if (breakPoint < content.length) {
+          // Try to break at a paragraph
+          const paragraphBreak = content.lastIndexOf('\n\n', breakPoint);
+          if (paragraphBreak > breakPoint * 0.7) {
+            breakPoint = paragraphBreak + 2;
+          } else {
+            // Try to break at a sentence
+            const sentenceBreak = content.lastIndexOf('. ', breakPoint);
+            if (sentenceBreak > breakPoint * 0.7) {
+              breakPoint = sentenceBreak + 2;
+            }
+          }
+        }
+        
+        chunks.push(content.substring(0, breakPoint));
+        content = content.substring(breakPoint);
+      }
+      
+      // If we have multiple chunks, return a processed version
+      if (chunks.length > 1) {
+        return {
+          role: message.role,
+          content: chunks[chunks.length - 1] + 
+                  `\n\n[Note: This is part ${chunks.length} of a ${chunks.length}-part message.]`
+        };
+      }
+    }
+    
+    return message;
+  });
+}
+
+/**
  * Generate a streaming chat completion using Grok
  * 
  * @param messages Array of messages in the conversation
  * @param onChunk Callback function for each chunk of the stream
  * @param options Optional parameters for the completion
  */
-export async function generateStreamingChatCompletion(
+export async function generateStreamingChatResponse(
   messages: ChatMessage[],
   onChunk: (chunk: string) => void,
   options: ChatOptions = {}
-): Promise<void> {
-  // Default timeout of 60 seconds (can be overridden)
-  const timeoutMs = options.timeoutMs || 60000;
+): Promise<{ content: string }> {
+  // Process messages to ensure they're not too long for Grok
+  const processedMessages = preprocessMessages(messages);
+  
+  // Default timeout of 75 seconds (can be overridden)
+  const timeoutMs = options.timeoutMs || 75000;
   
   // Create an abort controller for the timeout
   const timeoutController = new AbortController();
@@ -88,12 +144,17 @@ export async function generateStreamingChatCompletion(
   // Track when we last received content
   let lastContentTime = Date.now();
   // If we haven't received content for this long, send keepalive
-  const keepaliveThresholdMs = 10000; // 10 seconds
+  const keepaliveThresholdMs = 5000; // 5 seconds
   
   // Maximum retries for transient errors
-  const MAX_RETRIES = 2;
+  const MAX_RETRIES = 3;
   let retryCount = 0;
   let streamClosed = false;
+  let fullResponse = '';
+  
+  // Track streaming progress
+  let totalChunks = 0;
+  const lastActivityTime = Date.now();
   
   // Function to process chunks from the stream
   const processStream = async (reader: ReadableStreamDefaultReader<Uint8Array>, decoder: TextDecoder) => {
@@ -130,6 +191,8 @@ export async function generateStreamingChatCompletion(
               const content = parsedData.choices[0]?.delta?.content || '';
               if (content) {
                 hasContent = true;
+                fullResponse += content;
+                totalChunks++;
                 onChunk(content);
               }
             } catch (e) {
@@ -146,6 +209,16 @@ export async function generateStreamingChatCompletion(
           setTimeout(() => {
             timeoutController.abort();
           }, timeoutMs);
+        }
+        
+        // Check if we're potentially hitting model limits (many tokens without completion)
+        if (totalChunks > 500 && (Date.now() - lastActivityTime > 20000)) {
+          onChunk('\n\n[Note: This response is quite long and may be approaching model limits.]');
+          
+          // Force a stream reset if we've been generating for a long time
+          if (fullResponse.length > 12000) {
+            break;
+          }
         }
       }
     } catch (error) {
@@ -181,23 +254,32 @@ export async function generateStreamingChatCompletion(
       }
     };
     
-    // Set up keepalive interval
-    const keepaliveInterval = setInterval(checkKeepAlive, 5000); // Check every 5 seconds
+    // Set up keepalive interval (more frequent checks)
+    const keepaliveInterval = setInterval(checkKeepAlive, 2000); // Check every 2 seconds
     
     let success = false;
     while (!success && retryCount <= MAX_RETRIES) {
       try {
-        // Make the API request for streaming
+        // Add a custom HTTP header to disable compression which can help with streaming
+        const customHeaders = {
+          'Accept-Encoding': 'identity', // Disable compression for streaming
+          'Cache-Control': 'no-cache',
+          'X-Request-Type': 'streaming'
+        };
+        
+        // Make the API request for streaming with shorter timeouts for initial response
         const response = await grok.request('/chat/completions', {
           method: 'POST',
           body: JSON.stringify({
             model: aiConfig.modelConfig.chatModel,
-            messages,
+            messages: processedMessages,
             temperature: options.temperature ?? 0.7,
-            max_tokens: options.maxTokens,
+            max_tokens: options.maxTokens || 4000, // Set explicit max tokens
             stream: true,
           }),
+          headers: customHeaders,
           signal,
+          timeoutMs: 30000, // Use a shorter timeout for initial response
         });
         
         if (!response.ok) {
@@ -232,6 +314,8 @@ export async function generateStreamingChatCompletion(
         await new Promise(resolve => setTimeout(resolve, waitTime));
       }
     }
+    
+    return { content: fullResponse };
   } catch (error) {
     clearTimeout(timeoutId);
     
