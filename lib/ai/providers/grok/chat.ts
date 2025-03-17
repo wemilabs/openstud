@@ -127,21 +127,27 @@ export async function generateStreamingChatResponse(
   const processedMessages = preprocessMessages(messages);
 
   // Default timeout of 75 seconds (can be overridden)
-  const timeoutMs = options.timeoutMs || 75000;
+  const timeoutMs = options.timeoutMs || 180000; // Increased to 3 minutes default
 
   // Create an abort controller for the timeout
-  const timeoutController = new AbortController();
-
-  // Setup the combined signal if user provided one
-  let signal = timeoutController.signal;
-  if (options.signal) {
-    signal = options.signal;
+  const abortController = new AbortController();
+  
+  // Set up a properly working abort system that handles both user abort and timeout
+  const userSignal = options.signal;
+  
+  // Listen for abort signals from the user's AbortController
+  if (userSignal) {
+    // If the user signal is already aborted, abort immediately
+    if (userSignal.aborted) {
+      abortController.abort();
+    } else {
+      // Otherwise, listen for when it gets aborted
+      userSignal.addEventListener('abort', () => {
+        console.log("User aborted the request");
+        abortController.abort();
+      }, { once: true });
+    }
   }
-
-  // Setup timeout
-  const timeoutId = setTimeout(() => {
-    timeoutController.abort();
-  }, timeoutMs);
 
   // Track when we last received content
   let lastContentTime = Date.now();
@@ -157,6 +163,12 @@ export async function generateStreamingChatResponse(
   // Track streaming progress
   let totalChunks = 0;
   const lastActivityTime = Date.now();
+
+  // Set up timeout for the request
+  const timeoutId = setTimeout(() => {
+    console.log(`Request timed out after ${timeoutMs}ms`);
+    abortController.abort();
+  }, timeoutMs);
 
   // Initialize with dummy timeout that we'll overwrite
   let keepaliveInterval: NodeJS.Timeout = setTimeout(() => {}, 0);
@@ -210,15 +222,6 @@ export async function generateStreamingChatResponse(
           }
         }
 
-        // Reset the timeout if we got content
-        if (hasContent) {
-          clearTimeout(timeoutId);
-          // Set a new timeout
-          setTimeout(() => {
-            timeoutController.abort();
-          }, timeoutMs);
-        }
-
         // Check if we're potentially hitting model limits (many tokens without completion)
         if (totalChunks > 500 && Date.now() - lastActivityTime > 20000) {
           onChunk(
@@ -258,6 +261,8 @@ export async function generateStreamingChatResponse(
   try {
     // Function to check if we need a keepalive
     const checkKeepAlive = () => {
+      if (streamClosed) return;
+      
       const now = Date.now();
       if (now - lastContentTime > keepaliveThresholdMs) {
         // Send empty keepalive to client to keep connection alive
@@ -279,7 +284,7 @@ export async function generateStreamingChatResponse(
           "X-Request-Type": "streaming",
         };
 
-        // Make the API request for streaming with shorter timeouts for initial response
+        // Make the API request for streaming
         const response = await grok.request("/chat/completions", {
           method: "POST",
           body: JSON.stringify({
@@ -290,8 +295,8 @@ export async function generateStreamingChatResponse(
             stream: true,
           }),
           headers: customHeaders,
-          signal,
-          timeoutMs: 30000, // Use a shorter timeout for initial response
+          signal: abortController.signal, // Use our combined signal
+          timeoutMs, // Use the full timeout for the request
         });
 
         if (!response.ok) {
@@ -337,23 +342,25 @@ export async function generateStreamingChatResponse(
 
     return { content: fullResponse };
   } catch (error) {
-    clearTimeout(timeoutId);
-
     console.error("Error generating streaming chat completion:", error);
 
     // Check if it's a timeout error
     if (error instanceof DOMException && error.name === "AbortError") {
-      // Send a completion message to client so it knows streaming is done
-      onChunk(
-        "\n\n[Generation interrupted due to timeout. The response may be incomplete.]"
-      );
-      throw error;
+      // Check if it was aborted by the user or by the timeout
+      if (userSignal && userSignal.aborted) {
+        // This was user-initiated
+        onChunk("\n\n[Generation stopped by user]");
+      } else {
+        // This was a timeout
+        onChunk("\n\n[Generation timed out. The response may be incomplete.]");
+      }
+      
+      // Return what we have so far
+      return { content: fullResponse };
     }
 
     // For other errors, also try to notify the client
-    onChunk(
-      "\n\n[Error occurred during generation. The response may be incomplete.]"
-    );
+    onChunk("\n\n[Error occurred during generation. The response may be incomplete.]");
     throw new Error("Failed to generate streaming AI response");
   } finally {
     // Clean up
