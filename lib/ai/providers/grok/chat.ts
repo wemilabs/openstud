@@ -179,6 +179,8 @@ export async function generateStreamingChatResponse(
     decoder: TextDecoder
   ) => {
     try {
+      let incompleteJson = ""; // Buffer for handling incomplete JSON data
+      
       while (!streamClosed) {
         const { done, value } = await reader.read();
         if (done) {
@@ -207,7 +209,31 @@ export async function generateStreamingChatResponse(
             }
 
             try {
-              const parsedData = JSON.parse(data);
+              // Handle potentially incomplete JSON by attempting to parse it
+              let jsonData = data;
+              
+              // If we have incomplete JSON from previous chunks, try to combine
+              if (incompleteJson) {
+                jsonData = incompleteJson + data;
+                incompleteJson = ""; // Reset incomplete buffer
+              }
+              
+              // Attempt to parse the JSON
+              let parsedData;
+              try {
+                parsedData = JSON.parse(jsonData);
+              } catch (jsonError) {
+                // If this is a syntax error, it might be incomplete JSON
+                if (jsonError instanceof SyntaxError) {
+                  // Store this chunk for combining with the next one
+                  incompleteJson = jsonData;
+                  continue; // Skip to next line
+                } else {
+                  // Re-throw other errors
+                  throw jsonError;
+                }
+              }
+              
               const content = parsedData.choices[0]?.delta?.content || "";
               if (content) {
                 hasContent = true;
