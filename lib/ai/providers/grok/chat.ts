@@ -221,18 +221,6 @@ export async function generateStreamingChatResponse(
             }
           }
         }
-
-        // Check if we're potentially hitting model limits (many tokens without completion)
-        if (totalChunks > 500 && Date.now() - lastActivityTime > 20000) {
-          onChunk(
-            "\n\n[Note: This response is quite long and may be approaching model limits.]"
-          );
-
-          // Force a stream reset if we've been generating for a long time
-          if (fullResponse.length > 12000) {
-            break;
-          }
-        }
       }
     } catch (error) {
       // Handle stream processing errors
@@ -251,6 +239,13 @@ export async function generateStreamingChatResponse(
         return false; // Signal to retry
       } else {
         throw error; // Let the main try/catch handle it after max retries
+      }
+    } finally {
+      // Properly release the reader to avoid resource leaks
+      try {
+        await reader.cancel();
+      } catch (e) {
+        console.error("Error cancelling reader:", e);
       }
     }
 
@@ -291,7 +286,7 @@ export async function generateStreamingChatResponse(
             model: aiConfig.modelConfig.chatModel,
             messages: processedMessages,
             temperature: options.temperature ?? 0.7,
-            max_tokens: options.maxTokens || 4000, // Set explicit max tokens
+            max_tokens: options.maxTokens || 8000, // Increased max tokens to allow for longer responses
             stream: true,
           }),
           headers: customHeaders,
@@ -344,7 +339,7 @@ export async function generateStreamingChatResponse(
   } catch (error) {
     console.error("Error generating streaming chat completion:", error);
 
-    // Check if it's a timeout error
+    // Check if it's a timeout error or AbortError
     if (error instanceof DOMException && error.name === "AbortError") {
       // Check if it was aborted by the user or by the timeout
       if (userSignal && userSignal.aborted) {
@@ -359,7 +354,14 @@ export async function generateStreamingChatResponse(
       return { content: fullResponse };
     }
 
-    // For other errors, also try to notify the client
+    // Check for more generic streaming errors that might be happening in production
+    if (fullResponse.length > 0) {
+      console.log("Stream error occurred but we have partial content, returning it");
+      onChunk("\n\n[Error occurred. Returning partial response.]");
+      return { content: fullResponse };
+    }
+
+    // For other errors with no content, also try to notify the client
     onChunk("\n\n[Error occurred during generation. The response may be incomplete.]");
     throw new Error("Failed to generate streaming AI response");
   } finally {
