@@ -72,18 +72,28 @@ export async function sendMessageStream(
     async start(controller) {
       try {
         let fullResponse = "";
+        let isControllerActive = true;  // Track controller state
 
         // Create a callback function to handle chunks
         const handleChunk = (chunk: string) => {
+          // Skip if controller is no longer active
+          if (!isControllerActive) return;
+          
           // Encode the chunk as a Uint8Array
           const encoder = new TextEncoder();
           const encoded = encoder.encode(chunk);
 
-          // Add the chunk to the stream
-          controller.enqueue(encoded);
-
-          // Accumulate the full response
-          fullResponse += chunk;
+          try {
+            // Add the chunk to the stream if the controller is still active
+            controller.enqueue(encoded);
+            
+            // Accumulate the full response
+            fullResponse += chunk;
+          } catch (error) {
+            // Controller has been closed, update our state
+            isControllerActive = false;
+            console.warn("Stream controller is no longer active");
+          }
         };
 
         // Generate the streaming response
@@ -113,6 +123,7 @@ export async function sendMessageStream(
         controller.enqueue(encoder.encode(`\n${metadataChunk}`));
 
         // Close the stream when done
+        isControllerActive = false;
         controller.close();
       } catch (error) {
         console.error("Error in sendMessageStream:", error);

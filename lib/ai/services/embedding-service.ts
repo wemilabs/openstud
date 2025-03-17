@@ -1,14 +1,12 @@
 /**
  * Embedding Service
- * 
- * Provides a unified interface for embedding functionality across different AI providers
+ *
+ * Service for generating and managing vector embeddings for semantic search and similarity
  */
 
-import { aiConfig } from '../config';
-import * as OpenAIProvider from '../providers/openai/embeddings';
-import * as GrokProvider from '../providers/grok/embeddings';
-import { prisma } from '@/lib/prisma';
-import crypto from 'crypto';
+import * as GrokProvider from "../providers/grok/embeddings";
+import { prisma } from "@/lib/prisma";
+import crypto from "crypto";
 
 // Define types for our embedding operations
 type EmbeddingVector = number[];
@@ -24,33 +22,42 @@ interface NoteWithEmbedding {
   embedding: {
     id: string;
     noteId: string;
-    embedding: any; // This will be the vector
+    embedding: any;
     createdAt: Date;
     updatedAt: Date;
   } | null;
 }
 
+export interface EmbeddingOptions {
+  dimensions?: number;
+  normalizeVectors?: boolean;
+}
+
 /**
- * Generate an embedding for a text using the configured AI provider
- * 
- * @param text The text to generate an embedding for
+ * Generate an embedding for text
+ *
+ * @param text Text to generate embedding for
+ * @param options Optional parameters
  * @returns The embedding vector
  */
-export async function generateEmbedding(text: string): Promise<EmbeddingVector> {
-  // Use the appropriate provider based on configuration
-  switch (aiConfig.provider) {
-    case 'openai':
-      return OpenAIProvider.generateEmbedding(text);
-    case 'grok':
-      return GrokProvider.generateEmbedding(text);
-    default:
-      throw new Error(`Embedding provider ${aiConfig.provider} not supported`);
+export async function generateEmbedding(
+  text: string,
+  options: EmbeddingOptions = {}
+): Promise<number[]> {
+  // Sanitize the input - remove excess whitespace
+  text = text.trim().replace(/\s+/g, " ");
+
+  // Skip empty text or very short inputs
+  if (!text || text.length < 3) {
+    return [];
   }
+
+  return GrokProvider.generateEmbedding(text);
 }
 
 /**
  * Generate embeddings for a note and store in the database
- * 
+ *
  * @param noteId The note ID
  * @returns The created embedding record
  */
@@ -83,7 +90,7 @@ export async function generateAndStoreNoteEmbedding(noteId: string) {
         SET "embedding" = ${embedding}::vector, "updatedAt" = ${new Date()}
         WHERE "noteId" = ${noteId}
       `;
-      
+
       return prisma.noteEmbedding.findUnique({
         where: { noteId },
       });
@@ -91,25 +98,25 @@ export async function generateAndStoreNoteEmbedding(noteId: string) {
       // Create a new embedding record using raw SQL
       const id = crypto.randomUUID();
       const now = new Date();
-      
+
       await prisma.$executeRaw`
         INSERT INTO "NoteEmbedding" ("id", "noteId", "embedding", "createdAt", "updatedAt")
         VALUES (${id}, ${noteId}, ${embedding}::vector, ${now}, ${now})
       `;
-      
+
       return prisma.noteEmbedding.findUnique({
         where: { id },
       });
     }
   } catch (error) {
-    console.error('Error storing embedding:', error);
-    throw new Error('Failed to store embedding');
+    console.error("Error storing embedding:", error);
+    throw new Error("Failed to store embedding");
   }
 }
 
 /**
  * Find similar notes based on a query text
- * 
+ *
  * @param queryText The query text to find similar notes for
  * @param userId The user ID to restrict the search to their notes
  * @param limit Maximum number of results to return
@@ -134,12 +141,12 @@ export async function findSimilarNotes(
       },
     });
 
-    const courseIds = courses.map(course => course.id);
+    const courseIds = courses.map((course) => course.id);
 
     // Use a raw query to find similar notes using vector similarity
     // This is a placeholder - in a real implementation, you would use
     // the database's vector similarity search capabilities
-    const notes = await prisma.note.findMany({
+    const notes = (await prisma.note.findMany({
       where: {
         courseId: {
           in: courseIds,
@@ -148,21 +155,21 @@ export async function findSimilarNotes(
       include: {
         embedding: true,
       },
-    }) as unknown as NoteWithEmbedding[];
+    })) as unknown as NoteWithEmbedding[];
 
     // Filter notes that have embeddings
-    const notesWithEmbeddings = notes.filter(note => note.embedding !== null);
+    const notesWithEmbeddings = notes.filter((note) => note.embedding !== null);
 
     // Calculate similarity scores in JavaScript (fallback)
     const notesWithScores = notesWithEmbeddings.map((note) => {
       // We've already filtered out notes without embeddings
       const noteEmbedding = note.embedding!;
-      
-      const similarity = OpenAIProvider.cosineSimilarity(
+
+      const similarity = GrokProvider.cosineSimilarity(
         queryEmbedding,
         (noteEmbedding.embedding as unknown as EmbeddingVector) || []
       );
-      
+
       return {
         ...note,
         similarity,
@@ -174,7 +181,7 @@ export async function findSimilarNotes(
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, limit);
   } catch (error) {
-    console.error('Error finding similar notes:', error);
-    throw new Error('Failed to find similar notes');
+    console.error("Error finding similar notes:", error);
+    throw new Error("Failed to find similar notes");
   }
 }

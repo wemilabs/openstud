@@ -1,56 +1,29 @@
 /**
  * AI Provider Configuration
  *
- * This file contains configuration for different AI providers.
- * Currently supports OpenAI and Grok, with architecture ready for additional providers.
+ * This file contains configuration for Grok AI provider.
  */
 
-export type AIProviderType = "openai" | "grok";
-
 interface AIConfig {
-  provider: AIProviderType;
   modelConfig: {
     chatModel: string;
-    embeddingModel: string;
+    embeddingModel?: string;
   };
 }
 
 // Default configuration using environment variables
 export const aiConfig: AIConfig = {
-  provider: (process.env.AI_PROVIDER as AIProviderType) || "grok",
   modelConfig: {
-    chatModel:
-      process.env.AI_CHAT_MODEL ||
-      (process.env.AI_PROVIDER === "openai"
-        ? "gpt-3.5-turbo"
-        : "grok-2-latest"),
-    embeddingModel:
-      process.env.AI_EMBEDDING_MODEL ||
-      (process.env.AI_PROVIDER === "openai"
-        ? "text-embedding-3-small"
-        : "grok-embedding-1"),
+    chatModel: process.env.GROK_AI_CHAT_MODEL || "grok-2-vision-latest",
   },
-};
-
-// OpenAI specific configuration
-export const openAIConfig = {
-  apiKey: process.env.OPENAI_API_KEY,
-  organization: process.env.OPENAI_ORGANIZATION,
 };
 
 // Grok configuration
 export const grokConfig = {
-  apiKey: process.env.GROK_API_KEY,
+  apiKey: process.env.GROK_API_KEY!,
+  baseUrl: process.env.GROK_API_BASE_URL!,
 };
 
-// Export the current provider's configuration
-export const getCurrentProviderConfig = () => {
-  switch (aiConfig.provider) {
-    case "openai":
-      return openAIConfig;
-    case "grok":
-      return grokConfig;
-    default:
-      return openAIConfig;
-  }
-};
+export function getCurrentProviderConfig() {
+  return grokConfig;
+}
