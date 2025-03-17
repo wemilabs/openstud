@@ -124,45 +124,6 @@ export function ChatInterface() {
     };
   }, []);
 
-  // Setup stream activity monitoring
-  const setupStreamMonitoring = useCallback(() => {
-    // Clear any existing timeout
-    if (streamTimeoutRef.current) {
-      clearTimeout(streamTimeoutRef.current);
-      streamTimeoutRef.current = null;
-    }
-
-    // Reset activity timestamp
-    lastActivityRef.current = Date.now();
-
-    // Set up timeout to check for inactivity (30 seconds)
-    streamTimeoutRef.current = setTimeout(() => {
-      const inactiveTime = Date.now() - lastActivityRef.current;
-
-      // If no activity for 30 seconds and still loading, assume the stream is stalled
-      if (isLoading && inactiveTime > 30000) {
-        console.warn(`Stream appears stalled (inactive for ${inactiveTime}ms)`);
-
-        // Only retry if we haven't exceeded max retries
-        if (streamRetryCountRef.current < MAX_STREAM_RETRIES) {
-          streamRetryCountRef.current++;
-          setStreamingMessage((prev) =>
-            prev + `\n\n[Connection appears stalled. Attempting to recover... (${streamRetryCountRef.current}/${MAX_STREAM_RETRIES})]`
-          );
-
-          // Attempt to recover by finalizing what we have
-          finalizeStreamedMessage();
-        } else {
-          // Max retries exceeded, just finalize what we have
-          setStreamingMessage((prev) =>
-            prev + "\n\n[Connection lost. The response may be incomplete.]"
-          );
-          finalizeStreamedMessage();
-        }
-      }
-    }, 30000);
-  }, [isLoading]);
-
   // Finalize the current streaming message and add it to chat history
   const finalizeStreamedMessage = useCallback(() => {
     if (streamingMessage.trim()) {
@@ -191,6 +152,48 @@ export function ChatInterface() {
       }
     }
   }, [streamingMessage]);
+
+  // Setup stream activity monitoring
+  const setupStreamMonitoring = useCallback(() => {
+    // Clear any existing timeout
+    if (streamTimeoutRef.current) {
+      clearTimeout(streamTimeoutRef.current);
+      streamTimeoutRef.current = null;
+    }
+
+    // Reset activity timestamp
+    lastActivityRef.current = Date.now();
+
+    // Set up timeout to check for inactivity (30 seconds)
+    streamTimeoutRef.current = setTimeout(() => {
+      const inactiveTime = Date.now() - lastActivityRef.current;
+
+      // If no activity for 30 seconds and still loading, assume the stream is stalled
+      if (isLoading && inactiveTime > 30000) {
+        console.warn(`Stream appears stalled (inactive for ${inactiveTime}ms)`);
+
+        // Only retry if we haven't exceeded max retries
+        if (streamRetryCountRef.current < MAX_STREAM_RETRIES) {
+          streamRetryCountRef.current++;
+          setStreamingMessage(
+            (prev) =>
+              prev +
+              `\n\n[Connection appears stalled. Attempting to recover... (${streamRetryCountRef.current}/${MAX_STREAM_RETRIES})]`
+          );
+
+          // Attempt to recover by finalizing what we have
+          finalizeStreamedMessage();
+        } else {
+          // Max retries exceeded, just finalize what we have
+          setStreamingMessage(
+            (prev) =>
+              prev + "\n\n[Connection lost. The response may be incomplete.]"
+          );
+          finalizeStreamedMessage();
+        }
+      }
+    }, 30000);
+  }, [isLoading, finalizeStreamedMessage]);
 
   // Scroll to the bottom of the chat
   const scrollToBottom = () => {
@@ -257,8 +260,10 @@ export function ChatInterface() {
         if (isLoading) {
           console.warn("Stream exceeded maximum time limit (2 minutes)");
           // Add a message about the timeout
-          setStreamingMessage((prev) =>
-            prev + "\n\n[Response generation timed out after 2 minutes. The response may be incomplete.]"
+          setStreamingMessage(
+            (prev) =>
+              prev +
+              "\n\n[Response generation timed out after 2 minutes. The response may be incomplete.]"
           );
           // Finalize what we have
           finalizeStreamedMessage();
@@ -313,10 +318,10 @@ export function ChatInterface() {
               setStreamingMessage((prev) => prev + chunk);
             }
           } else if (
-            chunk.includes('[Connection interrupted') ||
-            chunk.includes('[Connection error') ||
-            chunk.includes('[Generation interrupted') ||
-            chunk.includes('[Error occurred during generation')
+            chunk.includes("[Connection interrupted") ||
+            chunk.includes("[Connection error") ||
+            chunk.includes("[Generation interrupted") ||
+            chunk.includes("[Error occurred during generation")
           ) {
             // Special handling for error messages
             setStreamingMessage((prev) => prev + chunk);
@@ -381,8 +386,10 @@ export function ChatInterface() {
         console.log("Stream reading was aborted");
       } else {
         console.error("Error processing stream:", error);
-        setStreamingMessage((prev) =>
-          prev + "\n\n[Error processing response. The response may be incomplete.]"
+        setStreamingMessage(
+          (prev) =>
+            prev +
+            "\n\n[Error processing response. The response may be incomplete.]"
         );
 
         // If we have partial content, finalize it even on error
