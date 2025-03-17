@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from "@/lib/auth";
-import { generateStreamingChatResponse } from "@/lib/ai";
-import { type ChatMessage } from "@/lib/ai";
+import { generateStreamingChatResponse } from "@/lib/ai/services/chat-service";
+import type { ChatMessage } from "@/lib/ai/types";
 
 // Use Edge runtime for better streaming support
 export const runtime = 'edge';

@@ -6,7 +6,7 @@
 
 import * as GrokProvider from "../providers/grok/embeddings";
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
+import { randomUUID } from "@/lib/utils/crypto-utils";
 
 // Define types for our embedding operations
 type EmbeddingVector = number[];
@@ -96,7 +96,7 @@ export async function generateAndStoreNoteEmbedding(noteId: string) {
       });
     } else {
       // Create a new embedding record using raw SQL
-      const id = crypto.randomUUID();
+      const id = randomUUID();
       const now = new Date();
 
       await prisma.$executeRaw`
