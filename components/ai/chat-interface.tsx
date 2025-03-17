@@ -7,17 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage } from "@/components/ai/chat-message";
 import {
-  sendMessageStream,
   getConversationById,
   cancelChatStreamById,
 } from "@/actions/ai-chat";
 import { type ChatMessage as ChatMessageType } from "@/lib/ai";
+import { useEdgeStreamingChat } from "@/components/chat/edge-stream-provider";
 import { toast } from "sonner";
 
 export function ChatInterface() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const conversationId = searchParams.get("id");
+  // Get the Edge streaming function from our custom hook
+  const { streamChat } = useEdgeStreamingChat();
 
   const [messages, setMessages] = useState<ChatMessageType[]>([
     {
@@ -186,7 +188,6 @@ export function ChatInterface() {
       }
 
       if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
         abortControllerRef.current = null;
       }
     }
@@ -234,177 +235,6 @@ export function ChatInterface() {
     }
   };
 
-  // Process the streaming response
-  const processStream = async (stream: ReadableStream<Uint8Array>) => {
-    try {
-      const reader = stream.getReader();
-      const decoder = new TextDecoder();
-
-      // Reset streaming message
-      setStreamingMessage("");
-
-      // Reset retry counter for this new stream
-      streamRetryCountRef.current = 0;
-
-      // Setup monitoring for this stream
-      setupStreamMonitoring();
-
-      let newConversationId: string | undefined;
-      let accumulatedContent = ""; // Track full response content
-
-      // Set timeout for the entire stream (2 minutes)
-      const streamTimeout = setTimeout(() => {
-        if (isLoading) {
-          console.warn("Stream exceeded maximum time limit (2 minutes)");
-          // Add a message about the timeout
-          setStreamingMessage((prev) =>
-            prev + "\n\n[Response generation timed out after 2 minutes. The response may be incomplete.]"
-          );
-          // Finalize what we have
-          finalizeStreamedMessage();
-        }
-      }, 120000);
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            break;
-          }
-
-          // Update activity timestamp
-          lastActivityRef.current = Date.now();
-
-          // Decode the chunk
-          const chunk = decoder.decode(value, { stream: true });
-
-          // Don't add empty chunks (keepalives) to accumulated content
-          if (chunk.trim()) {
-            accumulatedContent += chunk;
-          }
-
-          // Check if chunk contains metadata (conversation ID)
-          if (chunk.includes('{"__metadata":')) {
-            try {
-              // Extract the metadata part
-              const metadataStr = chunk.substring(
-                chunk.indexOf('{"__metadata":'),
-                chunk.length
-              );
-              const metadata = JSON.parse(metadataStr);
-
-              // Extract conversation ID
-              if (metadata.__metadata?.conversationId) {
-                newConversationId = metadata.__metadata.conversationId;
-              }
-
-              // Don't add this part to the streaming message
-              const contentPart = chunk.substring(
-                0,
-                chunk.indexOf('{"__metadata":')
-              );
-              if (contentPart.trim()) {
-                setStreamingMessage((prev) => prev + contentPart);
-              }
-            } catch (e) {
-              console.error("Error parsing metadata:", e);
-              // If parsing fails, just treat it as regular content
-              setStreamingMessage((prev) => prev + chunk);
-            }
-          } else if (
-            chunk.includes('[Connection interrupted') ||
-            chunk.includes('[Connection error') ||
-            chunk.includes('[Generation interrupted') ||
-            chunk.includes('[Error occurred during generation')
-          ) {
-            // Special handling for error messages
-            setStreamingMessage((prev) => prev + chunk);
-            // Reset the stream monitoring since we've received an update
-            setupStreamMonitoring();
-          } else if (chunk.trim()) {
-            // Regular content chunk, add to the streaming message
-            setStreamingMessage((prev) => prev + chunk);
-            // Reset the stream monitoring since we've received an update
-            setupStreamMonitoring();
-          } else {
-            // Empty chunk (keepalive) - just update the activity timestamp
-            // No need to update UI
-          }
-        }
-      } finally {
-        clearTimeout(streamTimeout);
-      }
-
-      // When stream is complete, ensure we add the final message to the chat history
-      if (accumulatedContent.trim()) {
-        // Clean metadata from the accumulated content
-        let finalContent = accumulatedContent;
-        if (finalContent.includes('{"__metadata":')) {
-          finalContent = finalContent.substring(
-            0,
-            finalContent.indexOf('{"__metadata":')
-          );
-        }
-
-        // Only add the message if there's actual content
-        if (finalContent.trim()) {
-          // Update the messages state with the final assistant response
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            {
-              role: "assistant",
-              content: finalContent.trim(),
-            },
-          ]);
-        }
-
-        // Clear streaming message after adding to chat history
-        setStreamingMessage("");
-      }
-
-      // Update the URL if we have a new conversation ID - using a setTimeout to avoid reload
-      if (newConversationId && !currentConversationId) {
-        setCurrentConversationId(newConversationId);
-
-        // Use setTimeout to defer the URL update until after the state updates have been processed
-        setTimeout(() => {
-          window.history.replaceState(
-            {},
-            "",
-            `/dashboard/ai-tutor?id=${newConversationId}`
-          );
-        }, 0);
-      }
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        console.log("Stream reading was aborted");
-      } else {
-        console.error("Error processing stream:", error);
-        setStreamingMessage((prev) =>
-          prev + "\n\n[Error processing response. The response may be incomplete.]"
-        );
-
-        // If we have partial content, finalize it even on error
-        if (streamingMessage.trim()) {
-          finalizeStreamedMessage();
-        } else {
-          toast.error("Error processing response");
-          setIsLoading(false);
-        }
-      }
-    } finally {
-      // Clean up resources
-      setIsLoading(false);
-      abortControllerRef.current = null;
-
-      if (streamTimeoutRef.current) {
-        clearTimeout(streamTimeoutRef.current);
-        streamTimeoutRef.current = null;
-      }
-    }
-  };
-
   // Handle sending a message
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -429,25 +259,76 @@ export function ChatInterface() {
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
-      // Get the response as a stream
-      const response = await sendMessageStream(
+      // Use Edge streaming API directly for better performance in production
+      // The Edge function will handle long responses without timeouts
+      await streamChat(
         messagesToSend,
-        currentConversationId || undefined
+        currentConversationId || undefined,
+        // Handle each chunk of the stream
+        (chunk: string) => {
+          // Update activity timestamp for monitoring
+          lastActivityRef.current = Date.now();
+          
+          // Update the streaming message with the new chunk
+          setStreamingMessage((prev) => prev + chunk);
+          
+          // Reset monitoring since we got a new chunk
+          setupStreamMonitoring();
+        },
+        // Handle errors
+        (error: Error) => {
+          console.error("Error in streamChat:", error);
+          // Only show error if not already showing something
+          if (!streamingMessage.trim()) {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              {
+                role: "assistant",
+                content: "Sorry, I encountered an error. Please try again.",
+              },
+            ]);
+          } else {
+            // If we have partial content, use it
+            finalizeStreamedMessage();
+          }
+        },
+        // Handle completion with conversation ID
+        (newConversationId: string) => {
+          // Finalize the message
+          finalizeStreamedMessage();
+          
+          // Update conversation ID if it's new
+          if (newConversationId && !currentConversationId) {
+            setCurrentConversationId(newConversationId);
+            
+            // Update URL without reload
+            window.history.replaceState(
+              {},
+              "",
+              `/dashboard/ai-tutor?id=${newConversationId}`
+            );
+          }
+        },
+        // Pass the abort signal for the stop button
+        signal
       );
-
-      // Process the stream
-      await processStream(response);
     } catch (error) {
       console.error("Error in handleSendMessage:", error);
 
-      // Use callback form to ensure we're working with the latest state
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
-        },
-      ]);
+      // If we already have streaming content, save it
+      if (streamingMessage.trim()) {
+        finalizeStreamedMessage();
+      } else {
+        // Otherwise show error message
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: "Sorry, I encountered an error. Please try again.",
+          },
+        ]);
+      }
+      
       setIsLoading(false);
     }
   };
