@@ -40,11 +40,11 @@ export async function getUserPlan() {
 }
 
 /**
- * Check if user is on team plan
+ * Check if user is on ultimate plan
  */
-export async function isTeamPlan() {
+export async function isUltimatePlan() {
   const plan = await getUserPlan();
-  return plan === "TEAM";
+  return plan === "ULTIMATE";
 }
 
 /**
@@ -52,5 +52,5 @@ export async function isTeamPlan() {
  */
 export async function isProOrHigher() {
   const plan = await getUserPlan();
-  return plan === "PRO" || plan === "TEAM";
+  return plan === "PRO" || plan === "ULTIMATE";
 }

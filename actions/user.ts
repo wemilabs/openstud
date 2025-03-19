@@ -132,19 +132,19 @@ export async function resetUserData() {
       },
     });
 
-    // Check if TeamInvitation exists and delete if it does
+    // Check if WorkspaceInvitation exists and delete if it does
     try {
-      await prisma.teamInvitation.deleteMany({
+      await prisma.workspaceInvitation.deleteMany({
         where: {
           createdBy: user.id,
         },
       });
     } catch (err) {
-      console.log("Note: TeamInvitation deletion skipped or errored");
+      console.log("Note: WorkspaceInvitation deletion skipped or errored");
     }
 
-    // Leave all teams but don't delete teams
-    await prisma.teamMember.deleteMany({
+    // Leave all workspaces but don't delete workspaces
+    await prisma.workspaceMember.deleteMany({
       where: {
         userId: user.id,
       },
@@ -152,7 +152,7 @@ export async function resetUserData() {
 
     // Revalidate all relevant paths to refresh the UI
     revalidatePath("/dashboard");
-    revalidatePath("/dashboard/teams");
+    revalidatePath("/dashboard/workspaces");
     revalidatePath("/dashboard/projects");
     revalidatePath("/dashboard/tasks");
     revalidatePath("/dashboard/settings");
@@ -204,19 +204,19 @@ export async function deleteAccount() {
       },
     });
 
-    // Check if TeamInvitation exists and delete if it does
+    // Check if WorkspaceInvitation exists and delete if it does
     try {
-      await prisma.teamInvitation.deleteMany({
+      await prisma.workspaceInvitation.deleteMany({
         where: {
           createdBy: user.id,
         },
       });
     } catch (err) {
-      console.log("Note: TeamInvitation deletion skipped or errored");
+      console.log("Note: WorkspaceInvitation deletion skipped or errored");
     }
 
-    // Remove from all teams
-    await prisma.teamMember.deleteMany({
+    // Remove from all workspaces
+    await prisma.workspaceMember.deleteMany({
       where: {
         userId: user.id,
       },

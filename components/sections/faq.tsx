@@ -24,7 +24,7 @@ const faqs = [
   {
     question: "Can I collaborate with other students?",
     answer:
-      "Yes! Pro and Team plans include collaboration features that let you share notes, create study groups, and work together with classmates.",
+      "Yes! Pro and Ultimate plans include collaboration features that let you share notes, create study groups, and work together with classmates.",
   },
   {
     question: "How do I get started?",

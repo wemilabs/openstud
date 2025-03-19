@@ -52,7 +52,7 @@ interface ActivityItem {
   taskTitle: string;
   completionPercentage?: number;
   user: User | null;
-  isTeamActivity: boolean;
+  isWorkspaceActivity: boolean;
   isCurrentUserAction?: boolean;
 }
 

@@ -30,7 +30,7 @@ interface ProjectCardProps {
   id: string;
   name: string;
   description?: string | null;
-  teamId?: string | null;
+  workspaceId?: string | null;
   userId?: string | null;
   updatedAt: Date;
   taskStats?: {
@@ -48,6 +48,7 @@ export function ProjectCard({
   id,
   name,
   description,
+  workspaceId,
   updatedAt,
   taskStats,
   onProjectDeleted,
@@ -179,12 +180,11 @@ export function ProjectCard({
         <CardFooter>
           <Button variant="ghost" size="sm" className="ml-auto gap-1">
             <span>View Project</span>
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="size-4" />
           </Button>
         </CardFooter>
       </Card>
 
-      {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>

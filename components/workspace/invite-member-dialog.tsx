@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { TeamRole } from "@prisma/client";
+import { WorkspaceRole } from "@prisma/client";
 import { toast } from "sonner";
 import { createWorkspaceInvitation } from "@/actions/workspace-invitations";
 
@@ -39,7 +39,7 @@ import { Loader2, Plus, Copy, Check } from "lucide-react";
 
 // Form schema for invitation
 const inviteFormSchema = z.object({
-  role: z.nativeEnum(TeamRole).default(TeamRole.MEMBER),
+  role: z.nativeEnum(WorkspaceRole).default(WorkspaceRole.MEMBER),
   expiresInDays: z.number().int().min(1).max(30).default(7),
   maxUses: z
     .union([z.number().int().min(1).max(100), z.literal(null)])
@@ -49,12 +49,12 @@ const inviteFormSchema = z.object({
 type InviteFormValues = z.infer<typeof inviteFormSchema>;
 
 interface InviteMemberDialogProps {
-  teamId: string;
+  workspaceId: string;
   trigger?: React.ReactNode;
 }
 
 export function InviteMemberDialog({
-  teamId,
+  workspaceId,
   trigger,
 }: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false);
@@ -66,7 +66,7 @@ export function InviteMemberDialog({
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteFormSchema),
     defaultValues: {
-      role: TeamRole.MEMBER,
+      role: WorkspaceRole.MEMBER,
       expiresInDays: 7,
       maxUses: null,
     },
@@ -76,7 +76,7 @@ export function InviteMemberDialog({
   const onSubmit = async (data: InviteFormValues) => {
     setIsLoading(true);
     try {
-      const result = await createWorkspaceInvitation(teamId, data);
+      const result = await createWorkspaceInvitation(workspaceId, data);
 
       if (result.error) {
         toast.error(result.error);
@@ -168,9 +168,15 @@ export function InviteMemberDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={TeamRole.MEMBER}>Member</SelectItem>
-                        <SelectItem value={TeamRole.ADMIN}>Admin</SelectItem>
-                        <SelectItem value={TeamRole.OWNER}>Owner</SelectItem>
+                        <SelectItem value={WorkspaceRole.MEMBER}>
+                          Member
+                        </SelectItem>
+                        <SelectItem value={WorkspaceRole.ADMIN}>
+                          Admin
+                        </SelectItem>
+                        <SelectItem value={WorkspaceRole.OWNER}>
+                          Owner
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormDescription>

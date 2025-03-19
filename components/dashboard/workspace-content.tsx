@@ -53,7 +53,7 @@ type Project = {
   id: string;
   name: string;
   description?: string | null;
-  teamId?: string | null;
+  workspaceId?: string | null;
   userId?: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -84,7 +84,7 @@ export function WorkspaceContent() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Check if this is the individual workspace or a team workspace
+  // Check if this is the individual workspace or a workspace workspace
   const isIndividual = currentWorkspace.id === INDIVIDUAL_WORKSPACE.id;
 
   /**
@@ -286,7 +286,7 @@ export function WorkspaceContent() {
               <CardDescription>
                 {isIndividual
                   ? "Manage your personal projects and assignments"
-                  : "Collaborate on team projects and assignments"}
+                  : "Collaborate on workspace projects and assignments"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -319,7 +319,7 @@ export function WorkspaceContent() {
                       name={project.name}
                       description={project.description}
                       updatedAt={new Date(project.updatedAt)}
-                      teamId={project.teamId}
+                      workspaceId={project.workspaceId}
                       taskStats={taskStats[project.id]}
                       onProjectDeleted={fetchProjects}
                     />
@@ -353,7 +353,7 @@ export function WorkspaceContent() {
               <CardDescription>
                 {isIndividual
                   ? "Access your study materials and notes"
-                  : "Share and collaborate on documents with your team"}
+                  : "Share and collaborate on documents with your workspace"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -380,7 +380,7 @@ export function WorkspaceContent() {
               <CardDescription>
                 {isIndividual
                   ? "Track your deadlines and schedule"
-                  : "Coordinate team schedules and deadlines"}
+                  : "Coordinate workspace schedules and deadlines"}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -389,7 +389,7 @@ export function WorkspaceContent() {
           </Card>
         </TabsContent>
 
-        {/* Settings tab (only for team workspaces) */}
+        {/* Settings tab (only for workspace workspaces) */}
         {!isIndividual && (
           <TabsContent value="settings" className="mt-4">
             <Card>

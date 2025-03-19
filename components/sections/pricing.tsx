@@ -30,7 +30,7 @@ const plans = [
     ],
   },
   {
-    name: "Team",
+    name: "Ultimate",
     description: "For study groups & classes",
     price: "19.99",
     features: [

@@ -4,12 +4,12 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
-import { TeamRole } from "@prisma/client";
+import { WorkspaceRole } from "@prisma/client";
 import { randomBytes } from "crypto";
 
 // Schema for invitation creation validation
 const InvitationSchema = z.object({
-  role: z.nativeEnum(TeamRole).default(TeamRole.MEMBER),
+  role: z.nativeEnum(WorkspaceRole).default(WorkspaceRole.MEMBER),
   expiresInDays: z.number().int().min(1).max(30).default(7),
   maxUses: z
     .union([z.number().int().min(1).max(100), z.literal(null)])
@@ -30,7 +30,7 @@ const generateInvitationToken = (): string => {
  * Only owners and admins can create invitations
  */
 export async function createWorkspaceInvitation(
-  teamId: string,
+  workspaceId: string,
   input: InvitationInput
 ) {
   try {
@@ -51,23 +51,23 @@ export async function createWorkspaceInvitation(
       return { error: "Invalid input data" };
     }
 
-    // Verify the user is an owner or admin of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Verify the user is an owner or admin of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId,
+        workspaceId_userId: {
+          workspaceId,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "Workspace not found or you don't have access to it" };
     }
 
     if (
-      teamMember.role !== TeamRole.OWNER &&
-      teamMember.role !== TeamRole.ADMIN
+      workspaceMember.role !== WorkspaceRole.OWNER &&
+      workspaceMember.role !== WorkspaceRole.ADMIN
     ) {
       return {
         error: "You don't have permission to invite members to this workspace",
@@ -80,9 +80,9 @@ export async function createWorkspaceInvitation(
     expires.setDate(expires.getDate() + input.expiresInDays);
 
     // Create the invitation
-    const invitation = await prisma.teamInvitation.create({
+    const invitation = await prisma.workspaceInvitation.create({
       data: {
-        teamId,
+        workspaceId,
         role: input.role,
         token,
         expires,
@@ -109,7 +109,7 @@ export async function createWorkspaceInvitation(
  * Gets all pending invitations for a workspace
  * Only owners and admins can view invitations
  */
-export async function getWorkspaceInvitations(teamId: string) {
+export async function getWorkspaceInvitations(workspaceId: string) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -118,23 +118,23 @@ export async function getWorkspaceInvitations(teamId: string) {
       return { error: "Unauthorized" };
     }
 
-    // Verify the user is an owner or admin of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Verify the user is an owner or admin of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId,
+        workspaceId_userId: {
+          workspaceId,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "Workspace not found or you don't have access to it" };
     }
 
     if (
-      teamMember.role !== TeamRole.OWNER &&
-      teamMember.role !== TeamRole.ADMIN
+      workspaceMember.role !== WorkspaceRole.OWNER &&
+      workspaceMember.role !== WorkspaceRole.ADMIN
     ) {
       return {
         error:
@@ -143,9 +143,9 @@ export async function getWorkspaceInvitations(teamId: string) {
     }
 
     // Get all pending invitations
-    const invitations = await prisma.teamInvitation.findMany({
+    const invitations = await prisma.workspaceInvitation.findMany({
       where: {
-        teamId,
+        workspaceId,
         expires: {
           gt: new Date(),
         },
@@ -175,13 +175,13 @@ export async function deleteWorkspaceInvitation(invitationId: string) {
       return { error: "Unauthorized" };
     }
 
-    // Get the invitation with team info
-    const invitation = await prisma.teamInvitation.findUnique({
+    // Get the invitation with workspace info
+    const invitation = await prisma.workspaceInvitation.findUnique({
       where: {
         id: invitationId,
       },
       include: {
-        team: true,
+        workspace: true,
       },
     });
 
@@ -189,23 +189,23 @@ export async function deleteWorkspaceInvitation(invitationId: string) {
       return { error: "Invitation not found" };
     }
 
-    // Verify the user is an owner or admin of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Verify the user is an owner or admin of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: invitation.teamId,
+        workspaceId_userId: {
+          workspaceId: invitation.workspaceId,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "You don't have access to this workspace" };
     }
 
     if (
-      teamMember.role !== TeamRole.OWNER &&
-      teamMember.role !== TeamRole.ADMIN
+      workspaceMember.role !== WorkspaceRole.OWNER &&
+      workspaceMember.role !== WorkspaceRole.ADMIN
     ) {
       return {
         error:
@@ -214,7 +214,7 @@ export async function deleteWorkspaceInvitation(invitationId: string) {
     }
 
     // Delete the invitation
-    await prisma.teamInvitation.delete({
+    await prisma.workspaceInvitation.delete({
       where: {
         id: invitationId,
       },
@@ -253,12 +253,12 @@ export async function validateInvitationToken(token: string) {
     }
 
     // Find the invitation
-    const invitation = await prisma.teamInvitation.findUnique({
+    const invitation = await prisma.workspaceInvitation.findUnique({
       where: {
         token,
       },
       include: {
-        team: true,
+        workspace: true,
       },
     });
 
@@ -279,11 +279,11 @@ export async function validateInvitationToken(token: string) {
       return { error: "This invitation has already been used up" };
     }
 
-    // Check if the user is already a member of the team
-    const existingMember = await prisma.teamMember.findUnique({
+    // Check if the user is already a member of the workspace
+    const existingMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: invitation.teamId,
+        workspaceId_userId: {
+          workspaceId: invitation.workspaceId,
           userId,
         },
       },
@@ -296,7 +296,7 @@ export async function validateInvitationToken(token: string) {
     return {
       data: {
         invitation,
-        team: invitation.team,
+        workspace: invitation.workspace,
       },
     };
   } catch (error) {
@@ -321,12 +321,12 @@ export async function acceptWorkspaceInvitation(token: string) {
       return { error: "Invalid invitation data" };
     }
 
-    const { invitation, team } = validation.data;
+    const { invitation, workspace } = validation.data;
     const session = await auth();
     const userId = session?.user?.id;
 
     // Increment the used count of the invitation
-    await prisma.teamInvitation.update({
+    await prisma.workspaceInvitation.update({
       where: {
         id: invitation.id,
       },
@@ -338,9 +338,9 @@ export async function acceptWorkspaceInvitation(token: string) {
     });
 
     // Add the user as a member with the specified role
-    await prisma.teamMember.create({
+    await prisma.workspaceMember.create({
       data: {
-        teamId: invitation.teamId,
+        workspaceId: invitation.workspaceId,
         userId: userId!,
         role: invitation.role,
       },
@@ -349,8 +349,8 @@ export async function acceptWorkspaceInvitation(token: string) {
     revalidatePath("/dashboard");
     return {
       success: true,
-      teamId: invitation.teamId,
-      teamName: team.name,
+      workspaceId: invitation.workspaceId,
+      workspaceName: workspace.name,
     };
   } catch (error) {
     console.error("Error accepting workspace invitation:", error);

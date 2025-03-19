@@ -37,10 +37,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, Trash2, Copy, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { TeamRole } from "@prisma/client";
+import { WorkspaceRole } from "@prisma/client";
 
 // Helper to get role badge color
-const getRoleBadgeVariant = (role: TeamRole) => {
+const getRoleBadgeVariant = (role: WorkspaceRole) => {
   switch (role) {
     case "OWNER":
       return "destructive";
@@ -54,22 +54,22 @@ const getRoleBadgeVariant = (role: TeamRole) => {
 };
 
 interface PendingInvitationsProps {
-  teamId: string;
+  workspaceId: string;
 }
 
-export function PendingInvitations({ teamId }: PendingInvitationsProps) {
+export function PendingInvitations({ workspaceId }: PendingInvitationsProps) {
   const [invitations, setInvitations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [copiedMap, setCopiedMap] = useState<Record<string, boolean>>({});
 
-  // Fetch invitations on component mount and when teamId changes
+  // Fetch invitations on component mount and when workspaceId changes
   useEffect(() => {
     const fetchInvitations = async () => {
       setIsLoading(true);
       try {
-        const result = await getWorkspaceInvitations(teamId);
+        const result = await getWorkspaceInvitations(workspaceId);
         if (result.error) {
           toast.error(result.error);
         } else if (result.data) {
@@ -84,7 +84,7 @@ export function PendingInvitations({ teamId }: PendingInvitationsProps) {
     };
 
     fetchInvitations();
-  }, [teamId]);
+  }, [workspaceId]);
 
   // Handle invitation deletion
   const handleDelete = async () => {

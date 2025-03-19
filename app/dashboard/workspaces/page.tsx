@@ -11,7 +11,7 @@ import {
   updateWorkspaceMemberRole,
   deleteWorkspace,
 } from "@/actions/workspaces";
-import { TeamRole } from "@prisma/client";
+import { WorkspaceRole } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -65,7 +65,7 @@ import { PendingInvitations } from "@/components/workspace/pending-invitations";
 
 type Member = {
   id: string;
-  role: TeamRole;
+  role: WorkspaceRole;
   user: {
     id: string;
     name: string | null;
@@ -88,7 +88,7 @@ export default function WorkspacesPage() {
   const [workspaceToDeleteId, setWorkspaceToDeleteId] = useState("");
 
   // Skip individual workspace
-  const teamWorkspaces = workspaces.filter(
+  const workspaceList = workspaces.filter(
     (w) => w.id !== INDIVIDUAL_WORKSPACE.id
   );
 
@@ -141,7 +141,7 @@ export default function WorkspacesPage() {
 
   const handleUpdateMemberRole = async (
     memberId: string,
-    newRole: TeamRole
+    newRole: WorkspaceRole
   ) => {
     try {
       const result = await updateWorkspaceMemberRole(
@@ -207,14 +207,14 @@ export default function WorkspacesPage() {
     }
   };
 
-  const getRoleIcon = (role: TeamRole) => {
+  const getRoleIcon = (role: WorkspaceRole) => {
     switch (role) {
-      case TeamRole.OWNER:
-        return <Crown className="h-4 w-4 text-yellow-500" />;
-      case TeamRole.ADMIN:
-        return <Shield className="h-4 w-4 text-blue-500" />;
-      case TeamRole.MEMBER:
-        return <User className="h-4 w-4 text-gray-500" />;
+      case WorkspaceRole.OWNER:
+        return <Crown className="size-4 text-yellow-500" />;
+      case WorkspaceRole.ADMIN:
+        return <Shield className="size-4 text-blue-500" />;
+      case WorkspaceRole.MEMBER:
+        return <User className="size-4 text-gray-500" />;
       default:
         return null;
     }
@@ -234,7 +234,7 @@ export default function WorkspacesPage() {
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Workspaces</h1>
         <p className="text-muted-foreground">
-          Manage your workspaces and team members
+          Manage your workspaces and members
         </p>
       </div>
 
@@ -258,7 +258,7 @@ export default function WorkspacesPage() {
             >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                  <User className="size-5" />
                   Individual
                 </CardTitle>
                 <CardDescription>Your personal workspace</CardDescription>
@@ -286,8 +286,8 @@ export default function WorkspacesPage() {
               </CardFooter>
             </Card>
 
-            {/* Team Workspaces Cards */}
-            {teamWorkspaces.map((workspace) => (
+            {/* Workspaces Cards */}
+            {workspaceList.map((workspace) => (
               <Card
                 key={workspace.id}
                 className={
@@ -297,10 +297,10 @@ export default function WorkspacesPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
+                      <Users className="size-5" />
                       {workspace.name}
                     </CardTitle>
-                    {workspace.role === TeamRole.OWNER && (
+                    {workspace.role === WorkspaceRole.OWNER && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -357,16 +357,16 @@ export default function WorkspacesPage() {
                     )}
                   </div>
                   <CardDescription>
-                    {workspace.role === TeamRole.OWNER
+                    {workspace.role === WorkspaceRole.OWNER
                       ? "You are the owner"
-                      : workspace.role === TeamRole.ADMIN
+                      : workspace.role === WorkspaceRole.ADMIN
                       ? "You are an admin"
                       : "You are a member"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Collaborate with your team members on shared projects and
+                    Collaborate with your members on shared projects and
                     assignments.
                   </p>
                 </CardContent>
@@ -397,18 +397,18 @@ export default function WorkspacesPage() {
                 {currentWorkspace.name} - Members
               </h2>
 
-              {(currentWorkspace.role === TeamRole.OWNER ||
-                currentWorkspace.role === TeamRole.ADMIN) && (
-                <InviteMemberDialog teamId={currentWorkspace.id} />
+              {(currentWorkspace.role === WorkspaceRole.OWNER ||
+                currentWorkspace.role === WorkspaceRole.ADMIN) && (
+                <InviteMemberDialog workspaceId={currentWorkspace.id} />
               )}
             </div>
 
             <Separator />
 
             {/* Pending Invitations Section */}
-            {(currentWorkspace.role === TeamRole.OWNER ||
-              currentWorkspace.role === TeamRole.ADMIN) && (
-              <PendingInvitations teamId={currentWorkspace.id} />
+            {(currentWorkspace.role === WorkspaceRole.OWNER ||
+              currentWorkspace.role === WorkspaceRole.ADMIN) && (
+              <PendingInvitations workspaceId={currentWorkspace.id} />
             )}
 
             {/* Current Members Section */}
@@ -434,8 +434,8 @@ export default function WorkspacesPage() {
                       <TableRow>
                         <TableHead>Member</TableHead>
                         <TableHead>Role</TableHead>
-                        {(currentWorkspace.role === TeamRole.OWNER ||
-                          currentWorkspace.role === TeamRole.ADMIN) && (
+                        {(currentWorkspace.role === WorkspaceRole.OWNER ||
+                          currentWorkspace.role === WorkspaceRole.ADMIN) && (
                           <TableHead className="text-right">Actions</TableHead>
                         )}
                       </TableRow>
@@ -469,8 +469,8 @@ export default function WorkspacesPage() {
                               <span>{member.role}</span>
                             </div>
                           </TableCell>
-                          {(currentWorkspace.role === TeamRole.OWNER ||
-                            currentWorkspace.role === TeamRole.ADMIN) && (
+                          {(currentWorkspace.role === WorkspaceRole.OWNER ||
+                            currentWorkspace.role === WorkspaceRole.ADMIN) && (
                             <TableCell className="text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -483,48 +483,49 @@ export default function WorkspacesPage() {
                                   <DropdownMenuSeparator />
 
                                   {/* Role management (owners only) */}
-                                  {currentWorkspace.role === TeamRole.OWNER && (
+                                  {currentWorkspace.role ===
+                                    WorkspaceRole.OWNER && (
                                     <>
                                       <DropdownMenuItem
                                         disabled={
-                                          member.role === TeamRole.OWNER
+                                          member.role === WorkspaceRole.OWNER
                                         }
                                         onClick={() =>
                                           handleUpdateMemberRole(
                                             member.id,
-                                            TeamRole.OWNER
+                                            WorkspaceRole.OWNER
                                           )
                                         }
                                       >
-                                        <Crown className="mr-2 h-4 w-4" />
+                                        <Crown className="mr-2 size-4" />
                                         Make Owner
                                       </DropdownMenuItem>
                                       <DropdownMenuItem
                                         disabled={
-                                          member.role === TeamRole.ADMIN
+                                          member.role === WorkspaceRole.ADMIN
                                         }
                                         onClick={() =>
                                           handleUpdateMemberRole(
                                             member.id,
-                                            TeamRole.ADMIN
+                                            WorkspaceRole.ADMIN
                                           )
                                         }
                                       >
-                                        <Shield className="mr-2 h-4 w-4" />
+                                        <Shield className="mr-2 size-4" />
                                         Make Admin
                                       </DropdownMenuItem>
                                       <DropdownMenuItem
                                         disabled={
-                                          member.role === TeamRole.MEMBER
+                                          member.role === WorkspaceRole.MEMBER
                                         }
                                         onClick={() =>
                                           handleUpdateMemberRole(
                                             member.id,
-                                            TeamRole.MEMBER
+                                            WorkspaceRole.MEMBER
                                           )
                                         }
                                       >
-                                        <User className="mr-2 h-4 w-4" />
+                                        <User className="mr-2 size-4" />
                                         Make Member
                                       </DropdownMenuItem>
                                       <DropdownMenuSeparator />
@@ -532,16 +533,19 @@ export default function WorkspacesPage() {
                                   )}
 
                                   {/* Remove member (owners can remove anyone, admins can remove members) */}
-                                  {(currentWorkspace.role === TeamRole.OWNER ||
-                                    (currentWorkspace.role === TeamRole.ADMIN &&
-                                      member.role === TeamRole.MEMBER)) && (
+                                  {(currentWorkspace.role ===
+                                    WorkspaceRole.OWNER ||
+                                    (currentWorkspace.role ===
+                                      WorkspaceRole.ADMIN &&
+                                      member.role ===
+                                        WorkspaceRole.MEMBER)) && (
                                     <DropdownMenuItem
                                       className="text-destructive"
                                       onClick={() =>
                                         handleRemoveMember(member.id)
                                       }
                                     >
-                                      <Trash className="mr-2 h-4 w-4" />
+                                      <Trash className="mr-2 size-4" />
                                       Remove
                                     </DropdownMenuItem>
                                   )}

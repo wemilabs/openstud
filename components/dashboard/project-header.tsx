@@ -18,11 +18,11 @@ interface ProjectData {
   id: string;
   name: string;
   description: string | null;
-  teamId: string | null;
+  workspaceId: string | null;
   userId: string | null;
   createdAt: Date;
   updatedAt: Date;
-  team?: {
+  workspace?: {
     id: string;
     name: string;
     createdAt: Date;
@@ -122,7 +122,7 @@ export function ProjectHeader({ projectId }: ProjectHeaderProps) {
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/dashboard">
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="size-5" />
               <span className="sr-only">Back to dashboard</span>
             </Link>
           </Button>
@@ -158,18 +158,18 @@ export function ProjectHeader({ projectId }: ProjectHeaderProps) {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                   <div className="flex items-center gap-1">
-                    <CheckCircle2 className="h-3 w-3" />
+                    <CheckCircle2 className="size-3" />
                     <span>{taskStats.completed}</span>
                   </div>
                   <span>/</span>
                   <div className="flex items-center gap-1">
-                    <Circle className="h-3 w-3" />
+                    <Circle className="size-3" />
                     <span>{taskStats.total}</span>
                   </div>
                 </div>
               </div>
               <div className="w-40">
-                <Progress value={progressPercentage} className="h-2" />
+                <Progress value={progressPercentage} className="size-2" />
               </div>
             </>
           )}

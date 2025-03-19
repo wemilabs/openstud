@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +23,12 @@ interface ProjectDialogProps {
   onProjectCreated?: () => void;
 }
 
-export function ProjectDialog({ open, onOpenChange, workspaceId, onProjectCreated }: ProjectDialogProps) {
+export function ProjectDialog({
+  open,
+  onOpenChange,
+  workspaceId,
+  onProjectCreated,
+}: ProjectDialogProps) {
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -32,14 +44,14 @@ export function ProjectDialog({ open, onOpenChange, workspaceId, onProjectCreate
       const result = await createProject({
         name: projectName.trim(),
         description: projectDescription.trim() || undefined,
-        teamId: workspaceId,
+        workspaceId,
       });
-      
+
       if (result.error) {
         toast.error(`Error: ${result.error}`);
         return;
       }
-      
+
       if (result.data) {
         toast.success("Project created successfully");
         setProjectName("");
@@ -56,7 +68,7 @@ export function ProjectDialog({ open, onOpenChange, workspaceId, onProjectCreate
       if (error instanceof Error) {
         errorMessage += `: ${error.message}`;
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setIsCreating(false);
@@ -107,10 +119,7 @@ export function ProjectDialog({ open, onOpenChange, workspaceId, onProjectCreate
             >
               Cancel
             </Button>
-            <Button 
-              type="submit"
-              disabled={isCreating || !projectName.trim()}
-            >
+            <Button type="submit" disabled={isCreating || !projectName.trim()}>
               {isCreating ? "Creating..." : "Create Project"}
             </Button>
           </DialogFooter>

@@ -76,9 +76,9 @@ export function InvitationClient({ token }: { token: string }) {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success(`You've been added to ${result.teamName}`);
+        toast.success(`You've been added to ${result.workspaceName}`);
         // Redirect to the workspace
-        router.push(`/dashboard?workspace=${result.teamId}`);
+        router.push(`/dashboard?workspace=${result.workspaceId}`);
       }
     } catch (err) {
       toast.error("Failed to accept invitation");
@@ -138,7 +138,8 @@ export function InvitationClient({ token }: { token: string }) {
             <CardTitle className="mt-4">Join Workspace</CardTitle>
             <CardDescription>
               You've been invited to join{" "}
-              <span className="font-medium">{invitation?.team?.name}</span> as a{" "}
+              <span className="font-medium">{invitation?.workspace?.name}</span>{" "}
+              as a{" "}
               {invitation?.invitation?.role.charAt(0) +
                 invitation?.invitation?.role.slice(1).toLowerCase()}
             </CardDescription>

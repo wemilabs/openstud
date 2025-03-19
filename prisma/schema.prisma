@@ -50,7 +50,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   courses       Course[]
-  teams         TeamMember[]
+  workspaces    WorkspaceMember[]
   projects      Project[]
   tasks         Task[]
   plan          Plan      @default(FREE)
@@ -93,78 +93,77 @@ model Note {
   @@index([courseId])
 }
 
-model Team {
+model Workspace {
   id          String       @id @default(cuid())
   name        String
-  members     TeamMember[]
+  members     WorkspaceMember[]
   projects    Project[]
-  invitations TeamInvitation[]
+  invitations WorkspaceInvitation[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+  Task Task[]
 }
 
-model TeamMember {
+model WorkspaceMember {
   id        String     @id @default(cuid())
-  teamId    String
+  workspaceId    String
   userId    String
-  role      TeamRole   @default(MEMBER)
-  team      Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  role      WorkspaceRole   @default(MEMBER)
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  @@unique([teamId, userId])
+  @@unique([workspaceId, userId])
   @@index([userId])
 }
 
-// Workspace invitation model
-model TeamInvitation {
+model WorkspaceInvitation {
   id          String    @id @default(cuid())
-  teamId      String
-  team        Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  role        TeamRole  @default(MEMBER)
+  workspaceId      String
+  workspace        Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  role        WorkspaceRole  @default(MEMBER)
   token       String    @unique
   expires     DateTime
-  maxUses     Int?      // null means unlimited uses
+  maxUses     Int?      @default(0)
   usedCount   Int       @default(0)
-  createdBy   String    // User ID who created the invitation
+  createdBy   String    
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  @@index([teamId])
+  @@index([workspaceId])
   @@index([token])
 }
 
 enum Plan {
   FREE
   PRO
-  TEAM
+  ULTIMATE
 }
 
-enum TeamRole {
+enum WorkspaceRole {
   OWNER
   ADMIN
   MEMBER
 }
 
-// Project model for workspace projects
 model Project {
   id          String   @id @default(cuid())
   name        String
   description String?  @db.Text
-  teamId      String?
-  team        Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  workspaceId      String?
+  workspace        Workspace?    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   tasks       Task[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@index([teamId])
+  @@index([workspaceId])
   @@index([userId])
 }
 
-// Task model for project tasks
 model Task {
   id          String    @id @default(cuid())
   title       String
@@ -176,6 +175,8 @@ model Task {
   category    String?   // "assignment", "exam", "presentation", "lab", "reading", "project", "study", "other"
   projectId   String
   project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workspaceId String?
+  workspace   Workspace?  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdById String?
   createdBy   User?     @relation(fields: [createdById], references: [id])
   createdAt   DateTime  @default(now())
@@ -185,7 +186,6 @@ model Task {
   @@index([createdById])
 }
 
-// AI Conversation models
 model AIConversation {
   id          String        @id @default(cuid())
   title       String?
@@ -209,12 +209,11 @@ model AIMessage {
   @@index([conversationId])
 }
 
-// Vector embeddings for notes and course content
 model NoteEmbedding {
   id          String   @id @default(cuid())
   noteId      String   @unique
   note        Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  embedding   Unsupported("vector(1536)") // OpenAI embedding dimension
+  embedding   Unsupported("vector(1536)")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

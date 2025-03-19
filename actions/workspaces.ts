@@ -4,9 +4,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
-import { TeamRole } from "@prisma/client";
+import { WorkspaceRole } from "@prisma/client";
 
-// Schema for workspace (team) creation/update validation
+// Schema for workspace (workspace) creation/update validation
 const WorkspaceSchema = z.object({
   name: z
     .string()
@@ -17,13 +17,13 @@ const WorkspaceSchema = z.object({
 export type WorkspaceInput = z.infer<typeof WorkspaceSchema>;
 
 /**
- * Creates a new workspace (team) with the current user as owner
+ * Creates a new workspace (workspace) with the current user as owner
  */
 export async function createWorkspace(input: WorkspaceInput) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    
+
     if (!userId) {
       return { error: "Unauthorized" };
     }
@@ -36,42 +36,50 @@ export async function createWorkspace(input: WorkspaceInput) {
       }
       return { error: "Invalid input data" };
     }
-    
+
     const validatedData = WorkspaceSchema.parse(input);
 
-    // Create the team and add the current user as an owner without using a transaction
+    // Create the workspace and add the current user as an owner without using a transaction
     try {
-      // Create the team
-      const team = await prisma.team.create({
+      // Create the workspace
+      const workspace = await prisma.workspace.create({
         data: {
           name: validatedData.name,
         },
       });
 
       // Add the current user as an owner
-      await prisma.teamMember.create({
+      await prisma.workspaceMember.create({
         data: {
-          teamId: team.id,
+          workspaceId: workspace.id,
           userId,
-          role: TeamRole.OWNER,
+          role: WorkspaceRole.OWNER,
         },
       });
-      
+
       revalidatePath("/dashboard");
-      return { data: team };
+      return { data: workspace };
     } catch (dbError) {
-      return { error: "Database error: " + (dbError instanceof Error ? dbError.message : "Unknown error") };
+      return {
+        error:
+          "Database error: " +
+          (dbError instanceof Error ? dbError.message : "Unknown error"),
+      };
     }
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors[0].message };
     }
-    return { error: "Failed to create workspace: " + (error instanceof Error ? error.message : "Unknown error") };
+    return {
+      error:
+        "Failed to create workspace: " +
+        (error instanceof Error ? error.message : "Unknown error"),
+    };
   }
 }
 
 /**
- * Fetches all workspaces (teams) for the current user
+ * Fetches all workspaces (workspaces) for the current user
  */
 export async function getWorkspaces() {
   try {
@@ -81,24 +89,24 @@ export async function getWorkspaces() {
       return { error: "Unauthorized" };
     }
 
-    // Get all teams where the user is a member
-    const teamMembers = await prisma.teamMember.findMany({
+    // Get all workspaces where the user is a member
+    const workspaceMembers = await prisma.workspaceMember.findMany({
       where: {
         userId,
       },
       include: {
-        team: true,
+        workspace: true,
       },
       orderBy: {
-        team: {
+        workspace: {
           name: "asc",
         },
       },
     });
 
-    // Extract the teams from the team members
-    const workspaces = teamMembers.map((member) => ({
-      ...member.team,
+    // Extract the workspaces from the workspace members
+    const workspaces = workspaceMembers.map((member) => ({
+      ...member.workspace,
       role: member.role,
     }));
 
@@ -110,7 +118,7 @@ export async function getWorkspaces() {
 }
 
 /**
- * Fetches a single workspace (team) by ID
+ * Fetches a single workspace (workspace) by ID
  */
 export async function getWorkspaceById(id: string) {
   try {
@@ -120,28 +128,28 @@ export async function getWorkspaceById(id: string) {
       return { error: "Unauthorized" };
     }
 
-    // Verify the user is a member of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Verify the user is a member of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: id,
+        workspaceId_userId: {
+          workspaceId: id,
           userId,
         },
       },
       include: {
-        team: true,
+        workspace: true,
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "Workspace not found or you don't have access to it" };
     }
 
-    return { 
+    return {
       data: {
-        ...teamMember.team,
-        role: teamMember.role,
-      }
+        ...workspaceMember.workspace,
+        role: workspaceMember.role,
+      },
     };
   } catch (error) {
     console.error("Error fetching workspace:", error);
@@ -150,8 +158,8 @@ export async function getWorkspaceById(id: string) {
 }
 
 /**
- * Updates an existing workspace (team)
- * Only owners and admins can update a workspace
+ * Updates an existing workspace.
+ * Only owners and admins can update a workspace.
  */
 export async function updateWorkspace(id: string, input: WorkspaceInput) {
   try {
@@ -161,27 +169,30 @@ export async function updateWorkspace(id: string, input: WorkspaceInput) {
       return { error: "Unauthorized" };
     }
 
-    // Verify the user is an owner or admin of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Verify the user is an owner or admin of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: id,
+        workspaceId_userId: {
+          workspaceId: id,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "Workspace not found or you don't have access to it" };
     }
 
-    if (teamMember.role !== TeamRole.OWNER && teamMember.role !== TeamRole.ADMIN) {
+    if (
+      workspaceMember.role !== WorkspaceRole.OWNER &&
+      workspaceMember.role !== WorkspaceRole.ADMIN
+    ) {
       return { error: "You don't have permission to update this workspace" };
     }
 
     const validatedData = WorkspaceSchema.parse(input);
 
-    const workspace = await prisma.team.update({
+    const workspace = await prisma.workspace.update({
       where: { id },
       data: validatedData,
     });
@@ -198,8 +209,8 @@ export async function updateWorkspace(id: string, input: WorkspaceInput) {
 }
 
 /**
- * Deletes a workspace (team)
- * Only owners can delete a workspace
+ * Deletes a workspace.
+ * Only owners can delete a workspace.
  */
 export async function deleteWorkspace(id: string) {
   try {
@@ -209,25 +220,25 @@ export async function deleteWorkspace(id: string) {
       return { error: "Unauthorized" };
     }
 
-    // Verify the user is an owner of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Verify the user is an owner of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: id,
+        workspaceId_userId: {
+          workspaceId: id,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "Workspace not found or you don't have access to it" };
     }
 
-    if (teamMember.role !== TeamRole.OWNER) {
+    if (workspaceMember.role !== WorkspaceRole.OWNER) {
       return { error: "Only workspace owners can delete workspaces" };
     }
 
-    await prisma.team.delete({
+    await prisma.workspace.delete({
       where: { id },
     });
 
@@ -240,10 +251,14 @@ export async function deleteWorkspace(id: string) {
 }
 
 /**
- * Adds a member to a workspace (team)
+ * Adds a member to a workspace (workspace)
  * Only owners and admins can add members
  */
-export async function addWorkspaceMember(teamId: string, email: string, role: TeamRole = TeamRole.MEMBER) {
+export async function addWorkspaceMember(
+  workspaceId: string,
+  email: string,
+  role: WorkspaceRole = WorkspaceRole.MEMBER
+) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -251,22 +266,27 @@ export async function addWorkspaceMember(teamId: string, email: string, role: Te
       return { error: "Unauthorized" };
     }
 
-    // Verify the user is an owner or admin of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Verify the user is an owner or admin of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId,
+        workspaceId_userId: {
+          workspaceId,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "Workspace not found or you don't have access to it" };
     }
 
-    if (teamMember.role !== TeamRole.OWNER && teamMember.role !== TeamRole.ADMIN) {
-      return { error: "You don't have permission to add members to this workspace" };
+    if (
+      workspaceMember.role !== WorkspaceRole.OWNER &&
+      workspaceMember.role !== WorkspaceRole.ADMIN
+    ) {
+      return {
+        error: "You don't have permission to add members to this workspace",
+      };
     }
 
     // Find the user by email
@@ -279,10 +299,10 @@ export async function addWorkspaceMember(teamId: string, email: string, role: Te
     }
 
     // Check if the user is already a member
-    const existingMember = await prisma.teamMember.findUnique({
+    const existingMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId,
+        workspaceId_userId: {
+          workspaceId,
           userId: user.id,
         },
       },
@@ -293,9 +313,9 @@ export async function addWorkspaceMember(teamId: string, email: string, role: Te
     }
 
     // Add the user as a member
-    const newMember = await prisma.teamMember.create({
+    const newMember = await prisma.workspaceMember.create({
       data: {
-        teamId,
+        workspaceId,
         userId: user.id,
         role,
       },
@@ -310,10 +330,13 @@ export async function addWorkspaceMember(teamId: string, email: string, role: Te
 }
 
 /**
- * Removes a member from a workspace (team)
+ * Removes a member from a workspace (workspace)
  * Owners can remove anyone, admins can remove members but not other admins or owners
  */
-export async function removeWorkspaceMember(teamId: string, memberId: string) {
+export async function removeWorkspaceMember(
+  workspaceId: string,
+  memberId: string
+) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -321,11 +344,11 @@ export async function removeWorkspaceMember(teamId: string, memberId: string) {
       return { error: "Unauthorized" };
     }
 
-    // Verify the user is an owner or admin of the team
-    const currentMember = await prisma.teamMember.findUnique({
+    // Verify the user is an owner or admin of the workspace
+    const currentMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId,
+        workspaceId_userId: {
+          workspaceId,
           userId,
         },
       },
@@ -336,33 +359,36 @@ export async function removeWorkspaceMember(teamId: string, memberId: string) {
     }
 
     // Get the member to be removed
-    const memberToRemove = await prisma.teamMember.findUnique({
+    const memberToRemove = await prisma.workspaceMember.findUnique({
       where: { id: memberId },
     });
 
-    if (!memberToRemove || memberToRemove.teamId !== teamId) {
+    if (!memberToRemove || memberToRemove.workspaceId !== workspaceId) {
       return { error: "Member not found in this workspace" };
     }
 
     // Check permissions
-    if (currentMember.role !== TeamRole.OWNER) {
+    if (currentMember.role !== WorkspaceRole.OWNER) {
       // Admins can only remove members
-      if (currentMember.role === TeamRole.ADMIN && memberToRemove.role !== TeamRole.MEMBER) {
+      if (
+        currentMember.role === WorkspaceRole.ADMIN &&
+        memberToRemove.role !== WorkspaceRole.MEMBER
+      ) {
         return { error: "You don't have permission to remove this member" };
       }
-      
+
       // Members can't remove anyone
-      if (currentMember.role === TeamRole.MEMBER) {
+      if (currentMember.role === WorkspaceRole.MEMBER) {
         return { error: "You don't have permission to remove members" };
       }
     }
 
     // Don't allow removing the last owner
-    if (memberToRemove.role === TeamRole.OWNER) {
-      const ownersCount = await prisma.teamMember.count({
+    if (memberToRemove.role === WorkspaceRole.OWNER) {
+      const ownersCount = await prisma.workspaceMember.count({
         where: {
-          teamId,
-          role: TeamRole.OWNER,
+          workspaceId,
+          role: WorkspaceRole.OWNER,
         },
       });
 
@@ -372,7 +398,7 @@ export async function removeWorkspaceMember(teamId: string, memberId: string) {
     }
 
     // Remove the member
-    await prisma.teamMember.delete({
+    await prisma.workspaceMember.delete({
       where: { id: memberId },
     });
 
@@ -385,10 +411,14 @@ export async function removeWorkspaceMember(teamId: string, memberId: string) {
 }
 
 /**
- * Updates a member's role in a workspace (team)
+ * Updates a member's role in a workspace (workspace)
  * Only owners can change roles, and there must always be at least one owner
  */
-export async function updateWorkspaceMemberRole(teamId: string, memberId: string, newRole: TeamRole) {
+export async function updateWorkspaceMemberRole(
+  workspaceId: string,
+  memberId: string,
+  newRole: WorkspaceRole
+) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -396,11 +426,11 @@ export async function updateWorkspaceMemberRole(teamId: string, memberId: string
       return { error: "Unauthorized" };
     }
 
-    // Verify the user is an owner of the team
-    const currentMember = await prisma.teamMember.findUnique({
+    // Verify the user is an owner of the workspace
+    const currentMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId,
+        workspaceId_userId: {
+          workspaceId,
           userId,
         },
       },
@@ -410,25 +440,28 @@ export async function updateWorkspaceMemberRole(teamId: string, memberId: string
       return { error: "Workspace not found or you don't have access to it" };
     }
 
-    if (currentMember.role !== TeamRole.OWNER) {
+    if (currentMember.role !== WorkspaceRole.OWNER) {
       return { error: "Only workspace owners can change member roles" };
     }
 
     // Get the member to update
-    const memberToUpdate = await prisma.teamMember.findUnique({
+    const memberToUpdate = await prisma.workspaceMember.findUnique({
       where: { id: memberId },
     });
 
-    if (!memberToUpdate || memberToUpdate.teamId !== teamId) {
+    if (!memberToUpdate || memberToUpdate.workspaceId !== workspaceId) {
       return { error: "Member not found in this workspace" };
     }
 
     // If changing from owner to another role, ensure there's at least one other owner
-    if (memberToUpdate.role === TeamRole.OWNER && newRole !== TeamRole.OWNER) {
-      const ownersCount = await prisma.teamMember.count({
+    if (
+      memberToUpdate.role === WorkspaceRole.OWNER &&
+      newRole !== WorkspaceRole.OWNER
+    ) {
+      const ownersCount = await prisma.workspaceMember.count({
         where: {
-          teamId,
-          role: TeamRole.OWNER,
+          workspaceId,
+          role: WorkspaceRole.OWNER,
         },
       });
 
@@ -438,7 +471,7 @@ export async function updateWorkspaceMemberRole(teamId: string, memberId: string
     }
 
     // Update the member's role
-    const updatedMember = await prisma.teamMember.update({
+    const updatedMember = await prisma.workspaceMember.update({
       where: { id: memberId },
       data: { role: newRole },
     });
@@ -452,9 +485,9 @@ export async function updateWorkspaceMemberRole(teamId: string, memberId: string
 }
 
 /**
- * Gets all members of a workspace (team)
+ * Gets all members of a workspace (workspace)
  */
-export async function getWorkspaceMembers(teamId: string) {
+export async function getWorkspaceMembers(workspaceId: string) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -462,23 +495,23 @@ export async function getWorkspaceMembers(teamId: string) {
       return { error: "Unauthorized" };
     }
 
-    // Verify the user is a member of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Verify the user is a member of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId,
+        workspaceId_userId: {
+          workspaceId,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "Workspace not found or you don't have access to it" };
     }
 
-    // Get all members of the team
-    const members = await prisma.teamMember.findMany({
-      where: { teamId },
+    // Get all members of the workspace
+    const members = await prisma.workspaceMember.findMany({
+      where: { workspaceId },
       include: {
         user: {
           select: {

@@ -17,16 +17,19 @@ const TaskSchema = z.object({
   dueDate: z.date().optional().nullable(),
   projectId: z.string(),
   priority: z.enum(["low", "medium", "high", "urgent"]).optional().nullable(),
-  category: z.enum([
-    "assignment", 
-    "exam", 
-    "presentation", 
-    "lab", 
-    "reading", 
-    "project", 
-    "study", 
-    "other"
-  ]).optional().nullable(),
+  category: z
+    .enum([
+      "assignment",
+      "exam",
+      "presentation",
+      "lab",
+      "reading",
+      "project",
+      "study",
+      "other",
+    ])
+    .optional()
+    .nullable(),
 });
 
 export type TaskInput = z.infer<typeof TaskSchema>;
@@ -54,7 +57,7 @@ export async function createTask(input: TaskInput) {
       }
       return { error: "Invalid input data" };
     }
-    
+
     const validatedData = TaskSchema.parse(input);
 
     // Get the project to check if user has access
@@ -63,7 +66,7 @@ export async function createTask(input: TaskInput) {
         id: validatedData.projectId,
       },
       include: {
-        team: true,
+        workspace: true,
       },
     });
 
@@ -72,12 +75,12 @@ export async function createTask(input: TaskInput) {
     }
 
     // Special case for individual workspace
-    if (project.teamId === null) {
+    if (project.workspaceId === null) {
       // Check if the user is the owner of the project
       if (project.userId !== userId) {
         return { error: "You don't have access to this project" };
       }
-      
+
       // Create task directly
       const task = await prisma.task.create({
         data: {
@@ -92,22 +95,22 @@ export async function createTask(input: TaskInput) {
           createdById: userId, // Store who created the task
         },
       });
-      
+
       revalidatePath(`/dashboard/projects/${validatedData.projectId}`);
       return { data: task };
     }
 
-    // Check if user is a member of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Check if user is a member of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: project.teamId,
+        workspaceId_userId: {
+          workspaceId: project.workspaceId,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "You are not a member of this project's workspace" };
     }
 
@@ -122,17 +125,21 @@ export async function createTask(input: TaskInput) {
         projectId: validatedData.projectId,
         priority: validatedData.priority,
         category: validatedData.category,
-        createdById: userId, // Add user ID to track who created the task in team projects
+        createdById: userId,
       },
     });
-    
+
     revalidatePath(`/dashboard/projects/${validatedData.projectId}`);
     return { data: task };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors[0].message };
     }
-    return { error: "Failed to create task: " + (error instanceof Error ? error.message : "Unknown error") };
+    return {
+      error:
+        "Failed to create task: " +
+        (error instanceof Error ? error.message : "Unknown error"),
+    };
   }
 }
 
@@ -143,12 +150,12 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    
+
     if (!userId) {
       return { error: "Unauthorized" };
     }
 
-    // Get the task with project and team info
+    // Get the task with project and workspace info
     const task = await prisma.task.findUnique({
       where: {
         id: taskId,
@@ -156,7 +163,7 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
       include: {
         project: {
           include: {
-            team: true,
+            workspace: true,
           },
         },
       },
@@ -165,19 +172,19 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
     if (!task) {
       return { error: "Task not found" };
     }
-    
+
     // Check if user is the task creator
     if (task.createdById && task.createdById !== userId) {
       return { error: "Only the task creator can edit this task" };
     }
 
     // Special case for individual workspace
-    if (task.project.teamId === null) {
+    if (task.project.workspaceId === null) {
       // Check if the user is the owner of the project
       if (task.project.userId !== userId) {
         return { error: "You don't have access to this project" };
       }
-      
+
       // Update task directly
       const updatedTask = await prisma.task.update({
         where: {
@@ -193,22 +200,22 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
           category: input.category,
         },
       });
-      
+
       revalidatePath(`/dashboard/projects/${task.projectId}`);
       return { data: updatedTask };
     }
 
-    // Check if user is a member of the team
-    const teamMember = await prisma.teamMember.findUnique({
+    // Check if user is a member of the workspace
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: task.project.teamId,
+        workspaceId_userId: {
+          workspaceId: task.project.workspaceId,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "You are not a member of this task's workspace" };
     }
 
@@ -227,14 +234,18 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
         category: input.category,
       },
     });
-    
+
     revalidatePath(`/dashboard/projects/${task.projectId}`);
     return { data: updatedTask };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { error: error.errors[0].message };
     }
-    return { error: "Failed to update task: " + (error instanceof Error ? error.message : "Unknown error") };
+    return {
+      error:
+        "Failed to update task: " +
+        (error instanceof Error ? error.message : "Unknown error"),
+    };
   }
 }
 
@@ -245,12 +256,12 @@ export async function deleteTask(taskId: string) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    
+
     if (!userId) {
       return { error: "Unauthorized" };
     }
 
-    // Get the task with project and team info
+    // Get the task with project and workspace info
     const task = await prisma.task.findUnique({
       where: {
         id: taskId,
@@ -258,7 +269,7 @@ export async function deleteTask(taskId: string) {
       include: {
         project: {
           include: {
-            team: true,
+            workspace: true,
           },
         },
       },
@@ -269,46 +280,51 @@ export async function deleteTask(taskId: string) {
     }
 
     // Special case for individual workspace
-    if (task.project.teamId === null) {
+    if (task.project.workspaceId === null) {
       // Check if the user is the owner of the project
       if (task.project.userId !== userId) {
         return { error: "You don't have access to this project" };
       }
-      
+
       // Project owner can delete any task
       const deletedTask = await prisma.task.delete({
         where: {
           id: taskId,
         },
       });
-      
+
       revalidatePath(`/dashboard/projects/${task.projectId}`);
       return { data: deletedTask };
     }
 
-    // For team workspace
-    // Check if user is a member of the team with appropriate role
-    const teamMember = await prisma.teamMember.findUnique({
+    // For workspace
+    // Check if user is a member of the workspace with appropriate role
+    const workspaceMember = await prisma.workspaceMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: task.project.teamId,
+        workspaceId_userId: {
+          workspaceId: task.project.workspaceId,
           userId,
         },
       },
     });
 
-    if (!teamMember) {
+    if (!workspaceMember) {
       return { error: "You are not a member of this project's workspace" };
     }
 
     // Check if user is either:
     // 1. The task creator
-    // 2. Team owner/admin who can delete any task
+    // 2. Workspace owner/admin who can delete any task
     const isTaskCreator = task.createdById === userId;
-    const isTeamOwnerOrAdmin = ['OWNER', 'ADMIN'].includes(teamMember.role);
-    
-    if (!isTaskCreator && !isTeamOwnerOrAdmin) {
-      return { error: "Only task creators and workspace owners/admins can delete tasks" };
+    const isWorkspaceOwnerOrAdmin = ["OWNER", "ADMIN"].includes(
+      workspaceMember.role
+    );
+
+    if (!isTaskCreator && !isWorkspaceOwnerOrAdmin) {
+      return {
+        error:
+          "Only task creators and workspace owners/admins can delete tasks",
+      };
     }
 
     // Delete the task
@@ -317,11 +333,15 @@ export async function deleteTask(taskId: string) {
         id: taskId,
       },
     });
-    
+
     revalidatePath(`/dashboard/projects/${task.projectId}`);
     return { data: deletedTask };
   } catch (error) {
-    return { error: "Failed to delete task: " + (error instanceof Error ? error.message : "Unknown error") };
+    return {
+      error:
+        "Failed to delete task: " +
+        (error instanceof Error ? error.message : "Unknown error"),
+    };
   }
 }
 
@@ -332,50 +352,50 @@ export async function getTasks(projectId: string) {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    
+
     if (!userId) {
       return { error: "Unauthorized" };
     }
-    
+
     // Check if the project exists and user has access
     const project = await prisma.project.findUnique({
       where: {
         id: projectId,
       },
       include: {
-        team: true,
+        workspace: true,
       },
     });
-    
+
     if (!project) {
       return { error: "Project not found" };
     }
-    
-    // Check if user has access to the team/workspace
+
+    // Check if user has access to the workspace/workspace
     let hasAccess = false;
-    
-    // For individual projects (no teamId)
-    if (project.teamId === null) {
+
+    // For individual projects (no workspaceId)
+    if (project.workspaceId === null) {
       // Check if the user is the owner of the project
       hasAccess = project.userId === userId;
     } else {
-      // For team projects, check if user is a team member
-      const teamMember = await prisma.teamMember.findUnique({
+      // For workspace projects, check if user is a workspace member
+      const workspaceMember = await prisma.workspaceMember.findUnique({
         where: {
-          teamId_userId: {
-            teamId: project.teamId,
+          workspaceId_userId: {
+            workspaceId: project.workspaceId,
             userId,
           },
         },
       });
-      
-      hasAccess = !!teamMember;
+
+      hasAccess = !!workspaceMember;
     }
-    
+
     if (!hasAccess) {
       return { error: "You don't have access to this project" };
     }
-    
+
     // Fetch tasks for the project
     const tasks = await prisma.task.findMany({
       where: {
@@ -385,7 +405,7 @@ export async function getTasks(projectId: string) {
         createdAt: "desc",
       },
     });
-    
+
     return { tasks };
   } catch (error) {
     console.error("Error fetching tasks:", error);
