@@ -88,7 +88,7 @@ export function CreateCourse() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-cyan-500 ease-in-out duration-500 cursor-pointer text-white dark:text-primary">
+        <Button>
           <Plus className="size-4" />
           Add course
         </Button>
@@ -134,11 +134,7 @@ export function CreateCourse() {
               )}
             />
             <DialogFooter>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-gradient-to-r from-blue-600 to-cyan-500"
-              >
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Creating..." : "Create"}
               </Button>
             </DialogFooter>
