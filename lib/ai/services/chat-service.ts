@@ -165,14 +165,17 @@ async function createConversation(
   userId: string,
   initialMessages: ChatMessage[] = []
 ): Promise<string> {
-  // First, verify the user exists
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
 
   if (!user) {
-    console.error(`User with ID ${userId} not found. Cannot create conversation.`);
-    throw new Error(`User with ID ${userId} not found. Cannot create conversation.`);
+    console.error(
+      `User with ID ${userId} not found. Cannot create conversation.`
+    );
+    throw new Error(
+      `User with ID ${userId} not found. Cannot create conversation.`
+    );
   }
 
   // Extract a title from the first user message if available

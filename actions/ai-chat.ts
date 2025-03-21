@@ -70,14 +70,60 @@ export async function sendMessageStream(
   // Create a new ReadableStream
   const stream = new ReadableStream({
     async start(controller) {
+      // Set up a keep-alive interval to prevent connection timeouts
+      // Send a small space every 10 seconds to keep the connection alive
+      const keepAliveInterval = setInterval(() => {
+        if (controller) {
+          try {
+            // Empty space as keep-alive signal
+            const encoder = new TextEncoder();
+            controller.enqueue(encoder.encode(" "));
+          } catch (e) {
+            // Controller might be closed already, clear interval
+            clearInterval(keepAliveInterval);
+          }
+        }
+      }, 10000); // Every 10 seconds
+
+      // Set a maximum runtime timer (3 minutes) as a safety measure
+      const maxRuntimeTimeout = setTimeout(() => {
+        try {
+          // If we hit the max runtime, send a message and close gracefully
+          const encoder = new TextEncoder();
+          controller.enqueue(
+            encoder.encode(
+              "\n\n[Response exceeded maximum allowed time. Please ask a follow-up question to continue.]"
+            )
+          );
+          
+          // Add metadata for the client
+          const metadataChunk = JSON.stringify({
+            __metadata: {
+              conversationId: resultConversationId,
+              truncated: true
+            },
+          });
+          controller.enqueue(encoder.encode(`\n${metadataChunk}`));
+          
+          controller.close();
+          clearInterval(keepAliveInterval);
+        } catch (e) {
+          // Controller might be closed already
+        }
+      }, 180000); // 3 minutes max runtime
+      
       try {
         let fullResponse = "";
         let isControllerActive = true;  // Track controller state
+        let lastActivityTime = Date.now(); // Track last activity for partial timeouts
 
         // Create a callback function to handle chunks
         const handleChunk = (chunk: string) => {
           // Skip if controller is no longer active
           if (!isControllerActive) return;
+          
+          // Update activity timestamp
+          lastActivityTime = Date.now();
           
           // Encode the chunk as a Uint8Array
           const encoder = new TextEncoder();
@@ -117,6 +163,7 @@ export async function sendMessageStream(
         const metadataChunk = JSON.stringify({
           __metadata: {
             conversationId: resultConversationId,
+            complete: true
           },
         });
         const encoder = new TextEncoder();
@@ -125,9 +172,29 @@ export async function sendMessageStream(
         // Close the stream when done
         isControllerActive = false;
         controller.close();
+        
+        // Clear our timers
+        clearInterval(keepAliveInterval);
+        clearTimeout(maxRuntimeTimeout);
       } catch (error) {
         console.error("Error in sendMessageStream:", error);
-        controller.error(error);
+        
+        // Try to send error information to the client
+        try {
+          const encoder = new TextEncoder();
+          controller.enqueue(
+            encoder.encode(
+              "\n\n[An error occurred while generating the response. Please try again.]"
+            )
+          );
+          controller.error(error);
+        } catch (e) {
+          // Controller might be closed already
+        }
+        
+        // Clean up timers
+        clearInterval(keepAliveInterval);
+        clearTimeout(maxRuntimeTimeout);
       }
     },
   });
