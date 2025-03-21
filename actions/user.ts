@@ -222,13 +222,6 @@ export async function deleteAccount() {
       },
     });
 
-    // Delete AI conversations
-    await prisma.aIConversation.deleteMany({
-      where: {
-        userId: user.id,
-      },
-    });
-
     // Delete account sessions to ensure logout
     await prisma.session.deleteMany({
       where: {
