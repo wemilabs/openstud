@@ -7,11 +7,6 @@ import {
 
 const faqs = [
   {
-    question: "What is Clever?",
-    answer:
-      "Clever is our AI-powered study assistant designed to be your personal tutor. It can explain complex concepts, help with homework, and provide personalized study plans. P.S.: Please, Clever should be used as a supplement to your own study, not a replacement. Don't use Clever for everything, but use it when you really need help. Some policies will soon be added to prevent plagiarism, cheating, and other forms of academic dishonesty.",
-  },
-  {
     question: "How does the free trial work?",
     answer:
       "You can try OpenStud free for 14 days with full access to all Pro features. No credit card required. At the end of the trial, you can choose to upgrade or continue with the free plan.",
