@@ -27,7 +27,7 @@ export const {
   callbacks: {
     async session({ token, session }) {
       if (token && session.user) {
-        session.user.id = token.sub ?? "";
+        session.user.id = token.id as string;
         session.user.name = token.name ?? "";
         session.user.email = token.email ?? "";
         session.user.image = token.picture ?? "";
@@ -41,19 +41,29 @@ export const {
         token.name = user.name;
         token.picture = user.image;
 
-        // First time sign in
-        await prisma.user.upsert({
+        const existingUser = await prisma.user.findUnique({
           where: { email: token.email! },
-          create: {
-            email: token.email!,
-            name: token.name ?? null,
-            image: token.picture ?? null,
-          },
-          update: {
-            name: token.name ?? null,
-            image: token.picture ?? null,
-          },
         });
+
+        if (!existingUser) {
+          const newUser = await prisma.user.create({
+            data: {
+              email: token.email!,
+              name: token.name ?? null,
+              image: token.picture ?? null,
+            },
+          });
+          token.id = newUser.id;
+        } else {
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              name: token.name ?? existingUser.name,
+              image: token.picture ?? existingUser.image,
+            },
+          });
+          token.id = existingUser.id;
+        }
       }
       return token;
     },
