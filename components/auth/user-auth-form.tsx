@@ -15,9 +15,8 @@ export function UserAuthForm() {
   async function loginWithGoogle() {
     setIsLoading(true);
     try {
-      // If there's a callbackUrl in search params, use it; otherwise default to dashboard
-      await signIn("google", { 
-        callbackUrl: callbackUrl || "/dashboard" 
+      await signIn("google", {
+        callbackUrl: callbackUrl || "/dashboard",
       });
     } catch (error) {
       console.error("Login error:", error);

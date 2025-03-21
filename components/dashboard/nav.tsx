@@ -28,11 +28,11 @@ const navItems: NavItem[] = [
     href: "/dashboard/courses",
     icon: "book",
   },
-  // {
-  //   title: "Ask Clever",
-  //   href: "/dashboard/ai-tutor",
-  //   icon: "bot",
-  // },
+  {
+    title: "Ask Clever",
+    href: "/dashboard/ai-tutor",
+    icon: "bot",
+  },
   {
     title: "Assignments",
     href: "/dashboard/assignments",
