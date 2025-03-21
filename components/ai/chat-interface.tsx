@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatMessage } from "@/components/ai/chat-message";
 import {
-  sendMessageStream,
   getConversationById,
   cancelChatStreamById,
 } from "@/actions/ai-chat";
@@ -413,49 +412,59 @@ export function ChatInterface() {
   };
 
   // Handle sending a message
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+
+    // Don't send empty messages
     if (!input.trim() || isLoading) return;
 
-    // Add user message to the chat
-    const userMessage: ChatMessageType = { role: "user", content: input };
+    // Prep the message
+    const userMessage: ChatMessageType = {
+      role: "user",
+      content: input.trim(),
+    };
 
-    // Use callback form to ensure we're working with the latest state
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-
-    // Clear input and set loading state
+    // Update the UI with the user message
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-    setStreamingMessage(""); // Reset streaming message
 
     try {
-      // Prepare messages to send (including system message)
-      // Important: Use the current messages state plus the new user message
-      const messagesToSend = [...messages, userMessage];
-
-      // Create a new AbortController for this request
+      // Create an abort controller for the fetch request
       abortControllerRef.current = new AbortController();
-      const signal = abortControllerRef.current.signal;
 
-      // Get the response as a stream
-      const response = await sendMessageStream(
-        messagesToSend,
-        currentConversationId || undefined
-      );
-
-      // Process the stream
-      await processStream(response);
-    } catch (error) {
-      console.error("Error in handleSendMessage:", error);
-
-      // Use callback form to ensure we're working with the latest state
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
+      // Instead of using the server action, use the Edge API route
+      const response = await fetch("/api/ai-chat/stream", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      ]);
-      setIsLoading(false);
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          conversationId: currentConversationId,
+        }),
+        signal: abortControllerRef.current.signal,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send message");
+      }
+
+      // Process the streaming response
+      if (response.body) {
+        await processStream(response.body);
+      } else {
+        throw new Error("No response body from server");
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.log("Request was aborted");
+      } else {
+        console.error("Error sending message:", error);
+        toast.error("Failed to send message. Please try again.");
+        setIsLoading(false);
+      }
     }
   };
 
