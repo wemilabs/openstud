@@ -2,10 +2,11 @@
 export const runtime = 'edge';
 
 import { auth } from "@/lib/auth";
+// Import only what we need to avoid Node.js dependencies
 import { 
   generateStreamingChatResponse,
-  type ChatMessage 
-} from "@/lib/ai";
+  type ChatMessage
+} from "@/lib/ai/services/chat-service";
 
 /**
  * POST handler for AI chat streaming
