@@ -123,7 +123,7 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="container pb-10">
+    <section id="features" className="container pb-10 mx-auto">
       <div className="mx-auto mb-8 flex max-w-[58rem] flex-col items-center space-y-4 text-center">
         <h2 className="font-bold text-3xl leading-[1.1] sm:text-4xl md:text-5xl">
           Features that Make Learning Easier
