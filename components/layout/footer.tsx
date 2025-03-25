@@ -88,7 +88,7 @@ export function Footer() {
         </div>
         <div className="mt-16 border-t border-muted pt-8 sm:mt-20">
           <p className="text-center text-sm leading-5 text-muted-foreground">
-            {new Date().getFullYear()} OpenStud. All rights reserved.
+            © {new Date().getFullYear()} OpenStud. All rights reserved.
           </p>
         </div>
       </div>
