@@ -194,20 +194,17 @@ export function DashboardHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex items-center px-2 py-4 md:px-8 md:py-6 max-w-full">
-        {/* Logo and Navigation */}
         <div className="flex items-center">
           <Logo
             href="/dashboard"
             className="hidden md:flex items-center px-4"
           />
-          <RightSideMenu className="md:hidden mx-2 cursor-pointer" />
+          <RightSideMenu className="md:hidden mx-2" />
 
-          {/* Divider slash */}
           <span className="hidden md:block font-thin text-2xl text-muted-foreground">
             /
           </span>
 
-          {/* Workspace selector */}
           <Popover open={openWorkspace} onOpenChange={setOpenWorkspace}>
             <PopoverTrigger asChild className="hidden md:flex">
               <Button
@@ -497,11 +494,7 @@ export function DashboardHeader() {
 
         {/* Right side controls */}
         <div className="flex flex-1 items-center justify-end">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative cursor-pointer"
-          >
+          <Button variant="ghost" size="icon" className="relative ">
             <Icons.bell className="size-4" />
             {/* <Badge
               variant="secondary"
@@ -521,7 +514,7 @@ export function DashboardHeader() {
           <ModeToggle />
 
           <DropdownMenu>
-            <DropdownMenuTrigger asChild className="cursor-pointer">
+            <DropdownMenuTrigger asChild className="">
               <Button variant="ghost" className="relative flex items-center">
                 <Avatar className="size-8">
                   {user?.image ? (

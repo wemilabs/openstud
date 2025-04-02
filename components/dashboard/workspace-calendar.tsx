@@ -152,7 +152,7 @@ export function WorkspaceCalendar({ workspaceId }: WorkspaceCalendarProps) {
         <HoverCardTrigger asChild>
           <div
             className={cn(
-              "relative h-9 w-9 p-0 flex items-center justify-center cursor-pointer",
+              "relative h-9 w-9 p-0 flex items-center justify-center ",
               tasksForDay.length > 0 && "hover:bg-muted/60 rounded-md"
             )}
           >

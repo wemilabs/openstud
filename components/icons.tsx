@@ -42,6 +42,7 @@ import {
   User,
   Users,
   X,
+  TextSearch,
   type Icon as LucideIcon,
 } from "lucide-react";
 
@@ -89,6 +90,7 @@ export const Icons = {
   arrowUp: ArrowUp,
   bot: Bot,
   paperclip: Paperclip,
+  textSearch: TextSearch,
 } as const;
 
 export const GoogleIcon = (props: SVGProps<SVGSVGElement>) => (

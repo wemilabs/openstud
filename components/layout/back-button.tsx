@@ -19,7 +19,7 @@ export function BackButton({ text, variant, className }: BackButtonProps) {
       type="button"
       variant={variant}
       onClick={() => router.back()}
-      className={cn("cursor-pointer", className)}
+      className={cn("", className)}
     >
       <ArrowLeft className="size-4" />
       {text}

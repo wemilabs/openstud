@@ -53,7 +53,7 @@ export function DeleteNote({ noteId, noteTitle }: DeleteNoteProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 bg-destructive text-muted hover:text-muted dark:text-primary hover:bg-destructive/90 cursor-pointer"
+          className="size-8 bg-destructive text-muted hover:text-muted dark:text-primary hover:bg-destructive/90 "
         >
           <Trash2 className="h-4 w-4" />
           <span className="sr-only">Delete note</span>
@@ -68,13 +68,11 @@ export function DeleteNote({ noteId, noteTitle }: DeleteNoteProps) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="cursor-pointer">
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel className="">Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-destructive text-muted dark:text-primary hover:bg-destructive/90 cursor-pointer"
+            className="bg-destructive text-muted dark:text-primary hover:bg-destructive/90 "
           >
             {isDeleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>

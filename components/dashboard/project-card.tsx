@@ -123,7 +123,7 @@ export function ProjectCard({
   return (
     <>
       <Card
-        className="hover:border-primary/50 transition-colors cursor-pointer"
+        className="hover:border-primary/50 transition-colors "
         onClick={navigateToProject}
       >
         <CardHeader className="pb-2">

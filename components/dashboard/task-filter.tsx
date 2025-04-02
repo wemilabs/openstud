@@ -37,7 +37,10 @@ export function TaskFilterDropdown({
   taskCounts = { all: 0, completed: 0, incomplete: 0 },
 }: TaskFilterDropdownProps) {
   // Filter options
-  const filters: Record<TaskFilterValue, { label: string; icon: React.ReactNode }> = {
+  const filters: Record<
+    TaskFilterValue,
+    { label: string; icon: React.ReactNode }
+  > = {
     all: {
       label: "All Tasks",
       icon: <Filter className="h-4 w-4" />,
@@ -159,12 +162,9 @@ export function TaskFilter({
             {categories.map((category) => {
               const categoryInfo = getTaskCategoryInfo(category);
               const isSelected = selectedCategories.includes(category);
-              
+
               return (
-                <div
-                  key={category}
-                  className="flex items-center space-x-2"
-                >
+                <div key={category} className="flex items-center space-x-2">
                   <Checkbox
                     id={`category-${category}`}
                     checked={isSelected}
@@ -172,7 +172,7 @@ export function TaskFilter({
                   />
                   <Label
                     htmlFor={`category-${category}`}
-                    className="flex items-center text-sm cursor-pointer"
+                    className="flex items-center text-sm "
                   >
                     {categoryInfo.icon}
                     <span>{categoryInfo.label}</span>
@@ -191,12 +191,9 @@ export function TaskFilter({
             {priorities.map((priority) => {
               const priorityInfo = getTaskPriorityInfo(priority);
               const isSelected = selectedPriorities.includes(priority);
-              
+
               return (
-                <div
-                  key={priority}
-                  className="flex items-center space-x-2"
-                >
+                <div key={priority} className="flex items-center space-x-2">
                   <Checkbox
                     id={`priority-${priority}`}
                     checked={isSelected}
@@ -204,9 +201,11 @@ export function TaskFilter({
                   />
                   <Label
                     htmlFor={`priority-${priority}`}
-                    className="flex items-center text-sm cursor-pointer"
+                    className="flex items-center text-sm "
                   >
-                    <span className={`h-2 w-2 rounded-full ${priorityInfo.color} mr-1.5`} />
+                    <span
+                      className={`h-2 w-2 rounded-full ${priorityInfo.color} mr-1.5`}
+                    />
                     {priorityInfo.label}
                   </Label>
                 </div>
@@ -218,7 +217,9 @@ export function TaskFilter({
 
       {(selectedCategories.length > 0 || selectedPriorities.length > 0) && (
         <div className="pt-2">
-          <h4 className="text-xs text-muted-foreground mb-2">Active filters:</h4>
+          <h4 className="text-xs text-muted-foreground mb-2">
+            Active filters:
+          </h4>
           <div className="flex flex-wrap gap-1">
             {selectedCategories.map((category) => {
               const { label } = getTaskCategoryInfo(category as TaskCategory);
