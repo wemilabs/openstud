@@ -84,9 +84,7 @@ export function DashboardNav({ className }: DashboardNavProps) {
               href={item.href}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                pathname === item.href
-                  ? "bg-muted hover:bg-muted"
-                  : "hover:bg-transparent",
+                pathname === item.href ? "bg-muted" : "hover:bg-muted",
                 "justify-start h-10 font-medium"
               )}
             >

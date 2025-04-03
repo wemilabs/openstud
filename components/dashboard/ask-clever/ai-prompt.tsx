@@ -19,6 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+
+/**
+ * Tutor (Gemini 2.5 Pro)
+ * Homework Helper (Grok 3)
+ * Latest News (Sonar - Perplexity AI)
+ * Companion (Grok 2)
+ */
 
 interface ResearchModeAndSuggestionItem {
   label?: string;
@@ -76,6 +84,7 @@ export function AIPrompt() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [query, setQuery] = useState("");
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
 
   // Auto resize textarea based on content
   useEffect(() => {
@@ -101,6 +110,18 @@ export function AIPrompt() {
     setIsButtonEnabled(query.trim().length > 0);
   }, [query]);
 
+  // Detect screen size changes for the label responsive behavior in the buttons mode
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 640);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div className="w-full">
       <form
@@ -123,12 +144,12 @@ export function AIPrompt() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="What do you wanna know?"
-              className="resize-none overflow-auto border-t border-x rounded-t-xl border-b-0 rounded-b-none p-4 pr-12 py-4 min-h-[120px] max-h-[300px] focus-visible:ring-0"
+              className="resize-none overflow-auto border-t border-x rounded-t-xl border-b-0 rounded-b-none p-4 pr-12 py-4 min-h-[120px] max-h-[300px] focus-visible:ring-0 focus-visible:ring-offset-0 text-xs"
               autoFocus
               rows={3}
             />
 
-            <div className="absolute left-0 right-0 -bottom-13 px-3 py-2 flex justify-between items-center border-b border-x rounded-b-xl">
+            <div className="absolute left-0 right-0 -bottom-13 px-3 py-2 flex justify-between items-center border-t-0 border-b border-x rounded-b-xl">
               <div className="flex items-center gap-2 text-muted-foreground">
                 {researchModeAndSuggestionItems
                   .slice(0, 3)
@@ -139,19 +160,24 @@ export function AIPrompt() {
                           <Button
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            className="gap-1.5 text-sm font-normal border rounded-xl"
+                            size={isLargeScreen ? "sm" : "icon"}
+                            className={cn(
+                              "text-xs font-normal border",
+                              isLargeScreen
+                                ? "gap-1.5 rounded-xl"
+                                : "rounded-full"
+                            )}
                             onClick={() =>
                               alert(`${label}: Not implemented yet`)
                             }
                             disabled={disabled}
                           >
                             {icon}
-                            {label}
+                            {isLargeScreen ? label : ""}
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p className="text-sm">{tooltip}</p>
+                          <p className="text-xs">{tooltip}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -160,7 +186,7 @@ export function AIPrompt() {
 
               <div className="flex items-center gap-2">
                 <div>
-                  <Select>
+                  <Select defaultValue="gemini-2.5-pro">
                     <SelectTrigger
                       id="personas-according-to-models"
                       className="border-none mr-1 cursor-pointer hover:bg-muted font-medium"
@@ -172,18 +198,12 @@ export function AIPrompt() {
                         <SelectLabel className="font-semibold">
                           Personas
                         </SelectLabel>
-                        <SelectItem value="gemini-2.5-pro">
-                          Tutor (Gemini 2.5 Pro)
-                        </SelectItem>
-                        <SelectItem value="grok-3">
-                          Homework Helper (Grok 3)
-                        </SelectItem>
+                        <SelectItem value="gemini-2.5-pro">Tutor</SelectItem>
+                        <SelectItem value="grok-3">Homework Helper</SelectItem>
                         <SelectItem value="sonar-perplexity-ai">
-                          Latest News (Sonar - Perplexity AI)
+                          Latest News
                         </SelectItem>
-                        <SelectItem value="grok-2">
-                          Companion (Grok 2)
-                        </SelectItem>
+                        <SelectItem value="grok-2">Companion</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -203,7 +223,7 @@ export function AIPrompt() {
           </div>
 
           <div className="flex items-center justify-center mt-13 px-1 py-6">
-            <div className="flex items-center gap-4 text-muted-foreground">
+            <div className="grid grid-cols-2 md:flex items-center gap-4 text-muted-foreground">
               {researchModeAndSuggestionItems
                 .slice(3)
                 .map(({ label, icon, tooltip, disabled }) => (
@@ -214,7 +234,7 @@ export function AIPrompt() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="gap-1.5 text-sm font-normal border rounded-xl"
+                          className="gap-1.5 text-xs font-normal border rounded-xl"
                           onClick={() => alert(`${label}: Not implemented yet`)}
                           disabled={disabled}
                         >
@@ -223,7 +243,7 @@ export function AIPrompt() {
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="text-sm">{tooltip}</p>
+                        <p className="text-xs">{tooltip}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
