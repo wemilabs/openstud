@@ -37,13 +37,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Plus, Copy, Check } from "lucide-react";
 
-// Form schema for invitation
 const inviteFormSchema = z.object({
-  role: z.nativeEnum(WorkspaceRole).default(WorkspaceRole.MEMBER),
-  expiresInDays: z.number().int().min(1).max(30).default(7),
-  maxUses: z
-    .union([z.number().int().min(1).max(100), z.literal(null)])
-    .default(null),
+  role: z.nativeEnum(WorkspaceRole),
+  expiresInDays: z.number().int().min(1).max(30),
+  maxUses: z.union([z.number().int().min(1).max(100), z.literal(null)]),
 });
 
 type InviteFormValues = z.infer<typeof inviteFormSchema>;
@@ -62,9 +59,8 @@ export function InviteMemberDialog({
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Initialize form with default values
   const form = useForm<InviteFormValues>({
-    resolver: zodResolver(inviteFormSchema),
+    resolver: zodResolver(inviteFormSchema) as any,
     defaultValues: {
       role: WorkspaceRole.MEMBER,
       expiresInDays: 7,
@@ -72,7 +68,6 @@ export function InviteMemberDialog({
     },
   });
 
-  // Handle form submission
   const onSubmit = async (data: InviteFormValues) => {
     setIsLoading(true);
     try {
@@ -103,7 +98,6 @@ export function InviteMemberDialog({
     }
   };
 
-  // Handle copying invite link to clipboard
   const copyToClipboard = async () => {
     if (!inviteLink) return;
 
@@ -119,7 +113,6 @@ export function InviteMemberDialog({
     }
   };
 
-  // Reset form and state when dialog closes
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       form.reset();
@@ -150,7 +143,10 @@ export function InviteMemberDialog({
 
         {!inviteLink ? (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(onSubmit as any)}
+              className="space-y-4"
+            >
               <FormField
                 control={form.control}
                 name="role"
