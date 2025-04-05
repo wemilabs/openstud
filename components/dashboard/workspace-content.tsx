@@ -293,7 +293,7 @@ export function WorkspaceContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Project creation card */}
                 <Card
-                  className="border-dashed border-2 hover:border-primary/50 cursor-pointer transition-colors"
+                  className="border-dashed border-2 hover:border-primary/50  transition-colors"
                   onClick={() => setOpenProjectDialog(true)}
                 >
                   <CardContent className="flex flex-col items-center justify-center h-40">
@@ -359,7 +359,7 @@ export function WorkspaceContent() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Document upload card */}
-                <Card className="border-dashed border-2 hover:border-primary/50 cursor-pointer transition-colors">
+                <Card className="border-dashed border-2 hover:border-primary/50  transition-colors">
                   <CardContent className="flex flex-col items-center justify-center h-40">
                     <FileText className="h-8 w-8 text-muted-foreground mb-2" />
                     <p className="text-sm font-medium">Upload Document</p>

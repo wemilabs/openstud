@@ -92,7 +92,7 @@ export function EditCourse({ course }: EditCourseProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 bg-muted text-primary dark:text-primary hover:bg-muted/90 cursor-pointer"
+          className="size-8 bg-muted text-primary dark:text-primary hover:bg-muted/90"
         >
           <Pencil className="h-4 w-4" />
           <span className="sr-only">Edit course</span>
@@ -140,7 +140,7 @@ export function EditCourse({ course }: EditCourseProps) {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-cyan-500 ease-in-out duration-500 cursor-pointer text-white dark:text-primary"
+                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-cyan-500 ease-in-out duration-500  text-white dark:text-primary"
               >
                 {isSubmitting ? "Saving..." : "Save changes"}
               </Button>

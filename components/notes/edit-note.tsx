@@ -94,7 +94,7 @@ export function EditNote({ note }: EditNoteProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 bg-muted text-primary dark:text-primary hover:bg-muted/90 cursor-pointer"
+          className="size-8 bg-muted text-primary dark:text-primary hover:bg-muted/90 "
         >
           <Pencil className="h-4 w-4" />
           <span className="sr-only">Edit note</span>
@@ -142,14 +142,14 @@ export function EditNote({ note }: EditNoteProps) {
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                className="cursor-pointer"
+                className=""
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-cyan-500 hover:ease-in-out hover:duration-500 cursor-pointer text-white dark:text-primary"
+                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-cyan-500 hover:ease-in-out hover:duration-500  text-white dark:text-primary"
               >
                 {isSubmitting ? "Saving..." : "Save Changes"}
               </Button>

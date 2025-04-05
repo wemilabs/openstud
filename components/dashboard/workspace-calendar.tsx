@@ -1,9 +1,25 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { DayPicker, DayProps } from "react-day-picker";
-import { format, isEqual, isSameMonth, isToday } from "date-fns";
-import { Calendar as CalendarIcon, Filter, Loader2 } from "lucide-react";
+import {
+  format,
+  isEqual,
+  isSameMonth,
+  isToday,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  getDay,
+} from "date-fns";
+import {
+  Calendar as CalendarIcon,
+  Filter,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   HoverCard,
@@ -24,7 +40,6 @@ import { getWorkspaceTasks } from "@/actions/workspace-tasks";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
-// Define the task with project information
 interface TaskWithProject extends Task {
   projectName: string;
 }
@@ -93,139 +108,56 @@ export function WorkspaceCalendar({ workspaceId }: WorkspaceCalendarProps) {
   });
 
   // Get tasks for a specific day
-  const getTasksForDay = (day: Date) => {
-    return filteredTasks.filter(
-      (task) =>
-        task.dueDate &&
-        isEqual(
-          new Date(task.dueDate).setHours(0, 0, 0, 0),
-          new Date(day).setHours(0, 0, 0, 0)
-        )
-    );
-  };
+  const getTasksForDay = useCallback(
+    (day: Date | any) => {
+      // Ensure we're working with a proper Date object
+      const dateToCheck = day instanceof Date ? day : new Date();
+
+      return filteredTasks.filter(
+        (task) =>
+          task.dueDate &&
+          isEqual(
+            new Date(task.dueDate).setHours(0, 0, 0, 0),
+            new Date(dateToCheck).setHours(0, 0, 0, 0)
+          )
+      );
+    },
+    [filteredTasks]
+  );
 
   // Function to render task indicators for a day
-  const renderTaskIndicators = (day: Date) => {
-    const tasksForDay = getTasksForDay(day);
-    if (tasksForDay.length === 0) return null;
+  const renderTaskIndicators = useCallback(
+    (day: Date | any) => {
+      const tasksForDay = getTasksForDay(day);
+      if (tasksForDay.length === 0) return null;
 
-    // Group tasks by priority to show different colored indicators
-    const urgentTasks = tasksForDay.filter(
-      (task) => task.priority === "urgent"
-    );
-    const highTasks = tasksForDay.filter((task) => task.priority === "high");
-    const otherTasks = tasksForDay.filter(
-      (task) => !["urgent", "high"].includes(task.priority || "")
-    );
+      // Group tasks by priority to show different colored indicators
+      const urgentTasks = tasksForDay.filter(
+        (task) => task.priority === "urgent"
+      );
+      const highTasks = tasksForDay.filter((task) => task.priority === "high");
+      const otherTasks = tasksForDay.filter(
+        (task) => !["urgent", "high"].includes(task.priority || "")
+      );
 
-    return (
-      <div className="absolute bottom-0.5 left-0 right-0 flex justify-center">
-        <div className="flex space-x-0.5">
-          {urgentTasks.length > 0 && (
-            <div className="h-1.5 w-1.5 rounded-full bg-destructive"></div>
-          )}
-          {highTasks.length > 0 && (
-            <div className="h-1.5 w-1.5 rounded-full bg-amber-500"></div>
-          )}
-          {otherTasks.length > 0 && (
-            <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // Function to render task details in a hover card
-  const renderTaskDetails = (day: Date) => {
-    const tasksForDay = getTasksForDay(day);
-    if (tasksForDay.length === 0) return null;
-
-    // Group tasks by priority to show different colored indicators
-    const urgentTasks = tasksForDay.filter(
-      (task) => task.priority === "urgent"
-    );
-    // const highTasks = tasksForDay.filter(task => task.priority === 'high');
-    // const otherTasks = tasksForDay.filter(task => !['urgent', 'high'].includes(task.priority || ''));
-
-    return (
-      <HoverCard>
-        <HoverCardTrigger asChild>
-          <div
-            className={cn(
-              "relative h-9 w-9 p-0 flex items-center justify-center cursor-pointer",
-              tasksForDay.length > 0 && "hover:bg-muted/60 rounded-md"
+      return (
+        <div className="absolute bottom-0.5 left-0 right-0 flex justify-center">
+          <div className="flex space-x-0.5">
+            {urgentTasks.length > 0 && (
+              <div className="h-1.5 w-1.5 rounded-full bg-destructive"></div>
             )}
-          >
-            <span className="inline-flex items-center justify-center">
-              {format(day, "d")}
-            </span>
-            {renderTaskIndicators(day)}
+            {highTasks.length > 0 && (
+              <div className="h-1.5 w-1.5 rounded-full bg-amber-500"></div>
+            )}
+            {otherTasks.length > 0 && (
+              <div className="h-1.5 w-1.5 rounded-full bg-primary"></div>
+            )}
           </div>
-        </HoverCardTrigger>
-        <HoverCardContent className="w-80 p-0" side="bottom">
-          <div className="p-4 space-y-2 border-b">
-            <p className="text-sm font-medium">
-              {format(day, "EEEE, MMMM d, yyyy")}
-            </p>
-            <div className="flex items-center gap-1.5">
-              <Badge variant="outline" className="text-xs">
-                {tasksForDay.length}{" "}
-                {tasksForDay.length === 1 ? "task" : "tasks"}
-              </Badge>
-              {urgentTasks.length > 0 && (
-                <Badge variant="destructive" className="text-xs">
-                  {urgentTasks.length} urgent
-                </Badge>
-              )}
-            </div>
-          </div>
-          <div className="max-h-[300px] overflow-y-auto">
-            {tasksForDay.map((task) => (
-              <div
-                key={task.id}
-                className="p-3 hover:bg-muted border-b last:border-b-0"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm font-medium">{task.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {task.projectName}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end space-y-1">
-                    {task.category && (
-                      <TaskCategoryBadge category={task.category} />
-                    )}
-                    {task.priority && (
-                      <TaskPriorityBadge priority={task.priority} />
-                    )}
-                  </div>
-                </div>
-                {task.description && (
-                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-                    {task.description}
-                  </p>
-                )}
-                <div className="mt-2 w-full bg-muted h-1.5 rounded-full overflow-hidden">
-                  <div
-                    className={cn(
-                      "h-full",
-                      task.completionPercentage === 100
-                        ? "bg-green-500"
-                        : task.priority === "urgent"
-                        ? "bg-destructive"
-                        : "bg-primary"
-                    )}
-                    style={{ width: `${task.completionPercentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </HoverCardContent>
-      </HoverCard>
-    );
-  };
+        </div>
+      );
+    },
+    [getTasksForDay]
+  );
 
   return (
     <div className="space-y-4">
@@ -233,7 +165,8 @@ export function WorkspaceCalendar({ workspaceId }: WorkspaceCalendarProps) {
         <div className="flex items-center space-x-2">
           <CalendarIcon className="h-5 w-5 text-primary" />
           <h2 className="text-xl font-semibold">
-            {format(month, "MMMM yyyy")}
+            {month.toLocaleString("default", { month: "long" })}{" "}
+            {month.getFullYear()}
           </h2>
         </div>
         <div className="flex items-center space-x-2">
@@ -270,79 +203,212 @@ export function WorkspaceCalendar({ workspaceId }: WorkspaceCalendarProps) {
         </div>
       </div>
 
-      <div className="border rounded-md overflow-hidden bg-card shadow-sm">
-        <DayPicker
-          mode="single"
-          showOutsideDays
-          month={month}
-          onMonthChange={setMonth}
-          modifiers={{
-            hasTask: (date) => getTasksForDay(date).length > 0,
-          }}
-          modifiersClassNames={{
-            hasTask: "font-medium",
-          }}
-          className="mx-auto w-full"
-          classNames={{
-            months: "flex justify-center",
-            month: "space-y-4 w-full",
-            caption: "flex justify-center pt-1 relative items-center",
-            caption_label: "text-sm font-medium",
-            nav: "space-x-1 flex items-center",
-            nav_button:
-              "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-            nav_button_previous: "absolute left-1",
-            nav_button_next: "absolute right-1",
-            table: "w-full border-collapse space-y-1",
-            head_row: "flex justify-center w-full",
-            head_cell:
-              "text-muted-foreground rounded-md w-10 font-normal text-[0.8rem] flex items-center justify-center",
-            row: "flex justify-center w-full mt-2",
-            cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 h-10 w-10 flex items-center justify-center",
-            day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors flex items-center justify-center",
-            day_selected:
-              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-            day_today: "bg-accent text-accent-foreground font-bold",
-            day_outside: "text-muted-foreground bg-muted/20",
-            day_disabled: "text-muted-foreground opacity-50",
-            day_range_middle:
-              "aria-selected:bg-accent aria-selected:text-accent-foreground",
-            day_hidden: "invisible",
-          }}
-          components={{
-            Day: ({ date, displayMonth, ...props }: DayProps) => {
-              // Return early if date is undefined
-              if (!date) return <div {...props} />;
+      <div className="border rounded-md overflow-hidden bg-card shadow-sm p-4">
+        {/* Calendar Header */}
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMonth(subMonths(month, 1))}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-              const isOutsideMonth = !isSameMonth(date, displayMonth);
-              const isTodayDate = isToday(date);
-              const hasTask = getTasksForDay(date).length > 0;
+          <h2 className="text-lg font-medium">{format(month, "MMMM yyyy")}</h2>
 
-              return (
-                <div {...props}>
-                  {hasTask && !isOutsideMonth ? (
-                    renderTaskDetails(date)
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMonth(addMonths(month, 1))}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Calendar Grid */}
+        <div className="grid grid-cols-7 gap-1">
+          {/* Day headers */}
+          {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+            <div
+              key={day}
+              className="text-center text-sm font-medium text-muted-foreground py-2"
+            >
+              {day}
+            </div>
+          ))}
+
+          {/* Calendar days */}
+          {(() => {
+            // Get all days in the current month
+            const monthStart = startOfMonth(month);
+            const monthEnd = endOfMonth(month);
+            const startDate = monthStart;
+            const endDate = monthEnd;
+
+            // Get all days in the interval
+            const days = eachDayOfInterval({ start: startDate, end: endDate });
+
+            // Get the day of the week for the first day (0 = Sunday, 6 = Saturday)
+            const startDay = getDay(monthStart);
+
+            // Create an array to hold all calendar cells
+            const calendarCells = [];
+
+            // Add empty cells for days before the start of the month
+            for (let i = 0; i < startDay; i++) {
+              calendarCells.push(
+                <div
+                  key={`empty-start-${i}`}
+                  className="h-12 text-center text-muted-foreground/40"
+                >
+                  {/* Empty cell */}
+                </div>
+              );
+            }
+
+            // Add cells for each day of the month
+            days.forEach((day) => {
+              const hasTask = getTasksForDay(day).length > 0;
+              const isTodayDate = isToday(day);
+
+              calendarCells.push(
+                <div key={day.toISOString()} className="h-12 relative">
+                  {hasTask ? (
+                    <HoverCard>
+                      <HoverCardTrigger asChild>
+                        <div
+                          className={cn(
+                            "h-full w-full flex items-center justify-center rounded-md cursor-pointer",
+                            isTodayDate
+                              ? "bg-primary text-primary-foreground font-bold"
+                              : "hover:bg-muted/60"
+                          )}
+                        >
+                          <span>{format(day, "d")}</span>
+                          {renderTaskIndicators(day)}
+                        </div>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80 p-0" side="bottom">
+                        <div className="p-4 space-y-2 border-b">
+                          <p className="text-sm font-medium">
+                            {day.toLocaleDateString("en-US", {
+                              weekday: "long",
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <Badge variant="outline" className="text-xs">
+                              {getTasksForDay(day).length}{" "}
+                              {getTasksForDay(day).length === 1
+                                ? "task"
+                                : "tasks"}
+                            </Badge>
+                            {getTasksForDay(day).filter(
+                              (task) => task.priority === "urgent"
+                            ).length > 0 && (
+                              <Badge variant="destructive" className="text-xs">
+                                {
+                                  getTasksForDay(day).filter(
+                                    (task) => task.priority === "urgent"
+                                  ).length
+                                }{" "}
+                                urgent
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="max-h-[300px] overflow-y-auto">
+                          {getTasksForDay(day).map((task) => (
+                            <div
+                              key={task.id}
+                              className="p-3 hover:bg-muted border-b last:border-b-0"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <p className="text-sm font-medium">
+                                    {task.title}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {task.projectName}
+                                  </p>
+                                </div>
+                                <div className="flex flex-col items-end space-y-1">
+                                  {task.category && (
+                                    <TaskCategoryBadge
+                                      category={task.category}
+                                    />
+                                  )}
+                                  {task.priority && (
+                                    <TaskPriorityBadge
+                                      priority={task.priority}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                              {task.description && (
+                                <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                                  {task.description}
+                                </p>
+                              )}
+                              <div className="mt-2 w-full bg-muted h-1.5 rounded-full overflow-hidden">
+                                <div
+                                  className={cn(
+                                    "h-full",
+                                    task.completionPercentage === 100
+                                      ? "bg-green-500"
+                                      : task.priority === "urgent"
+                                      ? "bg-destructive"
+                                      : "bg-primary"
+                                  )}
+                                  style={{
+                                    width: `${task.completionPercentage}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   ) : (
                     <div
                       className={cn(
-                        "relative h-9 w-9 p-0 flex items-center justify-center",
+                        "h-full w-full flex items-center justify-center",
                         isTodayDate &&
-                          "rounded-full bg-primary text-primary-foreground",
-                        isOutsideMonth &&
-                          "text-muted-foreground opacity-70 bg-muted/20"
+                          "bg-accent text-accent-foreground font-bold rounded-md"
                       )}
                     >
-                      <span className="inline-flex items-center justify-center">
-                        {format(date, "d")}
-                      </span>
-                      {renderTaskIndicators(date)}
+                      <span>{format(day, "d")}</span>
                     </div>
                   )}
                 </div>
               );
-            },
-          }}
-        />
+            });
+
+            // Calculate how many cells we need to fill the last row
+            const totalCells = calendarCells.length;
+            const rowSize = 7;
+            const rowsNeeded = Math.ceil(totalCells / rowSize);
+            const cellsNeeded = rowsNeeded * rowSize;
+            const emptyCellsToAdd = cellsNeeded - totalCells;
+
+            // Add empty cells for days after the end of the month
+            for (let i = 0; i < emptyCellsToAdd; i++) {
+              calendarCells.push(
+                <div
+                  key={`empty-end-${i}`}
+                  className="h-12 text-center text-muted-foreground/40"
+                >
+                  {/* Empty cell */}
+                </div>
+              );
+            }
+
+            return calendarCells;
+          })()}
+        </div>
       </div>
 
       {isLoading ? (
