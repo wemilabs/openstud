@@ -6,7 +6,7 @@ import { MyHoverCard } from "@/components/sections/my-hover-card";
 export function Hero() {
   return (
     <section className="relative overflow-hidden min-h-screen pt-24 md:pt-30">
-      <div className="container relative">
+      <div className="container relative mx-auto">
         <div className="mx-auto flex max-w-[980px] flex-col items-center gap-6 md:gap-y-10 text-center">
           <Badge
             variant="outline"
