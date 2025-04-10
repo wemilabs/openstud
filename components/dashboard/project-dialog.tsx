@@ -108,6 +108,7 @@ export function ProjectDialog({
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
                 rows={4}
+                className="resize-none"
               />
             </div>
           </div>

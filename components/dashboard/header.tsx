@@ -494,22 +494,22 @@ export function DashboardHeader() {
 
         {/* Right side controls */}
         <div className="flex flex-1 items-center justify-end">
-          <Button variant="ghost" size="icon" className="relative ">
+          {/* <Button variant="ghost" size="icon" className="relative ">
             <Icons.bell className="size-4" />
-            {/* <Badge
+            <Badge
               variant="secondary"
               className="absolute right-1 top-0 h-4 w-4 p-0"
             >
               0
-            </Badge> */}
-          </Button>
+            </Badge>
+          </Button> */}
 
-          <Link
+          {/* <Link
             href="/docs/introduction"
             className="hidden md:inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-normal transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground h-8 px-3 has-[>svg]:px-2.5"
           >
             <Icons.help className="size-4" />
-          </Link>
+          </Link> */}
 
           <ModeToggle />
 

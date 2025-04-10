@@ -15,13 +15,11 @@ import { toast } from "sonner";
 import { useWorkspace } from "@/contexts/workspace-context";
 import { BarChart as BarChartIcon } from "lucide-react";
 
-// Chart data type
 interface ChartData {
   name: string;
   total: number;
 }
 
-// Custom tooltip component for better dark mode support
 const CustomTooltip = ({
   active,
   payload,
@@ -33,7 +31,7 @@ const CustomTooltip = ({
         <p className="font-medium">{label}</p>
         <p className="text-sm">
           <span className="text-primary font-medium">{payload[0].value}%</span>{" "}
-          Avg. Completion
+          avg. completion
         </p>
       </div>
     );
@@ -55,7 +53,6 @@ export function OverviewChart() {
         setError(null);
         setData([]);
 
-        // Pass the current workspace ID to get workspace-specific data
         const result = await getTaskStatsByCategory(currentWorkspace.id);
 
         if (result.error) {
@@ -76,7 +73,7 @@ export function OverviewChart() {
     };
 
     fetchData();
-  }, [currentWorkspace.id]); // Re-fetch when workspace changes
+  }, [currentWorkspace.id]);
 
   if (loading) {
     return (

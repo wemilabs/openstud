@@ -33,41 +33,41 @@ const navItems: NavItem[] = [
     href: "/dashboard/ask-clever",
     icon: "bot",
   },
-  {
-    title: "Assignments",
-    href: "/dashboard/assignments",
-    icon: "pencil",
-  },
-  {
-    title: "Schedule",
-    href: "/dashboard/schedule",
-    icon: "calendar",
-  },
-  {
-    title: "Progress",
-    href: "/dashboard/progress",
-    icon: "chartNoAxesColumn",
-  },
+  // {
+  //   title: "Assignments",
+  //   href: "/dashboard/assignments",
+  //   icon: "pencil",
+  // },
+  // {
+  //   title: "Schedule",
+  //   href: "/dashboard/schedule",
+  //   icon: "calendar",
+  // },
+  // {
+  //   title: "Progress",
+  //   href: "/dashboard/progress",
+  //   icon: "chartNoAxesColumn",
+  // },
   {
     title: "Workspaces",
     href: "/dashboard/workspaces",
     icon: "users",
   },
-  {
-    title: "Billing",
-    href: "/dashboard/billing",
-    icon: "billing",
-  },
+  // {
+  //   title: "Billing",
+  //   href: "/dashboard/billing",
+  //   icon: "billing",
+  // },
   {
     title: "Settings",
     href: "/dashboard/settings",
     icon: "settings",
   },
-  {
-    title: "Help",
-    href: "/docs/introduction",
-    icon: "help",
-  },
+  // {
+  //   title: "Help",
+  //   href: "/docs/introduction",
+  //   icon: "help",
+  // },
 ];
 
 export function DashboardNav({ className }: DashboardNavProps) {

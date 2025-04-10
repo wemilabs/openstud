@@ -21,7 +21,7 @@ export default async function DashboardPage() {
           !
         </h1>
         <p className="text-sm text-muted-foreground">
-          Your collaborative space for academic success
+          Here's your space for academic success.
         </p>
       </div>
 
