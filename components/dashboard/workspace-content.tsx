@@ -15,9 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
   PlusCircle,
-  Users,
-  FileText,
-  Calendar,
+  /*Users,*/ FileText,
   Settings,
   Trash2,
 } from "lucide-react";
@@ -48,7 +46,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { WorkspaceCalendar } from "./workspace-calendar";
 
-// Project type definition
 type Project = {
   id: string;
   name: string;
@@ -59,9 +56,6 @@ type Project = {
   updatedAt: Date;
 };
 
-/**
- * Workspace content component that displays different content based on the selected workspace
- */
 export function WorkspaceContent() {
   const router = useRouter();
   const { currentWorkspace, refreshWorkspaces } = useWorkspace();
@@ -84,7 +78,6 @@ export function WorkspaceContent() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Check if this is the individual workspace or a workspace workspace
   const isIndividual = currentWorkspace.id === INDIVIDUAL_WORKSPACE.id;
 
   /**
@@ -106,7 +99,6 @@ export function WorkspaceContent() {
       if (result.data) {
         setProjects(result.data);
 
-        // Fetch task statistics for all projects
         const statsResult = await getWorkspaceProjectTaskStats(
           currentWorkspace.id
         );
@@ -142,21 +134,10 @@ export function WorkspaceContent() {
     }
   }, [currentWorkspace]);
 
-  // Fetch projects when the workspace changes
   useEffect(() => {
     fetchProjects();
   }, [currentWorkspace, fetchProjects]);
 
-  // Format date for display
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  // Handle workspace name update
   const handleEditWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -175,14 +156,11 @@ export function WorkspaceContent() {
       if (result.error) {
         toast.error(result.error);
       } else {
-        // Update was successful
         toast.success("Workspace updated successfully");
         setIsEditDialogOpen(false);
 
-        // Refresh workspaces to get the updated workspace name
         await refreshWorkspaces();
 
-        // Force a router refresh to ensure all components update
         router.refresh();
       }
     } catch (error) {
@@ -193,7 +171,6 @@ export function WorkspaceContent() {
     }
   };
 
-  // Handle workspace deletion
   const handleDeleteWorkspace = async () => {
     setIsDeleting(true);
 
@@ -205,10 +182,8 @@ export function WorkspaceContent() {
       } else {
         toast.success("Workspace deleted successfully");
 
-        // Refresh workspaces to update the context
         await refreshWorkspaces();
 
-        // Redirect to dashboard after deletion
         router.push("/dashboard");
         router.refresh();
       }
@@ -221,7 +196,6 @@ export function WorkspaceContent() {
     }
   };
 
-  // Open edit dialog and set current workspace name
   const openEditDialog = () => {
     setEditWorkspaceName(currentWorkspace.name);
     setIsEditDialogOpen(true);
@@ -229,7 +203,6 @@ export function WorkspaceContent() {
 
   return (
     <div className="grid gap-4">
-      {/* Workspace header with info and actions */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
@@ -243,21 +216,20 @@ export function WorkspaceContent() {
             </CardDescription>
           </div>
           <div className="flex space-x-2">
-            {!isIndividual && (
+            {/* {!isIndividual && (
               <Button variant="outline" size="sm">
-                <Users className="mr-2 h-4 w-4" />
+                <Users className="mr-2 size-4" />
                 Members
               </Button>
-            )}
+            )} */}
             <Button onClick={() => setOpenProjectDialog(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
+              <PlusCircle className="mr-2 size-4" />
               New Project
             </Button>
           </div>
         </CardHeader>
       </Card>
 
-      {/* Project creation dialog */}
       <ProjectDialog
         open={openProjectDialog}
         onOpenChange={setOpenProjectDialog}
@@ -267,7 +239,6 @@ export function WorkspaceContent() {
         }}
       />
 
-      {/* Workspace content tabs */}
       <Tabs defaultValue="projects" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="projects">Projects</TabsTrigger>
@@ -291,18 +262,16 @@ export function WorkspaceContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Project creation card */}
                 <Card
                   className="border-dashed border-2 hover:border-primary/50  transition-colors"
                   onClick={() => setOpenProjectDialog(true)}
                 >
                   <CardContent className="flex flex-col items-center justify-center h-40">
-                    <PlusCircle className="h-8 w-8 text-muted-foreground mb-2" />
+                    <PlusCircle className="size-8 text-muted-foreground mb-2" />
                     <p className="text-sm font-medium">Create New Project</p>
                   </CardContent>
                 </Card>
 
-                {/* Display projects */}
                 {isLoading ? (
                   <Card className="h-40">
                     <CardContent className="flex items-center justify-center h-full">
@@ -358,15 +327,17 @@ export function WorkspaceContent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Document upload card */}
                 <Card className="border-dashed border-2 hover:border-primary/50  transition-colors">
                   <CardContent className="flex flex-col items-center justify-center h-40">
-                    <FileText className="h-8 w-8 text-muted-foreground mb-2" />
+                    <FileText className="size-8 text-muted-foreground mb-2" />
                     <p className="text-sm font-medium">Upload Document</p>
+                    <span className="text-sm text-muted-foreground">
+                      (coming soon)
+                    </span>
                   </CardContent>
                 </Card>
 
-                {/* We'll add actual documents here later */}
+                {/* coming soon */}
               </div>
             </CardContent>
           </Card>
@@ -389,7 +360,7 @@ export function WorkspaceContent() {
           </Card>
         </TabsContent>
 
-        {/* Settings tab (only for workspace workspaces) */}
+        {/* Settings tab (only for workspaces with members) */}
         {!isIndividual && (
           <TabsContent value="settings" className="mt-4">
             <Card>
@@ -402,7 +373,7 @@ export function WorkspaceContent() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="grid gap-2">
-                    <h3 className="text-sm font-medium">Workspace Name</h3>
+                    <h3 className="text-sm font-semibold">Workspace Name</h3>
                     <div className="flex items-center gap-2">
                       <p className="text-sm">{currentWorkspace.name}</p>
                       {currentWorkspace.role === "OWNER" && (
@@ -411,7 +382,7 @@ export function WorkspaceContent() {
                           size="sm"
                           onClick={openEditDialog}
                         >
-                          <Settings className="h-4 w-4 mr-2" />
+                          <Settings className="size-4 mr-2" />
                           Edit
                         </Button>
                       )}
@@ -419,7 +390,7 @@ export function WorkspaceContent() {
                   </div>
 
                   <div className="grid gap-2">
-                    <h3 className="text-sm font-medium">Your Role</h3>
+                    <h3 className="text-sm font-semibold">Your Role</h3>
                     <p className="text-sm">{currentWorkspace.role}</p>
                   </div>
 
@@ -431,7 +402,7 @@ export function WorkspaceContent() {
                         className="w-fit"
                         onClick={() => setIsDeleteDialogOpen(true)}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="size-4 mr-2" />
                         Delete Workspace
                       </Button>
                     </div>
@@ -491,8 +462,8 @@ export function WorkspaceContent() {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              workspace "{currentWorkspace?.name}" and all of its projects and
-              tasks.
+              workspace "{currentWorkspace?.name}" and all of its related
+              projects and tasks.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
