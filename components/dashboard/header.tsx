@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { RightSideMenu } from "@/components/dashboard/right-side-menu";
+import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { Icons } from "@/components/icons";
 import {
   useWorkspace,
@@ -199,7 +199,7 @@ export function DashboardHeader() {
             href="/dashboard"
             className="hidden md:flex items-center px-4"
           />
-          <RightSideMenu className="md:hidden mx-2" />
+          <MobileNav className="md:hidden mx-2" />
 
           <span className="hidden md:block font-thin text-2xl text-muted-foreground">
             /

@@ -21,13 +21,6 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-/**
- * Tutor (Gemini 2.5 Pro)
- * Homework Helper (Grok 3)
- * Latest News (Sonar - Perplexity AI)
- * Companion (Grok 2)
- */
-
 interface ResearchModeAndSuggestionItem {
   label?: string;
   icon: React.ReactNode;
@@ -86,7 +79,6 @@ export function AIPrompt() {
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
 
-  // Auto resize textarea based on content
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -100,17 +92,14 @@ export function AIPrompt() {
     // Call once on mount
     adjustHeight();
 
-    // Setup event listeners
     textarea.addEventListener("input", adjustHeight);
     return () => textarea.removeEventListener("input", adjustHeight);
   }, []);
 
-  // Enable button when query has content
   useEffect(() => {
     setIsButtonEnabled(query.trim().length > 0);
   }, [query]);
 
-  // Detect screen size changes for the label responsive behavior in the buttons mode
   useEffect(() => {
     const handleResize = () => {
       setIsLargeScreen(window.innerWidth >= 640);
@@ -198,12 +187,12 @@ export function AIPrompt() {
                         <SelectLabel className="font-semibold">
                           Personas
                         </SelectLabel>
-                        <SelectItem value="gemini-2.5-pro">Tutor</SelectItem>
-                        <SelectItem value="grok-3">Homework Helper</SelectItem>
-                        <SelectItem value="sonar-perplexity-ai">
-                          Latest News
+                        <SelectItem value="tutor">Tutor</SelectItem>
+                        <SelectItem value="homework-helper">
+                          Homework Helper
                         </SelectItem>
-                        <SelectItem value="grok-2">Companion</SelectItem>
+                        <SelectItem value="latest-news">Latest News</SelectItem>
+                        <SelectItem value="companion">Companion</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
+import LoadingIndicator from "./loading-indicator";
 
 interface NavItem {
   title: string;
@@ -89,7 +90,7 @@ export function DashboardNav({ className }: DashboardNavProps) {
               )}
             >
               <Icon className="mr-2 size-4" />
-              {item.title}
+              {item.title} <LoadingIndicator />
             </Link>
           );
         })}
