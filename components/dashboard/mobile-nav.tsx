@@ -14,11 +14,11 @@ import { DashboardNav } from "@/components/dashboard/nav";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
-interface RightSideMenuProps {
+interface MobileNavProps {
   className?: string;
 }
 
-export function RightSideMenu({ className }: RightSideMenuProps) {
+export function MobileNav({ className }: MobileNavProps) {
   return (
     <Sheet>
       <SheetTrigger asChild className={className}>
