@@ -175,7 +175,7 @@ export function AIPrompt() {
 
               <div className="flex items-center gap-2">
                 <div>
-                  <Select defaultValue="gemini-2.5-pro">
+                  <Select defaultValue="tutor">
                     <SelectTrigger
                       id="personas-according-to-models"
                       className="border-none mr-1 cursor-pointer hover:bg-muted font-medium"
@@ -188,10 +188,10 @@ export function AIPrompt() {
                           Personas
                         </SelectLabel>
                         <SelectItem value="tutor">Tutor</SelectItem>
-                        <SelectItem value="homework-helper">
+                        {/* <SelectItem value="homework-helper">
                           Homework Helper
-                        </SelectItem>
-                        <SelectItem value="latest-news">Latest News</SelectItem>
+                        </SelectItem> */}
+                        {/* <SelectItem value="latest-news">Latest News</SelectItem> */}
                         <SelectItem value="companion">Companion</SelectItem>
                       </SelectGroup>
                     </SelectContent>
