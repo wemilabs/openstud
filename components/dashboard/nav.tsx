@@ -30,45 +30,55 @@ const navItems: NavItem[] = [
     icon: "book",
   },
   {
-    title: "Ask Clever",
-    href: "/dashboard/ask-clever",
-    icon: "bot",
+    title: "Marks",
+    href: "/dashboard/marks",
+    icon: "percent",
   },
+  // {
+  //   title: "Ask Clever",
+  //   href: "/dashboard/ask-clever",
+  //   icon: "bot",
+  // },
   // {
   //   title: "Assignments",
   //   href: "/dashboard/assignments",
   //   icon: "pencil",
   // },
+  {
+    title: "Timetable",
+    href: "/dashboard/timetable",
+    icon: "calendarDays",
+  },
   // {
   //   title: "Schedule",
   //   href: "/dashboard/schedule",
   //   icon: "calendar",
   // },
-  // {
-  //   title: "Progress",
-  //   href: "/dashboard/progress",
-  //   icon: "chartNoAxesColumn",
-  // },
+  {
+    title: "Progress",
+    href: "/dashboard/progress",
+    icon: "chartNoAxesColumn",
+  },
   {
     title: "Workspaces",
     href: "/dashboard/workspaces",
     icon: "users",
   },
-  // {
-  //   title: "Billing",
-  //   href: "/dashboard/billing",
-  //   icon: "billing",
-  // },
+  {
+    title: "Billing",
+    href: "/dashboard/billing",
+    icon: "billing",
+  },
   {
     title: "Settings",
     href: "/dashboard/settings",
     icon: "settings",
   },
-  // {
-  //   title: "Help",
-  //   href: "/docs/introduction",
-  //   icon: "help",
-  // },
+  {
+    title: "Help",
+    href: "/docs/introduction",
+    icon: "help",
+  },
 ];
 
 export function DashboardNav({ className }: DashboardNavProps) {
@@ -85,8 +95,10 @@ export function DashboardNav({ className }: DashboardNavProps) {
               href={item.href}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                pathname === item.href ? "bg-muted" : "hover:bg-muted",
-                "justify-start h-10 font-medium"
+                pathname === item.href
+                  ? "bg-muted font-semibold"
+                  : "hover:bg-muted font-medium",
+                "justify-start h-10"
               )}
             >
               <Icon className="mr-2 size-4" />
