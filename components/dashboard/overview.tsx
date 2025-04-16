@@ -19,7 +19,7 @@ export function Overview() {
     : `${currentWorkspace.name} Workspace Progress`;
 
   const description = isIndividual
-    ? "Relevant insights into your performance"
+    ? "Relevant insights about your ongoing projects"
     : `Collaborative performance overview for the ${currentWorkspace.name} workspace`;
 
   return (

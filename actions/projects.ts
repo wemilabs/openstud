@@ -52,7 +52,6 @@ export async function createProject(input: ProjectInput) {
               id: userId,
             },
           },
-          // No workspaceId for personal projects
         },
       });
 
