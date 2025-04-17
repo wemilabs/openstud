@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { UserAuthForm } from "@/components/auth/user-auth-form";
 import { BackButton } from "@/components/layout/back-button";
 
@@ -26,7 +27,9 @@ export default function LoginPage() {
           <p className="text-sm text-muted-foreground">Sign in below</p>
         </div>
 
-        <UserAuthForm />
+        <Suspense fallback={<div>Loading...</div>}>
+          <UserAuthForm />
+        </Suspense>
 
         <p className="sm:px-0 px-8 text-center text-sm text-muted-foreground">
           By continuing, you agree to our{" "}
