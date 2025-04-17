@@ -4,9 +4,11 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET! });
   const isLoggedIn = !!token;
+  console.log(`isLoggedIn: ${isLoggedIn}`);
+  console.log(token);
 
   const { pathname } = req.nextUrl;
-  const isAuthPage = pathname === "/login" || pathname.startsWith("/login/");
+  const isAuthPage = pathname.startsWith("/login");
   const isDashboardPage = pathname.startsWith("/dashboard");
 
   if (!isLoggedIn && isDashboardPage) {
@@ -45,7 +47,6 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/login",
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
