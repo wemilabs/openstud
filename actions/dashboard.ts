@@ -159,7 +159,6 @@ export async function getRecentActivity(workspaceId?: string) {
       }
     }
 
-    // Type for project with user information included
     type ProjectWithUserInfo = {
       id: string;
       name: string;
@@ -264,26 +263,26 @@ export async function getRecentActivity(workspaceId?: string) {
       },
     });
 
-    // Debug - Check if createdBy information is being fetched correctly
-    console.log(
-      "Tasks with creator info:",
-      JSON.stringify(
-        recentTasks.map((task) => ({
-          id: task.id,
-          title: task.title,
-          createdById: task.createdById,
-          createdBy: task.createdBy,
-          hasUser: !!task.createdBy,
-          userName: task.createdBy?.name,
-          userEmail: task.createdBy?.email,
-        })),
-        null,
-        2
-      )
-    );
+    // // Debug - Check if createdBy information is being fetched correctly
+    // console.log(
+    //   "Tasks with creator info:",
+    //   JSON.stringify(
+    //     recentTasks.map((task) => ({
+    //       id: task.id,
+    //       title: task.title,
+    //       createdById: task.createdById,
+    //       createdBy: task.createdBy,
+    //       hasUser: !!task.createdBy,
+    //       userName: task.createdBy?.name,
+    //       userEmail: task.createdBy?.email,
+    //     })),
+    //     null,
+    //     2
+    //   )
+    // );
 
-    // Debug the full task data from prisma
-    console.log("Raw task data:", JSON.stringify(recentTasks[0], null, 2));
+    // // Debug the full task data from prisma
+    // console.log("Raw task data:", JSON.stringify(recentTasks[0], null, 2));
 
     // Transform the data for the activity feed using the task creator information
     const activities = recentTasks.map((task) => {
