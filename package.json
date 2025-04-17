@@ -1,11 +1,11 @@
 {
   "name": "openstud",
-  "version": "0.12.9",
+  "version": "0.12.11",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
-    "start": "next start",
+    "build": "prisma generate && next build --turbopack",
+    "start": "next start --turbopack",
     "lint": "next lint"
   },
   "dependencies": {
