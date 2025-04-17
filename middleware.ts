@@ -2,12 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "@auth/core/jwt";
 
 export async function middleware(req: NextRequest) {
-  const token = await getToken({ req });
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET! });
   const isLoggedIn = !!token;
 
-  console.log(req.cookies);
-  console.log(`isLoggedIn: ${isLoggedIn}`);
   console.log(token);
+  console.log(isLoggedIn);
 
   const { pathname } = req.nextUrl;
   const isAuthPage = pathname.startsWith("/login");
