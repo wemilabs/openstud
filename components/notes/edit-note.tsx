@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { updateNote } from "@/actions/notes";
-import { Note } from "@prisma/client";
+import { Note } from "@/generated/prisma/client";
 import { Pencil } from "lucide-react";
 
 // Form validation schema

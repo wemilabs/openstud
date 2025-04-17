@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-  // Check if logged in using auth() session
-  const session = await auth();
-  const isLoggedIn = !!session;
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET! });
+  const isLoggedIn = !!token;
 
-  const isAuthPage = req.nextUrl.pathname.startsWith("/login");
-  const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
+  const { pathname } = req.nextUrl;
+  const isAuthPage = pathname === "/login" || pathname.startsWith("/login/");
+  const isDashboardPage = pathname.startsWith("/dashboard");
 
-  // Handle authentication redirects
   if (!isLoggedIn && isDashboardPage) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -17,8 +16,6 @@ export async function middleware(req: NextRequest) {
   if (isLoggedIn && isAuthPage) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
-
-  // Apply security headers
   const headers = new Headers(req.headers);
   headers.set("X-DNS-Prefetch-Control", "on");
   headers.set(
@@ -45,13 +42,10 @@ export async function middleware(req: NextRequest) {
   return response;
 }
 
-// Protect dashboard and auth routes while applying security headers to all routes
 export const config = {
   matcher: [
-    // Auth and dashboard routes that need protection
     "/dashboard/:path*",
     "/login",
-    // All routes for security headers
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };

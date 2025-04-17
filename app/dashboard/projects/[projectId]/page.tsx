@@ -46,12 +46,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { CompletionSlider } from "@/components/tasks/completion-slider";
 import { SaveChangesButton } from "@/components/dashboard/save-changes-button";
 
-// Sort options
 type SortOption = "createdAt" | "dueDate" | "priority" | "title";
 
-/**
- * Default project page that displays tasks
- */
 export default function ProjectPage() {
   const params = useParams();
   const projectId = params.projectId as string;
@@ -64,9 +60,6 @@ export default function ProjectPage() {
   );
 }
 
-/**
- * Project content component that displays tasks
- */
 function ProjectContent({ projectId }: { projectId: string }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
@@ -89,7 +82,6 @@ function ProjectContent({ projectId }: { projectId: string }) {
   const [sortBy, setSortBy] = useState<SortOption>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  // Fetch tasks when the component mounts
   useEffect(() => {
     const fetchTasks = async () => {
       setIsLoadingTasks(true);
@@ -122,11 +114,9 @@ function ProjectContent({ projectId }: { projectId: string }) {
     fetchTasks();
   }, [projectId]);
 
-  // Filter and sort tasks
   useEffect(() => {
     let filtered = [...tasks];
 
-    // Filter by status
     if (filterStatus === "completed") {
       filtered = filtered.filter(
         (task) => task.completed || task.completionPercentage === 100

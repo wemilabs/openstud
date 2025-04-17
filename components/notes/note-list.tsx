@@ -1,6 +1,6 @@
 "use client";
 
-import { Note } from "@prisma/client";
+import { Note } from "@/generated/prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { EditNote } from "./edit-note";
 import { DeleteNote } from "./delete-note";
@@ -22,7 +22,8 @@ export function NoteList({ notes = [], courseId }: NoteListProps) {
           <FileText className="h-10 w-10 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold">No notes yet</h3>
           <p className="mb-4 mt-2 text-center text-sm font-normal leading-6 text-muted-foreground">
-            You haven't created any notes for this course yet. Start by adding your first note.
+            You haven't created any notes for this course yet. Start by adding
+            your first note.
           </p>
         </div>
       </div>
@@ -38,10 +39,12 @@ export function NoteList({ notes = [], courseId }: NoteListProps) {
               <EditNote note={note} />
               <DeleteNote noteId={note.id} noteTitle={note.title} />
             </div>
-            <ViewNote note={{
-              ...note,
-              content: note.content === null ? null : (note.content || null)
-            }} />
+            <ViewNote
+              note={{
+                ...note,
+                content: note.content === null ? null : note.content || null,
+              }}
+            />
           </div>
         ))}
       </div>

@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
@@ -103,10 +103,10 @@ export async function getCourses({
       include: {
         _count: {
           select: {
-            notes: true
-          }
-        }
-      }
+            notes: true,
+          },
+        },
+      },
     });
 
     return {
