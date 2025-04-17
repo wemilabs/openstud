@@ -85,7 +85,6 @@ export function RecentActivity({
           setError(result.error);
           setActivities([]);
         } else {
-          console.log("Activity data received:", result.data);
           setActivities(result.data || []);
         }
       } catch (err) {
@@ -241,13 +240,6 @@ export function RecentActivity({
           ) : (
             <div className="space-y-4">
               {activities.map((activity) => {
-                console.log(
-                  "Rendering activity:",
-                  activity.id,
-                  "User:",
-                  activity.user
-                );
-
                 const categoryConfig = activity.category
                   ? getTaskCategoryConfig(activity.category)
                   : null;
