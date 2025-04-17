@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { WorkspaceRole } from "@prisma/client";
 import { toast } from "sonner";
+import { WorkspaceRoles } from "@/lib/workspace-roles";
 import { createWorkspaceInvitation } from "@/actions/workspace-invitations";
 
 import {
@@ -38,7 +38,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Plus, Copy, Check } from "lucide-react";
 
 const inviteFormSchema = z.object({
-  role: z.nativeEnum(WorkspaceRole),
+  role: z.nativeEnum(WorkspaceRoles),
   expiresInDays: z.number().int().min(1).max(30),
   maxUses: z.union([z.number().int().min(1).max(100), z.literal(null)]),
 });
@@ -62,7 +62,7 @@ export function InviteMemberDialog({
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteFormSchema) as any,
     defaultValues: {
-      role: WorkspaceRole.MEMBER,
+      role: WorkspaceRoles.MEMBER,
       expiresInDays: 7,
       maxUses: null,
     },
@@ -164,13 +164,13 @@ export function InviteMemberDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={WorkspaceRole.MEMBER}>
+                        <SelectItem value={WorkspaceRoles.MEMBER}>
                           Member
                         </SelectItem>
-                        <SelectItem value={WorkspaceRole.ADMIN}>
+                        <SelectItem value={WorkspaceRoles.ADMIN}>
                           Admin
                         </SelectItem>
-                        <SelectItem value={WorkspaceRole.OWNER}>
+                        <SelectItem value={WorkspaceRoles.OWNER}>
                           Owner
                         </SelectItem>
                       </SelectContent>
