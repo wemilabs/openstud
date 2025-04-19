@@ -67,6 +67,12 @@ export default function Chat() {
           placeholder="Say something..."
           onChange={handleInputChange}
         />
+        {/* <Textarea
+          className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 shadow-xl"
+          placeholder="Say something..."
+          value={input}
+          onChange={handleInputChange}
+        /> */}
       </form>
     </div>
   );
