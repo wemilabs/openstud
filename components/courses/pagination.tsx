@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation";
 import {
   Pagination as PaginationContainer,
   PaginationContent,
@@ -9,44 +9,42 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
+} from "@/components/ui/pagination";
 
 interface PaginationProps {
-  totalPages: number
-  currentPage: number
+  totalPages: number;
+  currentPage: number;
 }
 
 export function Pagination({ totalPages, currentPage }: PaginationProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
 
   const createPageURL = (pageNumber: number | string) => {
-    const params = new URLSearchParams(searchParams)
-    params.set("page", pageNumber.toString())
-    return `?${params.toString()}`
-  }
+    const params = new URLSearchParams(searchParams);
+    params.set("page", pageNumber.toString());
+    return `?${params.toString()}`;
+  };
 
-  // Generate page numbers to show
   const getPageNumbers = () => {
-    const pageNumbers = []
-    const maxPagesToShow = 5
-    const halfMaxPages = Math.floor(maxPagesToShow / 2)
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    const halfMaxPages = Math.floor(maxPagesToShow / 2);
 
-    let startPage = Math.max(currentPage - halfMaxPages, 1)
-    let endPage = Math.min(startPage + maxPagesToShow - 1, totalPages)
+    let startPage = Math.max(currentPage - halfMaxPages, 1);
+    let endPage = Math.min(startPage + maxPagesToShow - 1, totalPages);
 
     if (endPage - startPage + 1 < maxPagesToShow) {
-      startPage = Math.max(endPage - maxPagesToShow + 1, 1)
+      startPage = Math.max(endPage - maxPagesToShow + 1, 1);
     }
 
     for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i)
+      pageNumbers.push(i);
     }
 
-    return pageNumbers
-  }
+    return pageNumbers;
+  };
 
-  if (totalPages <= 1) return null
+  if (totalPages <= 1) return null;
 
   return (
     <PaginationContainer>
@@ -94,5 +92,5 @@ export function Pagination({ totalPages, currentPage }: PaginationProps) {
         </PaginationItem>
       </PaginationContent>
     </PaginationContainer>
-  )
+  );
 }

@@ -51,7 +51,7 @@ export function CourseList({ courses = [] }: CourseListProps) {
         <div className="flex items-center justify-between gap-x-4 -mb-4">
           <CourseSearch />
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="md:mr-6">
               <Button variant="outline" size="sm">
                 <ArrowUpDown className="size-4" />
               </Button>
@@ -91,7 +91,7 @@ export function CourseList({ courses = [] }: CourseListProps) {
       <div className="flex items-center justify-between gap-x-4 -mb-4">
         <CourseSearch />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild className="md:mr-6">
             <Button variant="outline" size="sm">
               <ArrowUpDown className="size-4" />
             </Button>
@@ -113,7 +113,7 @@ export function CourseList({ courses = [] }: CourseListProps) {
         </DropdownMenu>
       </div>
       <ScrollArea className="h-[calc(100vh-220px)]">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:pr-2">
           {courses.map((course) => (
             <Card
               key={course.id}
@@ -125,7 +125,7 @@ export function CourseList({ courses = [] }: CourseListProps) {
               </div>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Book className="h-4 w-4 text-muted-foreground" />
+                  <Book className="size-4 text-muted-foreground" />
                   <Link href={`/dashboard/courses/${course.id}`}>
                     <CardTitle className="line-clamp-1 text-base">
                       {course.name}
@@ -140,7 +140,7 @@ export function CourseList({ courses = [] }: CourseListProps) {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="size-4" />
                   <span>
                     Created {formatDistanceToNow(course.createdAt)} ago
                   </span>
@@ -151,8 +151,7 @@ export function CourseList({ courses = [] }: CourseListProps) {
                   variant="secondary"
                   className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
                 >
-                  {course._count.notes}{" "}
-                  {course._count.notes === 1 ? "Note" : "Notes"}
+                  {course._count.notes} Note{course._count.notes > 1 ? "s" : ""}
                 </Badge>
                 <Badge variant="outline">No assignments</Badge>
               </CardFooter>

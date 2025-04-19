@@ -1,17 +1,15 @@
 "use client";
 
 import { Note } from "@/generated/prisma/client";
-import { formatDistanceToNow } from "date-fns";
 import { EditNote } from "./edit-note";
 import { DeleteNote } from "./delete-note";
 import { ViewNote } from "./view-note";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText } from "lucide-react";
 
 interface NoteListProps {
   notes: Note[] | undefined;
-  courseId: string;
+  courseId?: string;
 }
 
 export function NoteList({ notes = [], courseId }: NoteListProps) {

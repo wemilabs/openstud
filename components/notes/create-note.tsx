@@ -50,9 +50,10 @@ const formSchema = z.object({
 
 interface CreateNoteProps {
   courseId: string;
+  className?: string;
 }
 
-export function CreateNote({ courseId }: CreateNoteProps) {
+export function CreateNote({ courseId, className }: CreateNoteProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,7 +95,7 @@ export function CreateNote({ courseId }: CreateNoteProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild className={className}>
         <Button size="sm">
           <Plus className="size-4" />
           Add Note
