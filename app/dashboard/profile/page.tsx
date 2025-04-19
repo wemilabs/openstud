@@ -16,7 +16,6 @@ export default async function ProfilePage() {
   const user = await requireAuth();
   const plan = (await getUserPlan()) || "FREE";
 
-  // Fetch the user from the database to get the username, bio, and school fields
   const dbUser = user.email
     ? await prisma.user.findUnique({
         where: { email: user.email },
@@ -38,10 +37,8 @@ export default async function ProfilePage() {
   const studentId = dbUser?.studentId || "";
   const schoolEmail = dbUser?.schoolEmail || "";
 
-  // Format the user's plan for display
   const formattedPlan = plan.charAt(0) + plan.slice(1).toLowerCase();
 
-  // Format date for display using the actual user creation date
   const joinedDate = dbUser?.createdAt
     ? new Date(dbUser.createdAt).toLocaleDateString("en-US", {
         year: "numeric",
