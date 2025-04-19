@@ -37,7 +37,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
           href="/dashboard/courses"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           Back to Courses
         </Link>
       </div>
@@ -60,7 +60,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
             Add and manage your course notes.
           </p>
         </div>
-        <CreateNote courseId={course.id} />
+        <CreateNote courseId={course.id} className="md:mr-6" />
       </div>
 
       <Suspense fallback={<div>Loading notes...</div>}>

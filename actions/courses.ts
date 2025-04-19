@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 
-// Schema for course creation/update validation
 const CourseSchema = z.object({
   name: z
     .string()

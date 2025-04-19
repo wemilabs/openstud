@@ -43,7 +43,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             Add and manage courses. Click on a course title to view your notes.
           </h2>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center md:mr-6">
           <CreateCourse />
         </div>
       </div>
