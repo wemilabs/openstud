@@ -12,6 +12,8 @@ interface NavItem {
   title: string;
   href: string;
   icon: keyof typeof Icons;
+  target?: string;
+  rel?: string;
 }
 
 interface DashboardNavProps {
@@ -78,6 +80,8 @@ const navItems: NavItem[] = [
     title: "Help",
     href: "/docs/introduction",
     icon: "help",
+    target: "_blank",
+    rel: "noreferrer",
   },
 ];
 
@@ -87,22 +91,24 @@ export function DashboardNav({ className }: DashboardNavProps) {
   return (
     <nav className={cn("grid items-start gap-2 p-4", className)}>
       <div className="grid gap-1 pt-4 pl-8 md:mt-8">
-        {navItems.map((item) => {
-          const Icon = Icons[item.icon];
+        {navItems.map(({ href, icon, rel, title, target }) => {
+          const Icon = Icons[icon];
           return (
             <Link
-              key={item.href}
-              href={item.href}
+              key={href}
+              href={href}
+              target={target}
+              rel={rel}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                pathname === item.href
+                pathname === href
                   ? "bg-muted font-semibold"
                   : "hover:bg-muted font-medium",
                 "justify-start h-10"
               )}
             >
               <Icon className="mr-2 size-4" />
-              {item.title} <LoadingIndicator />
+              {title} <LoadingIndicator />
             </Link>
           );
         })}

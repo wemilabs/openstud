@@ -43,9 +43,10 @@ import {
   Users,
   X,
   TextSearch,
-  type Icon as LucideIcon,
   Percent,
   CalendarDays,
+  Download,
+  type Icon as LucideIcon,
 } from "lucide-react";
 
 export type Icon = typeof LucideIcon;
@@ -95,6 +96,7 @@ export const Icons = {
   textSearch: TextSearch,
   percent: Percent,
   calendarDays: CalendarDays,
+  download: Download,
 } as const;
 
 export const GoogleIcon = (props: SVGProps<SVGSVGElement>) => (
