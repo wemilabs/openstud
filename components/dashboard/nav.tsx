@@ -81,7 +81,7 @@ const navItems: NavItem[] = [
     href: "/docs/introduction",
     icon: "help",
     target: "_blank",
-    rel: "noreferrer",
+    rel: "noopener noreferrer nofollow",
   },
 ];
 
@@ -97,8 +97,8 @@ export function DashboardNav({ className }: DashboardNavProps) {
             <Link
               key={href}
               href={href}
-              target={target}
               rel={rel}
+              target={target}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
                 pathname === href
