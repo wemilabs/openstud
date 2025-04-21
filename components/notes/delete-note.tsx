@@ -18,12 +18,13 @@ import { toast } from "sonner";
 import { deleteNote } from "@/actions/notes";
 import { Trash2 } from "lucide-react";
 
-interface DeleteNoteProps {
+export function DeleteNote({
+  noteId,
+  noteTitle,
+}: {
   noteId: string;
   noteTitle: string;
-}
-
-export function DeleteNote({ noteId, noteTitle }: DeleteNoteProps) {
+}) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -55,7 +56,7 @@ export function DeleteNote({ noteId, noteTitle }: DeleteNoteProps) {
           size="icon"
           className="size-8 bg-destructive text-muted hover:text-muted dark:text-primary hover:bg-destructive/90 "
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="size-4" />
           <span className="sr-only">Delete note</span>
         </Button>
       </AlertDialogTrigger>

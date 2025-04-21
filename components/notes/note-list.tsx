@@ -1,6 +1,7 @@
 "use client";
 
-import { Note } from "@/generated/prisma/client";
+import type { Note } from "@/generated/prisma/client";
+import { DownloadNote } from "./download-note";
 import { EditNote } from "./edit-note";
 import { DeleteNote } from "./delete-note";
 import { ViewNote } from "./view-note";
@@ -9,10 +10,9 @@ import { FileText } from "lucide-react";
 
 interface NoteListProps {
   notes: Note[] | undefined;
-  courseId?: string;
 }
 
-export function NoteList({ notes = [], courseId }: NoteListProps) {
+export function NoteList({ notes = [] }: NoteListProps) {
   if (notes.length === 0) {
     return (
       <div className="flex min-h-[200px] flex-col items-center justify-center rounded-md border border-dashed p-8 text-center animate-in fade-in-50">
@@ -34,7 +34,12 @@ export function NoteList({ notes = [], courseId }: NoteListProps) {
         {notes.map((note) => (
           <div key={note.id} className="relative group">
             <div className="absolute right-2 top-2 z-10 flex space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
-              <EditNote note={note} />
+              <DownloadNote noteId={note.id} />
+              <EditNote
+                noteId={note.id}
+                noteTitle={note.title}
+                noteContent={note.content || ""}
+              />
               <DeleteNote noteId={note.id} noteTitle={note.title} />
             </div>
             <ViewNote

@@ -51,13 +51,13 @@ export function ViewNote({ note, trigger }: ViewNoteProps) {
         <DialogHeader>
           <DialogTitle>{note.title}</DialogTitle>
           <DialogDescription className="flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
+            <Calendar className="size-3" />
             <span>Last updated {formatDistanceToNow(note.updatedAt)} ago</span>
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[calc(80vh-120px)]">
           <div className="space-y-4 p-1">
-            <div className="whitespace-pre-wrap">
+            <div className="whitespace-pre-wrap text-sm">
               {note.content || "This note has no content."}
             </div>
           </div>

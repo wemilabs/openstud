@@ -27,10 +27,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { updateNote } from "@/actions/notes";
-import { Note } from "@/generated/prisma/client";
+import type { Note } from "@/generated/prisma/client";
 import { Pencil } from "lucide-react";
 
-// Form validation schema
 const noteFormSchema = z.object({
   title: z
     .string()
@@ -49,11 +48,15 @@ const noteFormSchema = z.object({
     }),
 });
 
-interface EditNoteProps {
-  note: Note;
-}
-
-export function EditNote({ note }: EditNoteProps) {
+export function EditNote({
+  noteId,
+  noteTitle,
+  noteContent,
+}: {
+  noteId: string;
+  noteTitle: string;
+  noteContent: string;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,8 +64,8 @@ export function EditNote({ note }: EditNoteProps) {
   const form = useForm<z.infer<typeof noteFormSchema>>({
     resolver: zodResolver(noteFormSchema),
     defaultValues: {
-      title: note.title,
-      content: note.content || "",
+      title: noteTitle,
+      content: noteContent || "",
     },
   });
 
@@ -71,7 +74,7 @@ export function EditNote({ note }: EditNoteProps) {
     setIsSubmitting(true);
 
     try {
-      const result = await updateNote(note.id, values);
+      const result = await updateNote(noteId, values);
 
       if (result.error) {
         toast.error(result.error);
@@ -96,7 +99,7 @@ export function EditNote({ note }: EditNoteProps) {
           size="icon"
           className="size-8 bg-muted text-primary dark:text-primary hover:bg-muted/90 "
         >
-          <Pencil className="h-4 w-4" />
+          <Pencil className="size-4" />
           <span className="sr-only">Edit note</span>
         </Button>
       </DialogTrigger>
@@ -146,11 +149,7 @@ export function EditNote({ note }: EditNoteProps) {
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-cyan-500 hover:ease-in-out hover:duration-500  text-white dark:text-primary"
-              >
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
