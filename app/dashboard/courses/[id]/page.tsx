@@ -64,7 +64,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
       </div>
 
       <Suspense fallback={<div>Loading notes...</div>}>
-        <NoteList notes={notes} courseId={course.id} />
+        <NoteList notes={notes} />
       </Suspense>
     </div>
   );
