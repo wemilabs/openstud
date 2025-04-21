@@ -78,7 +78,7 @@ const navItems: NavItem[] = [
   },
   {
     title: "Help",
-    href: "/docs/introduction",
+    href: "/docs/introduction", // in the future, it'll point to docs.openstud.(com/app/dev)
     icon: "help",
     target: "_blank",
     rel: "noopener noreferrer nofollow",
