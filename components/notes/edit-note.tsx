@@ -27,8 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { updateNote } from "@/actions/notes";
-import type { Note } from "@/generated/prisma/client";
-import { Pencil } from "lucide-react";
+import { Icons } from "../icons";
 
 const noteFormSchema = z.object({
   title: z
@@ -99,7 +98,7 @@ export function EditNote({
           size="icon"
           className="size-8 bg-muted text-primary dark:text-primary hover:bg-muted/90 "
         >
-          <Pencil className="size-4" />
+          <Icons.pencil className="size-4" />
           <span className="sr-only">Edit note</span>
         </Button>
       </DialogTrigger>
