@@ -11,16 +11,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-/**
- * Button component for saving or discarding pending task changes
- */
 export function SaveChangesButton() {
-  const { hasPendingChanges, pendingChanges, saveAllChanges, discardAllChanges } = useTaskChanges();
+  const {
+    hasPendingChanges,
+    pendingChanges,
+    saveAllChanges,
+    discardAllChanges,
+  } = useTaskChanges();
   const [isSaving, setIsSaving] = useState(false);
 
-  /**
-   * Handle saving all changes
-   */
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -30,7 +29,6 @@ export function SaveChangesButton() {
     }
   };
 
-  // Don't render anything if there are no pending changes
   if (!hasPendingChanges) {
     return null;
   }
@@ -46,7 +44,7 @@ export function SaveChangesButton() {
               onClick={discardAllChanges}
               disabled={isSaving}
             >
-              <X className="h-4 w-4 mr-1" />
+              <X className="size-4 mr-1" />
               Discard
             </Button>
           </TooltipTrigger>
@@ -67,11 +65,12 @@ export function SaveChangesButton() {
               className="bg-green-600 hover:bg-green-700"
             >
               {isSaving ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                <Loader2 className="size-4 mr-1 animate-spin" />
               ) : (
-                <Save className="h-4 w-4 mr-1" />
+                <Save className="size-4 mr-1" />
               )}
-              Save {pendingChanges.length} {pendingChanges.length === 1 ? "Change" : "Changes"}
+              Save {pendingChanges.length}{" "}
+              {pendingChanges.length === 1 ? "Change" : "Changes"}
             </Button>
           </TooltipTrigger>
           <TooltipContent>
