@@ -13,12 +13,14 @@ import { Logo } from "@/components/layout/logo";
 import { DashboardNav } from "@/components/dashboard/nav";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import type { UserRole } from "@/generated/prisma/client";
 
 interface MobileNavProps {
   className?: string;
+  userRole: UserRole | null | undefined;
 }
 
-export function MobileNav({ className }: MobileNavProps) {
+export function MobileNav({ className, userRole }: MobileNavProps) {
   return (
     <Sheet>
       <SheetTrigger asChild className={className}>
@@ -34,7 +36,7 @@ export function MobileNav({ className }: MobileNavProps) {
           <SheetDescription className="">
             You're currently using{" "}
             <code className="bg-muted font-semibold px-2 rounded-full">
-              v0.17.11
+              v1.0.1
             </code>{" "}
             of Openstud.
           </SheetDescription>
@@ -46,7 +48,7 @@ export function MobileNav({ className }: MobileNavProps) {
           </Badge>
         </SheetHeader>
 
-        <DashboardNav />
+        <DashboardNav userRole={userRole} />
 
         <SheetFooter className="text-xs text-muted-foreground text-center">
           <div>

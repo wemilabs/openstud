@@ -16,7 +16,7 @@ export default async function DashboardPage() {
         <h1 className="text-xl font-medium tracking-tight">
           🎉 Hey, you're welcome{" "}
           <span className="font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-            {session?.user?.name}
+            {session?.user?.role}
           </span>
           !
         </h1>

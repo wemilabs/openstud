@@ -50,6 +50,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createWorkspace } from "@/actions/workspaces";
 import { toast } from "sonner";
+import type { UserRole } from "@/generated/prisma/client";
 
 // const academicYears = [
 //   {
@@ -97,7 +98,11 @@ import { toast } from "sonner";
 //   },
 // ];
 
-export function DashboardHeader() {
+export function DashboardHeader({
+  userRole,
+}: {
+  userRole: UserRole | null | undefined;
+}) {
   const { data: session } = useSession();
   const user = session?.user;
   const [openWorkspace, setOpenWorkspace] = useState(false);
@@ -199,7 +204,7 @@ export function DashboardHeader() {
             href="/dashboard"
             className="hidden md:flex items-center px-4"
           />
-          <MobileNav className="md:hidden mx-2" />
+          <MobileNav className="md:hidden mx-2" userRole={userRole} />
 
           <span className="hidden md:block font-thin text-2xl text-muted-foreground">
             /

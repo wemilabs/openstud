@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import LoadingIndicator from "./loading-indicator";
+import type { UserRole } from "@/generated/prisma/client";
 
 interface NavItem {
   title: string;
@@ -18,6 +19,7 @@ interface NavItem {
 
 interface DashboardNavProps {
   className?: string;
+  userRole: UserRole | null | undefined;
 }
 
 const navItems: NavItem[] = [
@@ -85,9 +87,8 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function DashboardNav({ className }: DashboardNavProps) {
+export function DashboardNav({ className, userRole }: DashboardNavProps) {
   const pathname = usePathname();
-
   return (
     <nav className={cn("grid items-start gap-2 p-4", className)}>
       <div className="grid gap-1 pt-4 pl-8 md:mt-8">

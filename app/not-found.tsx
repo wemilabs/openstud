@@ -23,9 +23,8 @@ export default function NotFound() {
       />
       <h1 className="text-4xl font-bold mb-4">Oops!😬</h1>
       <p className="mb-8">
-        <code className="bg-muted font-medium px-2 rounded-full">v0.17.11</code>
-        : The page you're looking for – either in construction or has been
-        moved.
+        <code className="bg-muted font-medium px-2 rounded-full">v1.0.1</code>:
+        The page you're looking for – either in construction or has been moved.
       </p>
 
       <BackButton variant="default" text="Previous" />
