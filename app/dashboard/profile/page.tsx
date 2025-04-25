@@ -51,7 +51,7 @@ export default async function ProfilePage() {
     <div className="container max-w-4xl py-8">
       <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>
 
-      <div className="grid gap-8 md:grid-cols-[1fr_2fr]">
+      <div className="grid gap-6 md:grid-cols-[1fr_2fr]">
         <Card className="h-fit">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
@@ -87,6 +87,7 @@ export default async function ProfilePage() {
           <ProfileForm
             username={username}
             email={user.email}
+            role={user.role}
             bio={bio}
             school={school}
             studentId={studentId}

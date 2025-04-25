@@ -2,18 +2,16 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
-/**
- * Get the current authenticated user's session
- */
 export async function getCurrentUser() {
   const session = await auth();
   return session?.user;
 }
 
-/**
- * Require authentication for a route
- * Redirects to login if not authenticated
- */
+export async function getCurrentUserRole() {
+  const user = await getCurrentUser();
+  return user?.role;
+}
+
 export async function requireAuth() {
   const user = await getCurrentUser();
 
@@ -24,9 +22,6 @@ export async function requireAuth() {
   return user;
 }
 
-/**
- * Get user's subscription plan
- */
 export async function getUserPlan() {
   const user = await getCurrentUser();
   if (!user?.email) return null;
@@ -37,20 +32,4 @@ export async function getUserPlan() {
   });
 
   return dbUser?.plan ?? "FREE";
-}
-
-/**
- * Check if user is on ultimate plan
- */
-export async function isUltimatePlan() {
-  const plan = await getUserPlan();
-  return plan === "ULTIMATE";
-}
-
-/**
- * Check if user is on pro plan or higher
- */
-export async function isProOrHigher() {
-  const plan = await getUserPlan();
-  return plan === "PRO" || plan === "ULTIMATE";
 }
