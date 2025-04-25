@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,6 +79,7 @@ export function AIPrompt() {
   const [query, setQuery] = useState("");
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -120,9 +122,9 @@ export function AIPrompt() {
           if (!query.trim()) return;
 
           // Redirect to the chat page with the question
-          window.location.href = `/dashboard/ask-clever/chat/new?q=${encodeURIComponent(
-            query
-          )}`;
+          router.push(
+            `/dashboard/ask-clever/chat/new?q=${encodeURIComponent(query)}`
+          );
         }}
       >
         <div className="flex flex-col w-full">

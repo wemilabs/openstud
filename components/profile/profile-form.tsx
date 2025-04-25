@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "../ui/textarea";
 import { Icons } from "../icons";
+import type { UserRole } from "@/generated/prisma/client";
 
 interface ProfileFormProps {
   username: string | null | undefined;
@@ -17,19 +18,20 @@ interface ProfileFormProps {
   school: string | null | undefined;
   studentId: string | null | undefined;
   schoolEmail: string | null | undefined;
+  role: UserRole | null | undefined;
 }
 
 export function ProfileForm({
   username,
-  bio,
+  role,
   email,
   school,
   studentId,
   schoolEmail,
+  bio,
 }: ProfileFormProps) {
   const [isPending, startTransition] = useTransition();
 
-  // Server action wrapper for client-side feedback
   const clientAction = async (formData: FormData) => {
     startTransition(async () => {
       const formUsername = formData.get("username") as string;
@@ -73,6 +75,21 @@ export function ProfileForm({
           <p className="text-xs text-muted-foreground">
             Your username must be 3-30 characters and can only include letters,
             numbers, underscores, and hyphens.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="role">Role</Label>
+          <Input
+            id="role"
+            name="role"
+            placeholder="Enter your role"
+            defaultValue={role || ""}
+            disabled
+          />
+          <p className="text-xs text-muted-foreground">
+            Your role is managed by your authentication provider. Contact the
+            administrator for role changes.
           </p>
         </div>
 

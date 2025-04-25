@@ -254,3 +254,44 @@ export async function deleteAccount() {
     };
   }
 }
+
+// Define allowed roles using Zod enum
+const AllowedRolesEnum = z.enum([
+  "STUDENT",
+  "PROFESSOR",
+  "RESEARCHER",
+  "ADMIN",
+]);
+
+/**
+ * Updates the user's role after onboarding.
+ *
+ * @param {string} role - The selected role (STUDENT, PROFESSOR, RESEARCHER, ADMIN).
+ */
+export async function updateUserRole(role: string) {
+  try {
+    const user = await getCurrentUser();
+    if (!user?.email || !user?.id) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    const validatedRole = AllowedRolesEnum.safeParse(role);
+    if (!validatedRole.success) {
+      return { success: false, error: "Invalid role selected" };
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        role: validatedRole.data,
+        onboardingCompleted: true,
+      },
+    });
+    revalidatePath("/dashboard");
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error updating user role:", error);
+    return { success: false, error: "Failed to update role" };
+  }
+}

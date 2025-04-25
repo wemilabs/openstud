@@ -4,5 +4,5 @@ export default async function ChatPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  return <div>Chat {id}</div>;
+  return <div>New conversation {id}</div>;
 }
