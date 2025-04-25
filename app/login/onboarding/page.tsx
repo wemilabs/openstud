@@ -31,11 +31,6 @@ const roles = [
       "Plan projects, track experiments, and collaborate on findings.",
     value: "RESEARCHER",
   },
-  {
-    name: "Administrator",
-    description: "Oversee the platform, manage users, and configure settings.",
-    value: "ADMIN",
-  },
 ];
 
 export default function OnboardingPage() {
