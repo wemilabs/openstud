@@ -4,7 +4,7 @@
 // export default function AskCleverPage() {
 //   return (
 //     <section>
-//       <div className="flex items-center justify-end -mt-2">
+//       <div className="flex items-center justify-end -mt-2 md:pr-9">
 //         <ChatHistory />
 //       </div>
 
