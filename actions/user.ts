@@ -260,13 +260,13 @@ const AllowedRolesEnum = z.enum([
   "STUDENT",
   "PROFESSOR",
   "RESEARCHER",
-  "ADMIN",
+  "SUPERVISOR",
 ]);
 
 /**
  * Updates the user's role after onboarding.
  *
- * @param {string} role - The selected role (STUDENT, PROFESSOR, RESEARCHER, ADMIN).
+ * @param {string} role - The selected role (STUDENT, PROFESSOR, RESEARCHER, SUPERVISOR).
  */
 export async function updateUserRole(role: string) {
   try {

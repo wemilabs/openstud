@@ -31,6 +31,12 @@ const roles = [
       "Plan projects, track experiments, and collaborate on findings.",
     value: "RESEARCHER",
   },
+  {
+    name: "Supervisor",
+    description:
+      "Manage researcher projects, assign tasks, and provide feedback.",
+    value: "SUPERVISOR",
+  },
 ];
 
 export default function OnboardingPage() {
@@ -95,7 +101,7 @@ export default function OnboardingPage() {
           Tell us who you are to personalize your experience.
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 px-4">
         {roles.map((role) => (
           <Card
             key={role.value}
