@@ -26,10 +26,10 @@ const profileSchema = z.object({
     .min(3, "School must be at least 3 characters")
     .max(100, "School must not exceed 100 characters")
     .optional(),
-  studentId: z
+  academicId: z
     .string()
-    .min(3, "Student ID must be at least 3 characters")
-    .max(100, "Student ID must not exceed 100 characters")
+    .min(3, "Academic ID must be at least 3 characters")
+    .max(100, "Academic ID must not exceed 100 characters")
     .optional(),
   schoolEmail: z
     .string()
@@ -67,7 +67,7 @@ export async function updateProfile(formData: ProfileFormData) {
         username: formData.username,
         bio: formData.bio,
         school: formData.school,
-        studentId: formData.studentId,
+        academicId: formData.academicId,
         schoolEmail: formData.schoolEmail,
       },
     });

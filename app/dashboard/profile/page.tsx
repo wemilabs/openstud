@@ -23,7 +23,7 @@ export default async function ProfilePage() {
           username: true,
           bio: true,
           school: true,
-          studentId: true,
+          academicId: true,
           schoolEmail: true,
           createdAt: true,
         },
@@ -34,7 +34,7 @@ export default async function ProfilePage() {
   const username = dbUser?.username || "";
   const bio = dbUser?.bio || "";
   const school = dbUser?.school || "";
-  const studentId = dbUser?.studentId || "";
+  const academicId = dbUser?.academicId || "";
   const schoolEmail = dbUser?.schoolEmail || "";
 
   const formattedPlan = plan.charAt(0) + plan.slice(1).toLowerCase();
@@ -90,7 +90,7 @@ export default async function ProfilePage() {
             role={user.role}
             bio={bio}
             school={school}
-            studentId={studentId}
+            academicId={academicId}
             schoolEmail={schoolEmail}
           />
         </Card>

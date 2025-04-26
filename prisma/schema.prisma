@@ -51,7 +51,7 @@ model User {
   onboardingCompleted Boolean @default(false)
   bio           String?
   school        String?
-  studentId     String?
+  academicId    String?
   email         String?   @unique
   emailVerified DateTime?
   schoolEmail   String?
