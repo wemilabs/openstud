@@ -15,6 +15,11 @@ interface NavItem {
   icon: keyof typeof Icons;
   target?: string;
   rel?: string;
+  // studentOnly?: boolean;
+  // professorOnly?: boolean;
+  // researcherOnly?: boolean;
+  // supervisorOnly?: boolean;
+  // adminOnly?: boolean;
 }
 
 interface DashboardNavProps {

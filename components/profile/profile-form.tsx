@@ -16,7 +16,7 @@ interface ProfileFormProps {
   bio: string | null | undefined;
   email: string | null | undefined;
   school: string | null | undefined;
-  studentId: string | null | undefined;
+  academicId: string | null | undefined;
   schoolEmail: string | null | undefined;
   role: UserRole | null | undefined;
 }
@@ -26,7 +26,7 @@ export function ProfileForm({
   role,
   email,
   school,
-  studentId,
+  academicId,
   schoolEmail,
   bio,
 }: ProfileFormProps) {
@@ -37,7 +37,7 @@ export function ProfileForm({
       const formUsername = formData.get("username") as string;
       const formBio = formData.get("bio") as string;
       const formSchool = formData.get("school") as string;
-      const formStudentId = formData.get("studentId") as string;
+      const formAcademicId = formData.get("academicId") as string;
       const formSchoolEmail = formData.get("schoolEmail") as string;
 
       try {
@@ -45,7 +45,7 @@ export function ProfileForm({
           username: formUsername || undefined,
           bio: formBio || undefined,
           school: formSchool || undefined,
-          studentId: formStudentId || undefined,
+          academicId: formAcademicId || undefined,
           schoolEmail: formSchoolEmail || undefined,
         });
 
@@ -107,16 +107,16 @@ export function ProfileForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="studentId">Student ID</Label>
+          <Label htmlFor="academicId">Academic ID</Label>
           <Input
-            id="studentId"
-            name="studentId"
-            placeholder="Enter your student ID"
-            defaultValue={studentId || ""}
+            id="academicId"
+            name="academicId"
+            placeholder="Enter your academic ID"
+            defaultValue={academicId || ""}
           />
           <p className="text-xs text-muted-foreground">
-            Your student ID must be 3-100 characters, depending on your school's
-            requirements.
+            Your academic ID must be 3-100 characters, depending on your
+            school's requirements.
           </p>
         </div>
 
