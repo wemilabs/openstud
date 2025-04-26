@@ -27,7 +27,7 @@ export function UserAuthForm() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-6 px-8 md:px-0">
       <Button
         variant="outline"
         type="button"
