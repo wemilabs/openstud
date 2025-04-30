@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useEffect, useState, useTransition } from "react";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { createNewConversation } from "@/actions/ai-convo";
 
 interface ResearchModeAndSuggestionItem {
   label?: string;
@@ -79,7 +79,7 @@ export function AIPrompt() {
   const [query, setQuery] = useState("");
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
-  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -119,12 +119,11 @@ export function AIPrompt() {
         className="w-full"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!query.trim()) return;
+          if (!query.trim() || isPending) return;
 
-          // Redirect to the chat page with the question
-          router.push(
-            `/dashboard/ask-clever/chat/new?q=${encodeURIComponent(query)}`
-          );
+          startTransition(async () => {
+            await createNewConversation(query);
+          });
         }}
       >
         <div className="flex flex-col w-full">
@@ -203,11 +202,13 @@ export function AIPrompt() {
                 <Button
                   type="submit"
                   size="icon"
-                  className="rounded-full"
-                  aria-label="Submit question"
-                  disabled={!isButtonEnabled}
+                  disabled={!isButtonEnabled || isPending}
                 >
-                  <Icons.arrowUp className="size-4" />
+                  {isPending ? (
+                    <Icons.spinner className="size-4 animate-spin" />
+                  ) : (
+                    <Icons.arrowUp className="size-4" />
+                  )}
                 </Button>
               </div>
             </div>
