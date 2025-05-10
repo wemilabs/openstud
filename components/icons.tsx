@@ -46,6 +46,8 @@ import {
   Percent,
   CalendarDays,
   Download,
+  Sparkles,
+  MessageSquare,
   type Icon as LucideIcon,
 } from "lucide-react";
 
@@ -97,6 +99,8 @@ export const Icons = {
   percent: Percent,
   calendarDays: CalendarDays,
   download: Download,
+  sparkles: Sparkles,
+  message: MessageSquare,
 } as const;
 
 export const GoogleIcon = (props: SVGProps<SVGSVGElement>) => (

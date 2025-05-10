@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Icons } from "@/components/icons";
 import {
   Tooltip,
@@ -17,25 +19,34 @@ import {
   CommandGroup,
   CommandSeparator,
   CommandEmpty,
-  CommandShortcut,
 } from "@/components/ui/command";
-import {
-  Calendar,
-  CreditCard,
-  Settings,
-  Smile,
-  User,
-  Calculator,
-} from "lucide-react";
+import { deleteConversation, getAllConversations } from "@/actions/ai-convo";
+import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
 
-export function ChatHistory() {
-  const [open, setOpen] = useState(false);
+interface ChatHistoryProps {
+  currentId?: string;
+}
+
+interface Conversation {
+  id: string;
+  title: string | null;
+  updatedAt: Date;
+}
+
+export function ChatHistory({ currentId }: ChatHistoryProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setIsOpen((open) => !open);
       }
     };
 
@@ -43,68 +54,188 @@ export function ChatHistory() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  useEffect(() => {
+    const fetchConversations = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedConversations = await getAllConversations();
+        const mappedConversations = fetchedConversations.map((convo) => ({
+          id: convo.id,
+          title: convo.title,
+          updatedAt: convo.updatedAt,
+        }));
+        setConversations(mappedConversations);
+      } catch (error) {
+        console.error("Failed to fetch conversations:", error);
+      }
+      setIsLoading(false);
+    };
+
+    fetchConversations();
+  }, []);
+
+  const handleDelete = (conversationId: string) => {
+    startTransition(async () => {
+      await deleteConversation(conversationId);
+      setConversations((prev) =>
+        prev.filter((convo) => convo.id !== conversationId)
+      );
+      if (currentId === conversationId) {
+        router.push("/dashboard/ask-clever");
+      }
+      setConfirmDeleteId(null);
+    });
+  };
+
   return (
     <>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="text-sm p-4 rounded-full"
-              onClick={() => setOpen((open) => !open)}
-            >
-              <Icons.textSearch className="size-6" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="text-sm">
-              Chat history{" "}
-              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                <span className="text-xs">⌘</span>K
-              </kbd>
-            </p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <div className="flex items-center gap-3">
+        <Link href="/dashboard/ask-clever">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="rounded-md"
+          >
+            <Icons.add className="size-5" />
+          </Button>
+        </Link>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="rounded-md"
+                onClick={() => setIsOpen((open) => !open)}
+              >
+                <Icons.textSearch className="size-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-sm">
+                Chat history{" "}
+                <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                  <span className="text-xs">⌘</span>K
+                </kbd>
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
+      <CommandDialog open={isOpen} onOpenChange={setIsOpen}>
         <CommandInput placeholder="Search history..." />
         <CommandList>
-          <CommandEmpty>No conversation matching your criteria.</CommandEmpty>
-          <CommandGroup heading="Suggestions">
-            <CommandItem>
-              <Calendar />
-              <span>Calendar</span>
-            </CommandItem>
-            <CommandItem>
-              <Smile />
-              <span>Search Emoji</span>
-            </CommandItem>
-            <CommandItem>
-              <Calculator />
-              <span>Calculator</span>
-            </CommandItem>
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Settings">
-            <CommandItem>
-              <User />
-              <span>Profile</span>
-              <CommandShortcut>⌘P</CommandShortcut>
-            </CommandItem>
-            <CommandItem>
-              <CreditCard />
-              <span>Billing</span>
-              <CommandShortcut>⌘B</CommandShortcut>
-            </CommandItem>
-            <CommandItem>
-              <Settings />
-              <span>Settings</span>
-              <CommandShortcut>⌘S</CommandShortcut>
-            </CommandItem>
-          </CommandGroup>
+          <CommandEmpty>No conversations found.</CommandEmpty>
+
+          {isLoading ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              Loading conversations...
+            </div>
+          ) : (
+            <>
+              <CommandGroup heading="New Conversation">
+                <CommandItem
+                  onSelect={() => {
+                    router.push("/dashboard/ask-clever");
+                    setIsOpen(false);
+                  }}
+                >
+                  <Icons.add className="mr-2 size-4" />
+                  <span>New Chat</span>
+                </CommandItem>
+              </CommandGroup>
+
+              <CommandSeparator />
+
+              {conversations.length > 0 && (
+                <CommandGroup heading="Recent Conversations">
+                  {conversations.map((convo) => (
+                    <CommandItem
+                      key={convo.id}
+                      className="justify-between group"
+                      value={convo.title || "Untitled Conversation"}
+                      onSelect={() => {
+                        router.push(`/dashboard/ask-clever/chat/${convo.id}`);
+                        setIsOpen(false);
+                      }}
+                    >
+                      <Link
+                        href={`/dashboard/ask-clever/chat/${convo.id}`}
+                        className={cn(
+                          "truncate flex-1",
+                          currentId === convo.id && "font-bold"
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {convo.title || "Untitled Conversation"}
+                      </Link>
+                      <div className="flex items-center space-x-1">
+                        {confirmDeleteId === convo.id ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-6"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(convo.id);
+                              }}
+                              disabled={isPending}
+                              aria-label="Confirm delete"
+                            >
+                              {isPending ? (
+                                <Icons.spinner className="size-3.5 animate-spin" />
+                              ) : (
+                                <Icons.check className="size-3.5 text-green-500" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-6"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmDeleteId(null);
+                              }}
+                              disabled={isPending}
+                              aria-label="Cancel delete"
+                            >
+                              <Icons.close className="size-3.5 text-red-500" />
+                            </Button>
+                          </>
+                        ) : (
+                          <div className="flex items-center space-x-1">
+                            <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                              {formatDistanceToNow(new Date(convo.updatedAt), {
+                                addSuffix: true,
+                              })}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-6 opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmDeleteId(convo.id);
+                              }}
+                              disabled={isPending}
+                              aria-label="Delete conversation"
+                            >
+                              <Icons.trash2 className="size-3.5 text-red-500" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+            </>
+          )}
         </CommandList>
       </CommandDialog>
     </>
