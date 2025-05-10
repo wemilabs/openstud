@@ -10,7 +10,6 @@ import { prisma } from "@/lib/prisma";
 
 export async function createNewConversation(query: string) {
   const session = await auth();
-
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
