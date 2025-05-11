@@ -34,7 +34,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     <div className="flex flex-col gap-8">
       <div className="flex items-center gap-2">
         <Link
-          href="/dashboard/courses"
+          href="/dashboard/courses-and-notes"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="size-4" />
