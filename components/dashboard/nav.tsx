@@ -43,12 +43,12 @@ const navItems: NavItem[] = [
     icon: "percent",
     allowedRoles: ["STUDENT"],
   },
-  // {
-  //   title: "Ask Clever",
-  //   href: "/dashboard/ask-clever",
-  //   icon: "bot",
-  //   allowedRoles: ["STUDENT", "PROFESSOR", "RESEARCHER", "SUPERVISOR", "ADMIN"],
-  // },
+  {
+    title: "Ask Clever",
+    href: "/dashboard/ask-clever",
+    icon: "bot",
+    allowedRoles: ["STUDENT", "PROFESSOR", "RESEARCHER", "SUPERVISOR", "ADMIN"],
+  },
   // {
   //   title: "Assignments",
   //   href: "/dashboard/assignments",
