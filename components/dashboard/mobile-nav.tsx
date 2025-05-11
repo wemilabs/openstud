@@ -36,7 +36,7 @@ export function MobileNav({ className, userRole }: MobileNavProps) {
           <SheetDescription className="">
             You're currently using{" "}
             <code className="bg-muted font-semibold px-2 rounded-full">
-              v1.0.1
+              v1.38
             </code>{" "}
             of Openstud.
           </SheetDescription>

@@ -11,10 +11,8 @@ export function Hero() {
             variant="outline"
             className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-full px-3 py-2 text-xs md:text-sm leading-6 tracking-wide border-none shadow-none"
           >
-            v1.0.1 breaking changes:
-            <code className="font-semibold">
-              user onboarding and role management
-            </code>
+            v1.38: Welcome
+            <code className="font-semibold">Clever, your AI tutor</code>
           </Badge>
           <h1 className="text-4xl font-extrabold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1] bg-gradient-to-r from-primary/10 via-primary to-primary/65 bg-clip-text text-transparent mt-2">
             Bridging the gap between learning and success
