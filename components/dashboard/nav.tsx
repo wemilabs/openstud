@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
     allowedRoles: ["STUDENT", "PROFESSOR", "RESEARCHER", "SUPERVISOR", "ADMIN"],
   },
   {
-    title: "Courses",
+    title: "Courses & Notes",
     href: "/dashboard/courses",
     icon: "book",
     allowedRoles: ["STUDENT"],
