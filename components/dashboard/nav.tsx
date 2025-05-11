@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
   },
   {
     title: "Courses & Notes",
-    href: "/dashboard/courses",
+    href: "/dashboard/courses-and-notes",
     icon: "book",
     allowedRoles: ["STUDENT"],
   },
