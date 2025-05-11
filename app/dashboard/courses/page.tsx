@@ -5,8 +5,8 @@ import { Pagination } from "@/components/courses/pagination";
 import { getCourses } from "@/actions/courses";
 
 export const metadata = {
-  title: "Courses - OpenStud",
-  description: "Create and manage your courses",
+  title: "Courses & Notes - OpenStud",
+  description: "Create and manage your courses and notes",
 };
 
 interface CoursesPageProps {
@@ -37,7 +37,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-            Courses
+            Courses & Notes
           </h1>
           <h2 className="text-sm md:text-base text-muted-foreground">
             Add and manage courses. Click on a course title to view your notes.
