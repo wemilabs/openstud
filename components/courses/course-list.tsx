@@ -126,7 +126,7 @@ export function CourseList({ courses = [] }: CourseListProps) {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Book className="size-4 text-muted-foreground" />
-                  <Link href={`/dashboard/courses/${course.id}`}>
+                  <Link href={`/dashboard/courses-and-notes/${course.id}`}>
                     <CardTitle className="line-clamp-1 text-base">
                       {course.name}
                     </CardTitle>
