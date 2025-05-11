@@ -1,13 +1,15 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
 import { useEffect, useRef } from "react";
-import { Icons } from "@/components/icons";
+import { useChat } from "@ai-sdk/react";
+import ReactMarkdown from "react-markdown";
+
+import { cn } from "@/lib/utils";
+import { addMessageToConversation } from "@/actions/ai-convo";
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { addMessageToConversation } from "@/actions/ai-convo";
-import { cn } from "@/lib/utils";
-import ReactMarkdown from "react-markdown";
+import { Icons } from "@/components/icons";
 
 type Message = {
   id: string;
@@ -32,6 +34,7 @@ export function ChatUI({
   } = useChat({
     api: "/api/chat",
     initialMessages: initialMessages,
+    id: conversationId,
     onFinish: async (message) => {
       await addMessageToConversation(
         conversationId,
@@ -44,6 +47,7 @@ export function ChatUI({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const initialResponseTriggered = useRef(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -54,10 +58,18 @@ export function ChatUI({
   }, [messages]);
 
   useEffect(() => {
-    if (messages.length === 1 && messages[0].role === "user") {
+    if (
+      !initialResponseTriggered.current &&
+      messages.length === 1 &&
+      messages[0].role === "user" &&
+      initialMessages.length === 1 &&
+      initialMessages[0].role === "user" &&
+      initialMessages[0].content === messages[0].content
+    ) {
+      initialResponseTriggered.current = true;
       reload();
     }
-  }, [messages, reload]);
+  }, [messages, reload, initialMessages]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

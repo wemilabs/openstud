@@ -20,7 +20,6 @@ export default async function ChatPage({
   }>;
 }) {
   const session = await auth();
-
   if (!session?.user?.id) {
     return notFound();
   }

@@ -6,8 +6,6 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-// TODO: Fix this weird behavior where when ai will generate a first response, if we reload or get back later to this very convo, it will render the ai response twice (or more) again.
-
 export async function createNewConversation(query: string) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -31,12 +29,8 @@ export async function createNewConversation(query: string) {
     });
 
     conversationId = conversation.id;
-
-    revalidatePath("/dashboard/ask-clever");
-    revalidatePath(`/dashboard/ask-clever/chat/${conversationId}`);
   } catch (error) {
     console.error("Error creating conversation:", error);
-
     redirect("/dashboard/ask-clever?error=creation_failed");
   }
 
@@ -45,7 +39,6 @@ export async function createNewConversation(query: string) {
 
 export async function getAllConversations() {
   const session = await auth();
-
   if (!session?.user?.id) {
     return [];
   }
@@ -81,7 +74,6 @@ export async function addMessageToConversation(
   content: string
 ) {
   const session = await auth();
-
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
@@ -110,8 +102,6 @@ export async function addMessageToConversation(
       where: { id: conversationId },
       data: { updatedAt: new Date() },
     });
-
-    revalidatePath(`/dashboard/ask-clever/chat/${conversationId}`);
   } catch (error) {
     console.error("Error adding message:", error);
     throw new Error("Failed to add message");
@@ -120,7 +110,6 @@ export async function addMessageToConversation(
 
 export async function deleteConversation(conversationId: string) {
   const session = await auth();
-
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
