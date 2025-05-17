@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import { useChat } from "@ai-sdk/react";
 import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import { cn } from "@/lib/utils";
 import { addMessageToConversation } from "@/actions/ai-convo";
@@ -10,6 +12,7 @@ import { addMessageToConversation } from "@/actions/ai-convo";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Icons } from "@/components/icons";
+import { CopyButton } from "./copy-button";
 
 type Message = {
   id: string;
@@ -150,24 +153,57 @@ export function ChatUI({
                           {children}
                         </blockquote>
                       ),
-                      pre: ({ node, ...props }) => (
-                        <div className="overflow-auto my-4 bg-slate-900 p-3 rounded-lg border border-border shadow-sm">
-                          <pre
-                            className="text-sm text-white bg-transparent"
-                            {...props}
-                          />
-                        </div>
-                      ),
-                      code: ({ node, className, ...props }: any) => {
+                      code: ({ node, className = "", ...props }: any) => {
                         const isInline = props.inline || false;
-                        return isInline ? (
+                        const match = /language-(\w+)/.exec(className || "");
+
+                        if (isInline) {
+                          return (
+                            <code
+                              className="bg-muted dark:bg-slate-900 px-1.5 py-0.5 rounded text-sm font-mono"
+                              {...props}
+                            />
+                          );
+                        }
+
+                        if (match) {
+                          const language = match[1];
+                          return (
+                            <div className="relative my-4">
+                              <span
+                                className="absolute top-2 left-2 z-10 px-2 py-1 rounded bg-white/10 dark:bg-primary/10 text-gray-300 dark:text-primary text-xs font-extralight tracking-wide select-none"
+                                style={{
+                                  backdropFilter: "blur(2px)",
+                                  letterSpacing: "0.05em",
+                                }}
+                              >
+                                {language}
+                              </span>
+
+                              <CopyButton code={String(props.children)} />
+
+                              <SyntaxHighlighter
+                                style={oneDark}
+                                language={language}
+                                PreTag="div"
+                                customStyle={{
+                                  borderRadius: "0.375rem",
+                                  fontSize: "0.875rem",
+                                  padding: "3rem 1rem 1rem 1rem",
+                                  margin: "1rem 0",
+                                  boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+                                }}
+                                {...props}
+                              >
+                                {String(props.children).replace(/\n$/, "")}
+                              </SyntaxHighlighter>
+                            </div>
+                          );
+                        }
+
+                        return (
                           <code
-                            className="bg-muted dark:bg-slate-900 px-1.5 py-0.5 rounded text-sm font-mono"
-                            {...props}
-                          />
-                        ) : (
-                          <code
-                            className={`px-1.5 py-0.5 rounded font-mono text-sm ${className}`}
+                            className={`bg-muted dark:bg-accent px-1.5 py-0.5 rounded font-mono text-sm ${className}`}
                             {...props}
                           />
                         );
