@@ -186,12 +186,17 @@ export function ChatUI({
                                 style={oneDark}
                                 language={language}
                                 PreTag="div"
+                                showLineNumbers
                                 customStyle={{
                                   borderRadius: "0.375rem",
                                   fontSize: "0.875rem",
-                                  padding: "3rem 1rem 1rem 1rem",
+                                  padding: "3rem 1rem 1rem .75rem",
                                   margin: "1rem 0",
                                   boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+                                }}
+                                lineNumberStyle={{
+                                  fontStyle: "normal",
+                                  paddingRight: "1.5rem",
                                 }}
                                 {...props}
                               >
