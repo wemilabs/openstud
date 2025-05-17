@@ -151,8 +151,11 @@ export function ChatUI({
                         </blockquote>
                       ),
                       pre: ({ node, ...props }) => (
-                        <div className="overflow-auto my-4 bg-muted/70 dark:bg-slate-950 p-3 rounded-lg border border-border shadow-sm">
-                          <pre className="text-sm" {...props} />
+                        <div className="overflow-auto my-4 bg-slate-900 p-3 rounded-lg border border-border shadow-sm">
+                          <pre
+                            className="text-sm text-white bg-transparent"
+                            {...props}
+                          />
                         </div>
                       ),
                       code: ({ node, className, ...props }: any) => {
@@ -164,9 +167,7 @@ export function ChatUI({
                           />
                         ) : (
                           <code
-                            className={`${
-                              className || ""
-                            } block font-mono text-sm`}
+                            className={`px-1.5 py-0.5 rounded font-mono text-sm ${className}`}
                             {...props}
                           />
                         );
@@ -225,7 +226,7 @@ export function ChatUI({
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 bg-background border-t p-4">
+      <div className="fixed bottom-0 left-0 md:left-[17rem] right-0 bg-background p-4">
         <form
           ref={formRef}
           onSubmit={handleFormSubmit}
@@ -243,7 +244,7 @@ export function ChatUI({
             type="submit"
             size="icon"
             disabled={isLoading || !input.trim()}
-            className=""
+            className="relative top-2.5 md:top-3.5"
           >
             {isLoading ? (
               <Icons.spinner className="size-4 animate-spin" />

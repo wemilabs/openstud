@@ -45,12 +45,12 @@ export default async function ChatPage({
   }
 
   return (
-    <section className="relative h-[calc(100vh-4rem)] flex flex-col">
+    <section className="flex flex-col">
       <div className="flex items-center justify-end -mt-2 pr-9">
         <ChatHistory currentId={id} />
       </div>
 
-      <div className="flex-1 px-4 py-2 md:px-8 h-full">
+      <div className="flex-1 px-4 py-2 md:px-8">
         <ChatUI
           initialMessages={conversation.messages.map(
             ({ id, role, content }) => ({
