@@ -97,16 +97,16 @@ export function ChatUI({
   };
 
   return (
-    <div className="flex flex-col h-full relative">
-      <div className="flex-1 overflow-y-auto pb-20">
+    <div className="flex flex-col">
+      <div className="pt-6 pb-20">
         {messages.map(({ id, role, content }) => (
           <div
             key={id}
             className={cn(
-              "flex px-4 py-6",
+              "px-4",
               role === "user"
-                ? "bg-muted/50 rounded-2xl justify-end"
-                : "bg-background justify-start"
+                ? "py-1.5 bg-muted rounded-2xl w-fit ml-auto"
+                : "py-8 bg-background"
             )}
           >
             <div className="flex-initial prose prose-slate dark:prose-invert max-w-none">
