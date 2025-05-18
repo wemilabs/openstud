@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Icons } from "@/components/icons";
 import { CopyButton } from "./copy-button";
+import { PersonaType } from "@/actions/ai-convo";
 
 type Message = {
   id: string;
@@ -23,9 +24,11 @@ type Message = {
 export function ChatUI({
   initialMessages,
   conversationId,
+  persona,
 }: {
   initialMessages: Message[];
   conversationId: string;
+  persona: PersonaType;
 }) {
   const {
     messages,
@@ -38,11 +41,13 @@ export function ChatUI({
     api: "/api/chat",
     initialMessages: initialMessages,
     id: conversationId,
+    body: { persona },
     onFinish: async (message) => {
       await addMessageToConversation(
         conversationId,
         "assistant",
-        message.content
+        message.content,
+        persona
       );
     },
   });
@@ -94,7 +99,7 @@ export function ChatUI({
 
     if (!input.trim() || isLoading) return;
 
-    await addMessageToConversation(conversationId, "user", input);
+    await addMessageToConversation(conversationId, "user", input, persona);
 
     handleSubmit(e);
   };

@@ -199,6 +199,7 @@ model Task {
 model AIConversation {
   id            String    @id @default(cuid())
   title         String?
+  persona       String @default("tutor")
   createdById   String
   createdBy     User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
   messages      Message[]
@@ -211,6 +212,7 @@ model Message {
   conversationId  String
   conversation    AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   role            String
+  persona         String @default("tutor")
   content         String       @db.Text
   createdAt       DateTime     @default(now())
 

@@ -6,7 +6,19 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function createNewConversation(query: string) {
+export type PersonaType =
+  | "tutor"
+  | "study-buddy"
+  | "writing-assistant"
+  | "project-helper";
+
+export async function createNewConversation({
+  query,
+  persona,
+}: {
+  query: string;
+  persona: PersonaType;
+}) {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
@@ -18,13 +30,15 @@ export async function createNewConversation(query: string) {
     const conversation = await prisma.aIConversation.create({
       data: {
         title: query.slice(0, 100),
-        createdById: session.user.id,
+        persona,
         messages: {
           create: {
             role: "user",
             content: query,
+            persona,
           },
         },
+        createdById: session.user.id,
       },
     });
 
@@ -70,8 +84,9 @@ export async function getAllConversations() {
 
 export async function addMessageToConversation(
   conversationId: string,
-  role: string,
-  content: string
+  role: "user" | "assistant",
+  content: string,
+  persona: PersonaType
 ) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -95,6 +110,7 @@ export async function addMessageToConversation(
         conversationId,
         role,
         content,
+        ...(persona && { persona }),
       },
     });
 

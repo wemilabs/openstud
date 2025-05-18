@@ -20,13 +20,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { createNewConversation } from "@/actions/ai-convo";
+import { createNewConversation, PersonaType } from "@/actions/ai-convo";
 
 interface ResearchModeAndSuggestionItem {
   label?: string;
   icon: React.ReactNode;
   tooltip?: string;
   disabled?: boolean;
+}
+
+interface Persona {
+  value: PersonaType;
+  label: string;
+  description?: string;
 }
 
 const researchModeAndSuggestionItems: ResearchModeAndSuggestionItem[] = [
@@ -74,11 +80,36 @@ const researchModeAndSuggestionItems: ResearchModeAndSuggestionItem[] = [
   },
 ];
 
+const PERSONAS: Persona[] = [
+  {
+    value: "tutor",
+    label: "Tutor",
+    description: "Get help understanding difficult concepts",
+  },
+  {
+    value: "study-buddy",
+    label: "Study Buddy",
+    description: "Collaborate on study sessions and material",
+  },
+  {
+    value: "writing-assistant",
+    label: "Writing Assistant",
+    description: "Help with essays and academic writing",
+  },
+  {
+    value: "project-helper",
+    label: "Project Helper",
+    description: "Break down and plan academic projects",
+  },
+];
+
 export function AIPrompt() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [selectedPersona, setSelectedPersona] = useState<PersonaType>("tutor");
   const [query, setQuery] = useState("");
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -113,19 +144,21 @@ export function AIPrompt() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!query.trim() || isPending) return;
+
+    startTransition(async () => {
+      await createNewConversation({ query, persona: selectedPersona });
+    });
+  };
+
+  console.log(selectedPersona);
+
   return (
     <div className="w-full">
-      <form
-        className="w-full"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!query.trim() || isPending) return;
-
-          startTransition(async () => {
-            await createNewConversation(query);
-          });
-        }}
-      >
+      <form className="w-full" onSubmit={handleSubmit}>
         <div className="flex flex-col w-full">
           <div className="relative">
             <Textarea
@@ -176,24 +209,36 @@ export function AIPrompt() {
 
               <div className="flex items-center gap-2">
                 <div>
-                  <Select defaultValue="tutor">
-                    <SelectTrigger
-                      id="personas-according-to-models"
-                      className="border-none mr-1 cursor-pointer hover:bg-muted font-medium"
-                    >
-                      <SelectValue placeholder="Select" />
+                  <Select
+                    defaultValue="tutor"
+                    onOpenChange={setIsSelectOpen}
+                    onValueChange={(value: string) =>
+                      setSelectedPersona(value as PersonaType)
+                    }
+                  >
+                    <SelectTrigger className="border-none mr-1 cursor-pointer hover:bg-muted font-medium">
+                      <SelectValue placeholder="Select persona" />
                     </SelectTrigger>
                     <SelectContent position="popper">
                       <SelectGroup>
                         <SelectLabel className="font-semibold">
                           Personas
                         </SelectLabel>
-                        <SelectItem value="tutor">Tutor</SelectItem>
-                        {/* <SelectItem value="homework-helper">
-                          Homework Helper
-                        </SelectItem> */}
-                        {/* <SelectItem value="latest-news">Latest News</SelectItem> */}
-                        <SelectItem value="companion">Companion</SelectItem>
+                        {PERSONAS.map(({ label, value, description }) => (
+                          <SelectItem key={value} value={value}>
+                            <div className="flex flex-col">
+                              <span>{label}</span>
+                              <span
+                                className={cn(
+                                  "text-xs text-muted-foreground",
+                                  isSelectOpen ? "" : "hidden"
+                                )}
+                              >
+                                {description}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
