@@ -28,7 +28,7 @@ export function ViewNote({ note, trigger }: ViewNoteProps) {
       <DialogTrigger asChild>
         {trigger || (
           <Card
-            className="overflow-hidden transition-all hover:shadow-md "
+            className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
             onClick={() => setOpen(true)}
           >
             <CardHeader>
