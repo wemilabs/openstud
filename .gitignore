@@ -42,3 +42,4 @@ next-env.d.ts
 
 # prisma client
 /generated/prisma/
+/generated/prisma/**
