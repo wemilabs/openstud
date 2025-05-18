@@ -9,7 +9,7 @@ const faqs = [
   {
     question: "How does the free trial work?",
     answer:
-      "You can try OpenStud free for 14 days with full access to all Pro features. No credit card required. At the end of the trial, you can choose to upgrade or continue with the free plan.",
+      "You can start with our 14-day free trial, with full access to all Pro features. No credit card required. At the end of the trial, you can choose to upgrade or continue with the free plan.",
   },
   {
     question: "Is my data secure?",
@@ -17,9 +17,14 @@ const faqs = [
       "Absolutely. We use industry-standard encryption and security measures to protect your data. Your study materials and personal information are completely private and secure.",
   },
   {
+    question: "Who can use OpenStud?",
+    answer:
+      "From students to teachers, researchers to supervisors, and professionals: OpenStud is a platform for everyone who needs to work on academic projects.",
+  },
+  {
     question: "Can I collaborate with other students?",
     answer:
-      "Yes! Pro and Ultimate plans include collaboration features that let you share notes, create study groups, and work together with classmates.",
+      "Not only can you collaborate with other students, but also with teachers and supervisors. With our seamless `Workspace` feature, you can work on your projects with others in real-time. Assignments, exams, presentations, lab work, reading, projects, study sessions, and other academic work can be done within the platform.",
   },
   {
     question: "How do I get started?",
@@ -30,7 +35,7 @@ const faqs = [
 
 export function FAQ() {
   return (
-    <section id="faq" className="container py-20 mx-auto">
+    <section id="faq" className="container pt-32 pb-20 mx-auto">
       <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
         <h2 className="font-bold text-3xl leading-[1.1] sm:text-4xl md:text-5xl">
           Frequently Asked Questions
