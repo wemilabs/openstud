@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 
 import { ChatUI } from "@/components/dashboard/ask-clever/chat-ui";
 import { ChatHistory } from "@/components/dashboard/ask-clever/chat-history";
+import { PersonaType } from "@/actions/ai-convo";
 
 export const metadata: Metadata = {
   title: "Chat with Clever | OpenStud",
@@ -52,6 +53,7 @@ export default async function ChatPage({
 
       <div className="flex-1 px-4 py-2 md:px-8">
         <ChatUI
+          conversationId={id}
           initialMessages={conversation.messages.map(
             ({ id, role, content }) => ({
               id,
@@ -59,7 +61,7 @@ export default async function ChatPage({
               content,
             })
           )}
-          conversationId={id}
+          persona={conversation.persona as PersonaType}
         />
       </div>
     </section>
