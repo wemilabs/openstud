@@ -17,7 +17,7 @@ const plans = [
   {
     name: "Pro",
     description: "For serious students",
-    price: "9.99",
+    price: "20",
     features: [
       "Advanced study planning",
       "Unlimited progress tracking",
@@ -27,21 +27,6 @@ const plans = [
       "Focus mode",
       "Study groups",
       "Custom templates",
-    ],
-  },
-  {
-    name: "Ultimate",
-    description: "For study groups & classes",
-    price: "19.99",
-    features: [
-      "Everything in Pro",
-      "Team collaboration",
-      "Shared resources",
-      "Team analytics",
-      "Admin controls",
-      "API access",
-      "Custom integrations",
-      "Dedicated support",
     ],
   },
 ];
@@ -59,6 +44,7 @@ export function Pricing() {
           </p>
         </div>
         <div className="isolate mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-y-8 sm:gap-8 lg:grid-cols-3 relative">
+          {/* Blurring */}
           <div className="absolute inset-0 backdrop-blur-sm bg-background/70 z-10 flex items-center justify-center">
             <div className="text-center px-6 py-12 rounded-xl bg-background/80 shadow-lg">
               <h3 className="text-xl font-bold mb-2">Coming Soon</h3>
@@ -71,6 +57,8 @@ export function Pricing() {
               </Button>
             </div>
           </div>
+          {/* Blurring */}
+
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -93,7 +81,7 @@ export function Pricing() {
               <ul className="mt-8 space-y-3 text-sm leading-6">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex gap-x-3">
-                    <Check className="h-5 w-5 flex-none" />
+                    <Check className="size-5 flex-none" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -107,6 +95,33 @@ export function Pricing() {
               </Button>
             </div>
           ))}
+          <div className="rounded-3xl p-8 ring-1 ring-muted/10 bg-card">
+            <h3 className="text-lg font-semibold leading-8">Ultimate</h3>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              For schools and universities needing a more customized solution
+            </p>
+            <div className="mt-6 flex items-baseline gap-x-1">
+              <span className="text-4xl font-bold tracking-tight">
+                Book a call
+              </span>
+            </div>
+            <ul className="mt-8 space-y-3 text-sm leading-6">
+              {[
+                "Custom templates",
+                "Admin controls",
+                "Custom integrations",
+                "Dedicated support",
+              ].map((feature) => (
+                <li key={feature} className="flex gap-x-3">
+                  <Check className="size-5 flex-none" />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <Button className="mt-8 w-full" variant="default" size="lg">
+              Book a call
+            </Button>
+          </div>
         </div>
       </div>
     </section>
