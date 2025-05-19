@@ -12,12 +12,12 @@ export function Hero() {
             className="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950 rounded-full px-3 py-2 text-xs md:text-sm leading-6 tracking-wide border-none shadow-none"
           >
             Introducing
-            <code className="font-semibold">
+            <span className="font-semibold">
               persona-based AI conversations
-            </code>
+            </span>
           </Badge>
           <h1 className="text-4xl font-extrabold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1] bg-gradient-to-r from-primary/10 via-primary to-primary/65 bg-clip-text text-transparent mt-2">
-            Bridging the gap between learning and success
+            Education in a smarter way
           </h1>
           <h2 className="max-w-[750px] text-muted-foreground md:text-lg font-mono">
             Your all-in-one platform for efficient study and academic project
