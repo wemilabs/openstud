@@ -1,8 +1,7 @@
 import { createXai } from "@ai-sdk/xai";
 import { streamText } from "ai";
 
-import { SYSTEM_PROMPT } from "@/lib/ai/prompts";
-import { PERSONA_PROMPTS } from "@/lib/ai/personas";
+import { SYSTEM_PROMPT, PERSONA_PROMPTS } from "@/lib/ai/prompts";
 
 export const maxDuration = 30;
 
