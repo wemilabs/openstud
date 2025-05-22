@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 
 import { ChatUI } from "@/components/dashboard/ask-clever/chat-ui";
 import { ChatHistory } from "@/components/dashboard/ask-clever/chat-history";
-import { PersonaType } from "@/actions/ai-convo";
+import { PersonaType } from "@/lib/actions/ai-convo";
 
 export const metadata: Metadata = {
   title: "Chat with Clever | OpenStud",

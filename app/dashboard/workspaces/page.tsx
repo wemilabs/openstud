@@ -10,7 +10,7 @@ import {
   removeWorkspaceMember,
   updateWorkspaceMemberRole,
   deleteWorkspace,
-} from "@/actions/workspaces";
+} from "@/lib/actions/workspaces";
 import { WorkspaceRoles, type WorkspaceRole } from "@/lib/workspace-roles";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

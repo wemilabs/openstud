@@ -6,7 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import {
   getWorkspaceInvitations,
   deleteWorkspaceInvitation,
-} from "@/actions/workspace-invitations";
+} from "@/lib/actions/workspace-invitations";
 
 import {
   Card,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getRecentActivity } from "@/actions/dashboard";
+import { getRecentActivity } from "@/lib/actions/dashboard";
 import { formatDistanceToNow } from "date-fns";
 import {
   Card,

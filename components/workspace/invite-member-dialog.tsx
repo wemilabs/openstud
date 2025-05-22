@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { WorkspaceRoles } from "@/lib/workspace-roles";
-import { createWorkspaceInvitation } from "@/actions/workspace-invitations";
+import { createWorkspaceInvitation } from "@/lib/actions/workspace-invitations";
 
 import {
   Dialog,

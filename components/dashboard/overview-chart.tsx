@@ -10,7 +10,7 @@ import {
   Tooltip,
   TooltipProps,
 } from "recharts";
-import { getTaskStatsByCategory } from "@/actions/dashboard";
+import { getTaskStatsByCategory } from "@/lib/actions/dashboard";
 import { toast } from "sonner";
 import { useWorkspace } from "@/contexts/workspace-context";
 import { BarChart as BarChartIcon } from "lucide-react";

@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
-import { deleteCourse } from "@/actions/courses";
+import { deleteCourse } from "@/lib/actions/courses";
 
 interface DeleteCourseProps {
   courseId: string;

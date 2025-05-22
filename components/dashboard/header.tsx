@@ -48,7 +48,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createWorkspace } from "@/actions/workspaces";
+import { createWorkspace } from "@/lib/actions/workspaces";
 import { toast } from "sonner";
 import type { UserRole } from "@/generated/prisma/client";
 

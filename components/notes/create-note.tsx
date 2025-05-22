@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { createNote } from "@/actions/notes";
+import { createNote } from "@/lib/actions/notes";
 import { Plus } from "lucide-react";
 
 // Form validation schema

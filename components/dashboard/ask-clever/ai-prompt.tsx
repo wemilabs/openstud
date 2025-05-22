@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { createNewConversation, PersonaType } from "@/actions/ai-convo";
+import { createNewConversation, PersonaType } from "@/lib/actions/ai-convo";
 
 interface ResearchModeAndSuggestionItem {
   label?: string;

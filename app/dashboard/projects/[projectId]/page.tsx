@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PlusCircle, ArrowUpDown, Filter } from "lucide-react";
 import { TaskCard, Task } from "@/components/dashboard/task-card";
-import { createTask, deleteTask, getTasks } from "@/actions/tasks";
+import { createTask, deleteTask, getTasks } from "@/lib/actions/tasks";
 import { toast } from "sonner";
 import {
   TaskFilterDropdown,

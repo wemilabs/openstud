@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { updateNote } from "@/actions/notes";
+import { updateNote } from "@/lib/actions/notes";
 import { Icons } from "../icons";
 
 const noteFormSchema = z.object({

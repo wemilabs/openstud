@@ -7,13 +7,13 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import { cn } from "@/lib/utils";
-import { addMessageToConversation } from "@/actions/ai-convo";
+import { addMessageToConversation } from "@/lib/actions/ai-convo";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Icons } from "@/components/icons";
 import { CopyButton } from "./copy-button";
-import { PersonaType } from "@/actions/ai-convo";
+import { PersonaType } from "@/lib/actions/ai-convo";
 
 type Message = {
   id: string;

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { CreateCourse } from "@/components/courses/create-course";
 import { CourseList } from "@/components/courses/course-list";
 import { Pagination } from "@/components/courses/pagination";
-import { getCourses } from "@/actions/courses";
+import { getCourses } from "@/lib/actions/courses";
 
 export const metadata = {
   title: "Courses & Notes - OpenStud",

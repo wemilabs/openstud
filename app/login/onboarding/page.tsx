@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { updateUserRole } from "@/actions/user";
+import { updateUserRole } from "@/lib/actions/user";
 import { useSession } from "next-auth/react";
 
 const roles = [
