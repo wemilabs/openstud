@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { getCourseById } from "@/actions/courses";
-import { getNotesByCourseId } from "@/actions/notes";
+import { getCourseById } from "@/lib/actions/courses";
+import { getNotesByCourseId } from "@/lib/actions/notes";
 import { NoteList } from "@/components/notes/note-list";
 import { CreateNote } from "@/components/notes/create-note";
 import { notFound } from "next/navigation";

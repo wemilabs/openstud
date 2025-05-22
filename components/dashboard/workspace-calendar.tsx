@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import {
   format,
   isEqual,
-  isSameMonth,
   isToday,
   addMonths,
   subMonths,
@@ -36,7 +35,7 @@ import { TaskPriorityBadge } from "./task-priority";
 import { cn } from "@/lib/utils";
 import { Task } from "./task-card";
 import { TaskFilter } from "./task-filter";
-import { getWorkspaceTasks } from "@/actions/workspace-tasks";
+import { getWorkspaceTasks } from "@/lib/actions/workspace-tasks";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 

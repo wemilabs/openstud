@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { deleteNote } from "@/actions/notes";
+import { deleteNote } from "@/lib/actions/notes";
 import { Trash2 } from "lucide-react";
 
 export function DeleteNote({

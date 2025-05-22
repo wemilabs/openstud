@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   validateInvitationToken,
   acceptWorkspaceInvitation,
-} from "@/actions/workspace-invitations";
+} from "@/lib/actions/workspace-invitations";
 import { Button } from "@/components/ui/button";
 import {
   Card,

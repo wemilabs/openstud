@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getProject, getProjectTaskStats } from "@/actions/projects";
+import { getProject, getProjectTaskStats } from "@/lib/actions/projects";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, ArrowLeft } from "lucide-react";
 import Link from "next/link";

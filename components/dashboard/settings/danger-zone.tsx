@@ -22,7 +22,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { resetUserData, deleteAccount } from "@/actions/user";
+import { resetUserData, deleteAccount } from "@/lib/actions/user";
 
 type DangerAction = {
   title: string;

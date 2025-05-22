@@ -20,7 +20,10 @@ import {
   CommandSeparator,
   CommandEmpty,
 } from "@/components/ui/command";
-import { deleteConversation, getAllConversations } from "@/actions/ai-convo";
+import {
+  deleteConversation,
+  getAllConversations,
+} from "@/lib/actions/ai-convo";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 

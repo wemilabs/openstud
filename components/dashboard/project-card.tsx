@@ -14,7 +14,7 @@ import { Folder, ArrowRight, Clock, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { deleteProject } from "@/actions/projects";
+import { deleteProject } from "@/lib/actions/projects";
 import {
   AlertDialog,
   AlertDialogAction,

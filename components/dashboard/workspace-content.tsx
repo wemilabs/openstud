@@ -21,9 +21,12 @@ import {
 } from "lucide-react";
 import { ProjectDialog } from "./project-dialog";
 import { ProjectCard } from "./project-card";
-import { getProjects, getWorkspaceProjectTaskStats } from "@/actions/projects";
+import {
+  getProjects,
+  getWorkspaceProjectTaskStats,
+} from "@/lib/actions/projects";
 import { toast } from "sonner";
-import { updateWorkspace, deleteWorkspace } from "@/actions/workspaces";
+import { updateWorkspace, deleteWorkspace } from "@/lib/actions/workspaces";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,

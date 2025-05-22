@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
-import { createCourse } from "@/actions/courses";
+import { createCourse } from "@/lib/actions/courses";
 
 const courseFormSchema = z.object({
   name: z

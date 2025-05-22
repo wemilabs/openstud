@@ -1,13 +1,13 @@
 "use client";
 
-import { 
-  createContext, 
-  useContext, 
-  useState, 
-  useEffect, 
-  ReactNode 
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
 } from "react";
-import { getWorkspaces } from "@/actions/workspaces";
+import { getWorkspaces } from "@/lib/actions/workspaces";
 
 // Define the workspace type
 export type Workspace = {
@@ -49,8 +49,11 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
 
 // Provider component
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([INDIVIDUAL_WORKSPACE]);
-  const [currentWorkspace, setCurrentWorkspace] = useState<Workspace>(INDIVIDUAL_WORKSPACE);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([
+    INDIVIDUAL_WORKSPACE,
+  ]);
+  const [currentWorkspace, setCurrentWorkspace] =
+    useState<Workspace>(INDIVIDUAL_WORKSPACE);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,26 +61,28 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const fetchWorkspaces = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await getWorkspaces();
-      
+
       if (result.error) {
         setError(result.error);
         return;
       }
-      
+
       if (result.data) {
         // Always include the individual workspace first
         const allWorkspaces = [INDIVIDUAL_WORKSPACE, ...result.data];
         setWorkspaces(allWorkspaces);
-        
+
         // If no current workspace is set, use the individual workspace
         if (!currentWorkspace || currentWorkspace.id === "individual") {
           setCurrentWorkspace(INDIVIDUAL_WORKSPACE);
         } else {
           // Make sure the current workspace still exists in the updated list
-          const stillExists = allWorkspaces.find(w => w.id === currentWorkspace.id);
+          const stillExists = allWorkspaces.find(
+            (w) => w.id === currentWorkspace.id
+          );
           if (!stillExists) {
             setCurrentWorkspace(INDIVIDUAL_WORKSPACE);
           }
@@ -99,9 +104,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   // Get workspace from localStorage on initial load
   useEffect(() => {
     const savedWorkspaceId = localStorage.getItem("currentWorkspaceId");
-    
+
     if (savedWorkspaceId && workspaces.length > 0) {
-      const savedWorkspace = workspaces.find(w => w.id === savedWorkspaceId);
+      const savedWorkspace = workspaces.find((w) => w.id === savedWorkspaceId);
       if (savedWorkspace) {
         setCurrentWorkspace(savedWorkspace);
       }
@@ -135,10 +140,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 // Custom hook to use the workspace context
 export function useWorkspace() {
   const context = useContext(WorkspaceContext);
-  
+
   if (context === undefined) {
     throw new Error("useWorkspace must be used within a WorkspaceProvider");
   }
-  
+
   return context;
 }

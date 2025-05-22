@@ -7,7 +7,7 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import { updateTask } from "@/actions/tasks";
+import { updateTask } from "@/lib/actions/tasks";
 import { toast } from "sonner";
 import { PriorityLevel } from "@/components/dashboard/task-priority";
 import { TaskCategory } from "@/components/dashboard/task-category";
