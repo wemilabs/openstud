@@ -4,13 +4,13 @@ import { notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-import { ChatUI } from "@/components/dashboard/ask-clever/chat-ui";
-import { ChatHistory } from "@/components/dashboard/ask-clever/chat-history";
+import { ChatUI } from "@/components/dashboard/ask-qlever/chat-ui";
+import { ChatHistory } from "@/components/dashboard/ask-qlever/chat-history";
 import { PersonaType } from "@/lib/actions/ai-convo";
 
 export const metadata: Metadata = {
-  title: "Chat with Clever | OpenStud",
-  description: "Get answers to your academic questions from Clever AI",
+  title: "Chat with Qlever | OpenStud",
+  description: "Get answers to your academic questions from Qlever AI",
 };
 
 export default async function ChatPage({

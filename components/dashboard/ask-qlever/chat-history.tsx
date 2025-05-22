@@ -84,7 +84,7 @@ export function ChatHistory({ currentId }: ChatHistoryProps) {
         prev.filter((convo) => convo.id !== conversationId)
       );
       if (currentId === conversationId) {
-        router.push("/dashboard/ask-clever");
+        router.push("/dashboard/ask-qlever");
       }
       setConfirmDeleteId(null);
     });
@@ -93,7 +93,7 @@ export function ChatHistory({ currentId }: ChatHistoryProps) {
   return (
     <>
       <div className="flex items-center gap-3">
-        <Link href="/dashboard/ask-clever">
+        <Link href="/dashboard/ask-qlever">
           <Button
             type="button"
             variant="ghost"
@@ -143,7 +143,7 @@ export function ChatHistory({ currentId }: ChatHistoryProps) {
               <CommandGroup heading="New Conversation">
                 <CommandItem
                   onSelect={() => {
-                    router.push("/dashboard/ask-clever");
+                    router.push("/dashboard/ask-qlever");
                     setIsOpen(false);
                   }}
                 >
@@ -162,12 +162,12 @@ export function ChatHistory({ currentId }: ChatHistoryProps) {
                       className="justify-between group"
                       value={convo.title || "Untitled Conversation"}
                       onSelect={() => {
-                        router.push(`/dashboard/ask-clever/chat/${convo.id}`);
+                        router.push(`/dashboard/ask-qlever/chat/${convo.id}`);
                         setIsOpen(false);
                       }}
                     >
                       <Link
-                        href={`/dashboard/ask-clever/chat/${convo.id}`}
+                        href={`/dashboard/ask-qlever/chat/${convo.id}`}
                         className={cn(
                           "truncate flex-1",
                           currentId === convo.id && "font-bold"

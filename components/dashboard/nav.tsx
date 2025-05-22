@@ -44,8 +44,8 @@ const navItems: NavItem[] = [
     allowedRoles: ["STUDENT"],
   },
   {
-    title: "Ask Clever",
-    href: "/dashboard/ask-clever",
+    title: "Ask Qlever",
+    href: "/dashboard/ask-qlever",
     icon: "bot",
     allowedRoles: ["STUDENT", "PROFESSOR", "RESEARCHER", "SUPERVISOR", "ADMIN"],
   },
