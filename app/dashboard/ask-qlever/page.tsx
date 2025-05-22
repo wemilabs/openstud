@@ -1,7 +1,7 @@
-import { AIPrompt } from "@/components/dashboard/ask-clever/ai-prompt";
-import { ChatHistory } from "@/components/dashboard/ask-clever/chat-history";
+import { AIPrompt } from "@/components/dashboard/ask-qlever/ai-prompt";
+import { ChatHistory } from "@/components/dashboard/ask-qlever/chat-history";
 
-export default function AskCleverPage() {
+export default function AskQleverPage() {
   return (
     <section>
       <div className="flex items-center justify-end -mt-2 md:pr-9">
@@ -15,7 +15,7 @@ export default function AskCleverPage() {
 
         <ul className="text-muted-foreground mb-8 max-w-md list-disc text-xs font-mono">
           <li>
-            Ask anything to <code>Clever</code> about your studies, research, or
+            Ask anything to <code>Qlever</code> about your studies, research, or
             academic questions.
           </li>
           <li>Choose the tone that fits better according to your need.</li>

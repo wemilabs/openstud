@@ -51,7 +51,7 @@ const researchModeAndSuggestionItems: ResearchModeAndSuggestionItem[] = [
   {
     label: "Think",
     icon: <Icons.lightbulb className="size-4" />,
-    tooltip: "Let Clever take its time",
+    tooltip: "Let Qlever take its time",
     disabled: true,
   },
   {

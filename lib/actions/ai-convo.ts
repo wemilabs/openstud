@@ -45,10 +45,10 @@ export async function createNewConversation({
     conversationId = conversation.id;
   } catch (error) {
     console.error("Error creating conversation:", error);
-    redirect("/dashboard/ask-clever?error=creation_failed");
+    redirect("/dashboard/ask-qlever?error=creation_failed");
   }
 
-  redirect(`/dashboard/ask-clever/chat/${conversationId}`);
+  redirect(`/dashboard/ask-qlever/chat/${conversationId}`);
 }
 
 export async function getAllConversations() {
@@ -150,7 +150,7 @@ export async function deleteConversation(conversationId: string) {
       },
     });
 
-    revalidatePath("/dashboard/ask-clever");
+    revalidatePath("/dashboard/ask-qlever");
   } catch (error) {
     console.error("Error deleting conversation:", error);
     throw new Error("Failed to delete conversation");
