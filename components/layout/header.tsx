@@ -30,10 +30,10 @@ export function Header() {
         </div>
         <div className="flex flex-1 items-center justify-end gap-x-4">
           <Link
-            href="/dashboard"
+            href="/login"
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-8 px-3 has-[>svg]:px-2.5 bg-primary hover:bg-primary/90 text-muted"
           >
-            Get Started
+            Sign In
           </Link>
           <ModeToggle />
         </div>
