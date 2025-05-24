@@ -43,11 +43,17 @@ const researchModeAndSuggestionItems: ResearchModeAndSuggestionItem[] = [
     disabled: true,
   },
   {
-    label: "DeepSearch",
-    icon: <Icons.search className="size-4" />,
-    tooltip: "Advanced search and reasoning",
+    label: "Search",
+    icon: <Icons.globe className="size-4" />,
+    tooltip: "Search the web",
     disabled: true,
   },
+  // {
+  //   label: "DeepSearch",
+  //   icon: <Icons.search className="size-4" />,
+  //   tooltip: "Advanced search and reasoning",
+  //   disabled: true,
+  // },
   {
     label: "Think",
     icon: <Icons.lightbulb className="size-4" />,

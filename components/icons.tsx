@@ -48,6 +48,7 @@ import {
   Download,
   Sparkles,
   MessageSquare,
+  Globe,
   type Icon as LucideIcon,
 } from "lucide-react";
 
@@ -101,6 +102,7 @@ export const Icons = {
   download: Download,
   sparkles: Sparkles,
   message: MessageSquare,
+  globe: Globe,
 } as const;
 
 export const GoogleIcon = (props: SVGProps<SVGSVGElement>) => (
