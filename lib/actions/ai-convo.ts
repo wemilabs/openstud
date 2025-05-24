@@ -5,12 +5,41 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createXai } from "@ai-sdk/xai";
+import { streamText, generateText } from "ai";
 
 export type PersonaType =
   | "tutor"
   | "study-buddy"
   | "writing-assistant"
   | "project-helper";
+
+async function generateAIConversationTitle(message: string): Promise<string> {
+  try {
+    const xai = createXai({
+      apiKey: process.env.GROK_API_KEY!,
+      baseURL: process.env.GROK_API_BASE_URL!,
+    });
+
+    const result = await generateText({
+      model: xai(process.env.GROK_AI_CHAT_MODEL! || "grok-3-mini-fast-latest"),
+      system:
+        "Generate a very short, concise title (ensure it is not more than 80 characters long) that summarizes the first message a user begins a conversation with. Just return the title. No quotes, colons or formatting.",
+      messages: [
+        {
+          role: "user" as const,
+          content: `Generate a title for this message: ${message}`,
+        },
+      ],
+    });
+
+    return result.text || "New conversation";
+  } catch (error) {
+    console.error("Error generating AI title:", error);
+    // Fallback to first 50 chars of the message
+    return message.trim().substring(0, 50) || "New conversation";
+  }
+}
 
 export async function createNewConversation({
   query,
@@ -29,7 +58,7 @@ export async function createNewConversation({
   try {
     const conversation = await prisma.aIConversation.create({
       data: {
-        title: query.slice(0, 100),
+        title: await generateAIConversationTitle(query),
         persona,
         messages: {
           create: {
