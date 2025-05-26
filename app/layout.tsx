@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
@@ -75,17 +76,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  modal,
+  auth,
 }: Readonly<{
   children: React.ReactNode;
-  modal?: React.ReactNode;
+  auth?: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geist.className} antialiased`}>
+        <div>{auth}</div>
         <Providers>{children}</Providers>
         <Toaster closeButton richColors />
-        {modal}
+        <Analytics />
       </body>
     </html>
   );
