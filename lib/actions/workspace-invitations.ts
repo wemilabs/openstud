@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
-import { WorkspaceRole } from "@/generated/prisma/client";
+import { WorkspaceRole } from "@/lib/generated/prisma/client";
 import { randomBytes } from "crypto";
 
 // Schema for invitation creation validation

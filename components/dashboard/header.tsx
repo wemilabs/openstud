@@ -50,7 +50,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createWorkspace } from "@/lib/actions/workspaces";
 import { toast } from "sonner";
-import type { UserRole } from "@/generated/prisma/client";
+import type { UserRole } from "@/lib/generated/prisma/client";
 
 // const academicYears = [
 //   {

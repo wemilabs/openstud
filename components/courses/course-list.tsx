@@ -1,6 +1,6 @@
 "use client";
 
-import { Course } from "@/generated/prisma/client";
+import { Course } from "@/lib/generated/prisma/client";
 import {
   Card,
   CardContent,
