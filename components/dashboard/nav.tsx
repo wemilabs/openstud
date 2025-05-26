@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-import type { UserRole } from "@/generated/prisma/client";
+import type { UserRole } from "@/lib/generated/prisma/client";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Icons } from "@/components/icons";

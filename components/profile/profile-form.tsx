@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "../ui/textarea";
 import { Icons } from "../icons";
-import type { UserRole } from "@/generated/prisma/client";
+import type { UserRole } from "@/lib/generated/prisma/client";
 
 interface ProfileFormProps {
   username: string | null | undefined;
