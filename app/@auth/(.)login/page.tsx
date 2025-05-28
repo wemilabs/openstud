@@ -27,7 +27,8 @@ export default function LoginPage() {
             </span>
           </DialogTitle>
           <DialogDescription className="text-center">
-            Sign in below to continue
+            Sign in below to your account. If you don't have one, it will be
+            automatically created for you.
           </DialogDescription>
         </DialogHeader>
         <UserAuthForm />
