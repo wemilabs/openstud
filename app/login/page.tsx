@@ -24,7 +24,10 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold tracking-tight">
             You're just one step behind!
           </h1>
-          <p className="text-sm text-muted-foreground">Sign in below</p>
+          <p className="text-sm text-muted-foreground">
+            Sign in below to your account. If you don't have one, it will be
+            automatically created for you.
+          </p>
         </div>
 
         <Suspense fallback={<div>Loading...</div>}>

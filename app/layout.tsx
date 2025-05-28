@@ -1,6 +1,7 @@
-import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 import { Providers } from "@/components/providers/index";
@@ -88,6 +89,7 @@ export default function RootLayout({
         <Providers>{children}</Providers>
         <Toaster closeButton richColors />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
