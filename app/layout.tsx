@@ -14,7 +14,7 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: "Openstud",
-  description: "The Ultimate Place for Smarter Learning",
+  description: "Education in today's smartest way",
   metadataBase: new URL("https://openstud.vercel.app/"),
   keywords: [
     "education",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://openstud.vercel.app/",
     title: "Openstud",
-    description: "The Ultimate Place for Smarter Learning",
+    description: "Education in today's smartest way",
     siteName: "Openstud",
     images: [
       {
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Openstud",
-    description: "The Ultimate Place for Smarter Learning",
+    description: "Education in today's smartest way",
     images: [
       "https://ubrw5iu3hw.ufs.sh/f/TFsxjrtdWsEINd5qsXKy9kHohf1BAiUGcSeL3dVQDnmF4YO6",
     ],

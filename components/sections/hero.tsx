@@ -17,7 +17,7 @@ export function Hero() {
             </span>
           </Badge>
           <h1 className="text-4xl font-extrabold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1] bg-gradient-to-r from-primary/10 via-primary to-primary/65 bg-clip-text text-transparent mt-2">
-            Education in today's smarter way
+            Education in today's smartest way
           </h1>
           <h2 className="max-w-[750px] text-muted-foreground md:text-lg font-mono">
             Your all-in-one platform for efficient study and academic project
