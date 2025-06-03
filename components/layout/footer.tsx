@@ -27,14 +27,14 @@ export function Footer() {
     <footer className="border-t bg-muted/30">
       <div className="mx-auto max-w-7xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-          <div>
+          <div className="w-fit">
             <Logo />
             <p className="text-sm leading-6 text-muted-foreground">
               Making academic success accessible and achievable for every
               student.
             </p>
           </div>
-          <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
+          <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0 text-center">
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
                 <h3 className="text-sm font-semibold leading-6">Product</h3>

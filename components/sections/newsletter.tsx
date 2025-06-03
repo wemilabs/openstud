@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 export function Newsletter() {
   return (
     <section className="border-t bg-muted/30">
-      <div className="container py-20 md:py-32">
+      <div className="container py-20 md:py-32 mx-auto">
         <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
           <h2 className="font-bold text-3xl leading-[1.1] sm:text-4xl md:text-5xl">
             Stay Updated
