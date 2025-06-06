@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Note } from "@/lib/generated/prisma/client";
+import { Note } from "@/prisma/generated/client";
 import { formatDistanceToNow } from "date-fns";
 import {
   Dialog,

@@ -13,7 +13,7 @@ import { Logo } from "@/components/layout/logo";
 import { DashboardNav } from "@/components/dashboard/nav";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import type { UserRole } from "@/lib/generated/prisma/client";
+import type { UserRole } from "@/prisma/generated/client";
 
 interface MobileNavProps {
   className?: string;

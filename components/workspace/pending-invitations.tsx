@@ -37,7 +37,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2, Trash2, Copy, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { WorkspaceRole } from "@/lib/generated/prisma/client";
+import { WorkspaceRole } from "@/prisma/generated/client";
 
 // Helper to get role badge color
 const getRoleBadgeVariant = (role: WorkspaceRole) => {

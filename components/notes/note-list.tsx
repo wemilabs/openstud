@@ -1,6 +1,6 @@
 "use client";
 
-import type { Note } from "@/lib/generated/prisma/client";
+import type { Note } from "@/prisma/generated/client";
 import { DownloadNote } from "./download-note";
 import { EditNote } from "./edit-note";
 import { DeleteNote } from "./delete-note";
