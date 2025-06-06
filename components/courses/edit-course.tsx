@@ -28,7 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 import { updateCourse } from "@/lib/actions/courses";
-import type { Course } from "@/lib/generated/prisma/client";
+import type { Course } from "@/prisma/generated/client";
 
 const courseFormSchema = z.object({
   name: z
