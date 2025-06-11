@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { GoogleIcon, Icons } from "@/components/icons";
+import { Icons } from "@/components/icons";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 
@@ -38,7 +38,7 @@ export function UserAuthForm() {
         {isLoading ? (
           <Icons.spinner className="mr-2 size-4 animate-spin" />
         ) : (
-          <GoogleIcon className="mr-2 size-4" />
+          <Icons.google className="mr-2 size-4" />
         )}{" "}
         Continue with Google
       </Button>

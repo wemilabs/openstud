@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 
 // Schema for note creation/update validation
 const NoteSchema = z.object({
@@ -137,7 +137,10 @@ export async function getNoteById(id: string) {
 /**
  * Updates an existing note
  */
-export async function updateNote(id: string, input: Omit<NoteInput, "courseId">) {
+export async function updateNote(
+  id: string,
+  input: Omit<NoteInput, "courseId">
+) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -145,10 +148,12 @@ export async function updateNote(id: string, input: Omit<NoteInput, "courseId">)
     }
 
     // Validate input
-    const validatedData = z.object({
-      title: NoteSchema.shape.title,
-      content: NoteSchema.shape.content,
-    }).parse(input);
+    const validatedData = z
+      .object({
+        title: NoteSchema.shape.title,
+        content: NoteSchema.shape.content,
+      })
+      .parse(input);
 
     // Get the note with course information
     const existingNote = await prisma.note.findUnique({

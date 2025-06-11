@@ -1,10 +1,10 @@
 "use server";
 
 import { z } from "zod";
-import { Prisma } from "@/prisma/generated/client";
+import { Prisma } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 
 const CourseSchema = z.object({
   name: z

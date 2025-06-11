@@ -4,7 +4,7 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardNav } from "@/components/dashboard/nav";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { WorkspaceProvider } from "@/contexts/workspace-context";
-import { getCurrentUserRole } from "@/lib/auth/auth-utils";
+import { getCurrentUserRole } from "@/lib/auth/utils";
 
 export const metadata: Metadata = {
   title: "Dashboard - Openstud",

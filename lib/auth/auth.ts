@@ -27,7 +27,7 @@ export const {
   callbacks: {
     async jwt({ token, user, account, trigger, session }) {
       console.log("[Auth JWT Callback] Trigger:", trigger);
-      // Initial sign-in
+
       if (account && user) {
         console.log(
           "[Auth JWT Callback] Initial sign-in/link account detected."
