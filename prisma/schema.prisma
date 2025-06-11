@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output = "../prisma/generated"
+  output = "../lib/generated/prisma"
 }
 
 datasource db {
@@ -53,7 +53,7 @@ model User {
   school        String?
   academicId    String?
   email         String?   @unique
-  emailVerified DateTime?
+  emailVerified Boolean @default(false)
   schoolEmail   String?
   image         String?
   accounts      Account[]
@@ -76,6 +76,7 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
 
 model Course {
   id          String   @id @default(cuid())

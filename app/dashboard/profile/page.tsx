@@ -1,4 +1,6 @@
-import { requireAuth } from "@/lib/auth/auth-utils";
+import { requireAuth, getUserPlan } from "@/lib/auth/utils";
+import { prisma } from "@/lib/prisma";
+
 import {
   Card,
   CardContent,
@@ -8,9 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { getUserPlan } from "@/lib/auth/auth-utils";
 import { ProfileForm } from "@/components/profile/profile-form";
-import { prisma } from "@/lib/prisma";
 
 export default async function ProfilePage() {
   const user = await requireAuth();

@@ -2,9 +2,9 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { Prisma, WorkspaceRole } from "@/prisma/generated/client";
+import { Prisma, WorkspaceRole } from "@/lib/generated/prisma/client";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 
 // Schema for project creation/update validation
 const ProjectSchema = z.object({

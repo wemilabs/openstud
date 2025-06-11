@@ -17,7 +17,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   console.log(
-    `[Middleware] Path: ${pathname}, LoggedIn: ${isLoggedIn}, Role: ${userRole}, OnboardingCompleted: ${onboardingCompleted}`,
+    `[Middleware] Path: ${pathname}, LoggedIn: ${isLoggedIn}, Role: ${userRole}, OnboardingCompleted: ${onboardingCompleted}`
   );
 
   const isAuthPage = pathname.startsWith("/login");
@@ -34,13 +34,17 @@ export async function middleware(req: NextRequest) {
 
   // 2. Logged in, but onboarding not complete, trying to access dashboard
   if (isLoggedIn && !onboardingCompleted && isDashboardPage) {
-    console.log("[Middleware] Redirecting: Logged in, onboarding incomplete -> /login/onboarding");
+    console.log(
+      "[Middleware] Redirecting: Logged in, onboarding incomplete -> /login/onboarding"
+    );
     return NextResponse.redirect(new URL("/login/onboarding", req.url));
   }
 
   // 3. Logged in, onboarding complete, trying to access onboarding page
   if (isLoggedIn && onboardingCompleted && isOnboardingPage) {
-    console.log("[Middleware] Redirecting: Logged in, onboarding complete, accessing onboarding -> /dashboard");
+    console.log(
+      "[Middleware] Redirecting: Logged in, onboarding complete, accessing onboarding -> /dashboard"
+    );
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
@@ -49,10 +53,14 @@ export async function middleware(req: NextRequest) {
   //    If onboarding is NOT done, redirect TO onboarding.
   if (isLoggedIn && isAuthPage && !isOnboardingPage) {
     if (onboardingCompleted) {
-      console.log("[Middleware] Redirecting: Logged in, onboarding complete, accessing auth page -> /dashboard");
+      console.log(
+        "[Middleware] Redirecting: Logged in, onboarding complete, accessing auth page -> /dashboard"
+      );
       return NextResponse.redirect(new URL("/dashboard", req.url));
     } else {
-      console.log("[Middleware] Redirecting: Logged in, onboarding incomplete, accessing auth page -> /login/onboarding");
+      console.log(
+        "[Middleware] Redirecting: Logged in, onboarding incomplete, accessing auth page -> /login/onboarding"
+      );
       return NextResponse.redirect(new URL("/login/onboarding", req.url));
     }
   }

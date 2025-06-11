@@ -3,8 +3,8 @@
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
-import { WorkspaceRole } from "@/prisma/generated/client";
+import { auth } from "@/lib/auth/auth";
+import { WorkspaceRole } from "@/lib/generated/prisma/client";
 
 // Schema for workspace (workspace) creation/update validation
 const WorkspaceSchema = z.object({
@@ -522,10 +522,7 @@ export async function getWorkspaceMembers(workspaceId: string) {
           },
         },
       },
-      orderBy: [
-        { role: "asc" }, // Owners first, then admins, then members
-        { user: { name: "asc" } }, // Alphabetical by name within each role
-      ],
+      orderBy: [{ role: "asc" }, { user: { name: "asc" } }],
     });
 
     return { data: members };
