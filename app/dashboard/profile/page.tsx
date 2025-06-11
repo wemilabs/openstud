@@ -1,5 +1,5 @@
 import { requireAuth, getUserPlan } from "@/lib/auth/utils";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
 import {
   Card,

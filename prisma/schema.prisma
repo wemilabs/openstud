@@ -5,7 +5,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url       = env("DATABASE_URL") // points to the connection pool for queries
+  directUrl = env("DIRECT_URL")   // points to the database for migrations
 }
 
 enum UserRole {
@@ -53,7 +54,7 @@ model User {
   school        String?
   academicId    String?
   email         String?   @unique
-  emailVerified Boolean @default(false)
+  emailVerified DateTime?
   schoolEmail   String?
   image         String?
   accounts      Account[]
