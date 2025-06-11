@@ -33,6 +33,7 @@ interface ProjectData {
 interface TaskStats {
   total: number;
   completed: number;
+  avgCompletion: number;
 }
 
 interface ProjectHeaderProps {
@@ -47,6 +48,7 @@ export function ProjectHeader({ projectId }: ProjectHeaderProps) {
   const [taskStats, setTaskStats] = useState<TaskStats>({
     total: 0,
     completed: 0,
+    avgCompletion: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,8 +82,12 @@ export function ProjectHeader({ projectId }: ProjectHeaderProps) {
 
         // Get project task statistics
         const statsResult = await getProjectTaskStats(projectId);
-        if (statsResult.data) {
-          setTaskStats(statsResult.data);
+        if (!statsResult.error) {
+          setTaskStats({
+            total: statsResult.totalTasks || 0,
+            completed: statsResult.completedTasks || 0,
+            avgCompletion: statsResult.avgCompletionPercentage || 0,
+          });
         }
       } catch (err) {
         console.error("Error fetching project data:", err);

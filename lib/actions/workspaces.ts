@@ -1,12 +1,16 @@
 "use server";
 
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth";
-import { WorkspaceRole } from "@/lib/generated/prisma/client";
+import { Prisma, WorkspaceRole } from "@/lib/generated/prisma/client";
 
-// Schema for workspace (workspace) creation/update validation
+// Define a type for WorkspaceMember that includes the workspace relation
+type WorkspaceMemberWithWorkspace = Prisma.WorkspaceMemberGetPayload<{
+  include: { workspace: true };
+}>;
+
 const WorkspaceSchema = z.object({
   name: z
     .string()
@@ -90,7 +94,7 @@ export async function getWorkspaces() {
     }
 
     // Get all workspaces where the user is a member
-    const workspaceMembers = await prisma.workspaceMember.findMany({
+    const workspaceMembers = (await prisma.workspaceMember.findMany({
       where: {
         userId,
       },
@@ -102,7 +106,7 @@ export async function getWorkspaces() {
           name: "asc",
         },
       },
-    });
+    })) as WorkspaceMemberWithWorkspace[];
 
     // Extract the workspaces from the workspace members
     const workspaces = workspaceMembers.map((member) => ({

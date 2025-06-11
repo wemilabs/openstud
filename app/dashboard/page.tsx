@@ -14,11 +14,11 @@ export default async function DashboardPage() {
     <>
       <div className="grid gap-1 mb-4">
         <h1 className="text-xl font-medium tracking-tight">
-          🎉 Hey, you're welcome{" "}
+          🎉 Hey, you're welcome dear{" "}
           <span className="font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-            {session?.user?.role}
+            {session?.user?.role?.toLocaleLowerCase()}
           </span>
-          !
+          .
         </h1>
         <p className="text-sm text-muted-foreground">
           Here's your space for academic success.

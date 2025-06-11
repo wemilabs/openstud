@@ -1,11 +1,10 @@
 "use server";
 
 import { z } from "zod";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth/auth";
 
-// Schema for task creation/update validation
 const TaskSchema = z.object({
   title: z
     .string()
@@ -217,6 +216,32 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
 
     if (!workspaceMember) {
       return { error: "You are not a member of this task's workspace" };
+    }
+
+    // Check if user is trying to modify more than just completionPercentage
+    const isUpdatingMoreThanCompletion =
+      input.title !== undefined ||
+      input.description !== undefined ||
+      input.completed !== undefined ||
+      input.dueDate !== undefined ||
+      input.priority !== undefined ||
+      input.category !== undefined;
+
+    // If user is not the task creator or admin/owner, and is trying to modify more than completionPercentage
+    const isTaskCreator = task.createdById === userId;
+    const isWorkspaceOwnerOrAdmin = ["OWNER", "ADMIN"].includes(
+      workspaceMember.role
+    );
+
+    if (
+      isUpdatingMoreThanCompletion &&
+      !isTaskCreator &&
+      !isWorkspaceOwnerOrAdmin
+    ) {
+      return {
+        error:
+          "You can only update the completion percentage of this task. Only task creators and workspace admins can modify other fields.",
+      };
     }
 
     // Update the task
