@@ -1,7 +1,27 @@
 "use server";
 
-import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth";
+import prisma from "@/lib/prisma";
+import { Prisma } from "@/lib/generated/prisma/client";
+
+type TaskStatsByCategory = Array<{
+  category: string | null;
+  _count: { id: number };
+  _avg: { completionPercentage: number | null };
+}>;
+
+type TaskWithCreator = Prisma.TaskGetPayload<{
+  include: {
+    createdBy: {
+      select: {
+        id: true;
+        name: true;
+        email: true;
+        image: true;
+      };
+    };
+  };
+}>;
 
 /**
  * Fetches task completion statistics by category for the specified workspace
@@ -77,11 +97,13 @@ export async function getTaskStatsByCategory(workspaceId?: string) {
     });
 
     // Transform the data for the chart
-    const formattedStats = taskStats.map((stat) => ({
-      name: stat.category || "Uncategorized",
-      total: Math.round(stat._avg.completionPercentage || 0),
-      count: stat._count.id,
-    }));
+    const formattedStats = (taskStats as unknown as TaskStatsByCategory).map(
+      (stat) => ({
+        name: stat.category || "Uncategorized",
+        total: Math.round(stat._avg.completionPercentage || 0),
+        count: stat._count.id,
+      })
+    );
 
     return { data: formattedStats };
   } catch (error) {
@@ -241,7 +263,7 @@ export async function getRecentActivity(workspaceId?: string) {
     }
 
     // Get recent tasks with updates - include createdById and creator info
-    const recentTasks = await prisma.task.findMany({
+    const recentTasks = (await prisma.task.findMany({
       where: {
         projectId: {
           in: projectIds,
@@ -261,28 +283,7 @@ export async function getRecentActivity(workspaceId?: string) {
           },
         },
       },
-    });
-
-    // // Debug - Check if createdBy information is being fetched correctly
-    // console.log(
-    //   "Tasks with creator info:",
-    //   JSON.stringify(
-    //     recentTasks.map((task) => ({
-    //       id: task.id,
-    //       title: task.title,
-    //       createdById: task.createdById,
-    //       createdBy: task.createdBy,
-    //       hasUser: !!task.createdBy,
-    //       userName: task.createdBy?.name,
-    //       userEmail: task.createdBy?.email,
-    //     })),
-    //     null,
-    //     2
-    //   )
-    // );
-
-    // // Debug the full task data from prisma
-    // console.log("Raw task data:", JSON.stringify(recentTasks[0], null, 2));
+    })) as TaskWithCreator[];
 
     // Transform the data for the activity feed using the task creator information
     const activities = recentTasks.map((task) => {
@@ -303,7 +304,7 @@ export async function getRecentActivity(workspaceId?: string) {
 
       // Get a user object to show from various sources
       // 1. From the task's createdBy relation if it exists
-      let activityUser = task.createdBy || null;
+      let activityUser = task?.createdBy || null;
 
       // 2. Fallback to project owner if no creator info
       if (!activityUser && projectOwners[task.projectId]) {

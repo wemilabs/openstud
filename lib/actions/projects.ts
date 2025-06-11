@@ -18,6 +18,22 @@ const ProjectSchema = z.object({
 
 export type ProjectInput = z.infer<typeof ProjectSchema>;
 
+// Type for project task statistics
+export type ProjectTaskStats = {
+  id: string;
+  totalTasks: number;
+  completedTasks: number;
+  avgCompletionPercentage: number;
+  name?: string;
+};
+
+// Type for task aggregate result
+type TaskAggregateResult = {
+  _avg: {
+    completionPercentage: number | null;
+  };
+};
+
 /**
  * Creates a new project in a workspace (workspace)
  */
@@ -254,34 +270,31 @@ export async function getProjectTaskStats(projectId: string) {
       return { error: "You don't have access to this project" };
     }
 
-    // Get task statistics
-    const taskStats = await prisma.$transaction([
+    // Get task statistics using separate queries instead of transaction
+    const [totalTasks, completedTasks, avgResult] = await Promise.all([
       prisma.task.count({ where: { projectId } }),
       prisma.task.count({ where: { projectId, completed: true } }),
+      prisma.task.aggregate({
+        where: { projectId },
+        _avg: { completionPercentage: true },
+      }) as unknown as Promise<TaskAggregateResult>,
     ]);
 
+    // Safely handle potential undefined/null values
+    const avgCompletion = avgResult?._avg?.completionPercentage ?? 0;
+
     return {
-      data: {
-        total: taskStats[0],
-        completed: taskStats[1],
-      },
+      id: project.id,
+      name: project.name,
+      totalTasks: Number(totalTasks ?? 0),
+      completedTasks: Number(completedTasks ?? 0),
+      avgCompletionPercentage: Number(avgCompletion),
     };
   } catch (error) {
     console.error("Error getting project task stats:", error);
     return { error: "Failed to get project task statistics" };
   }
 }
-
-/**
- * Type for project task statistics
- */
-export type ProjectTaskStats = {
-  id: string;
-  totalTasks: number;
-  completedTasks: number;
-  avgCompletionPercentage: number;
-  name?: string;
-};
 
 /**
  * Get task statistics for all projects in a workspace
@@ -386,7 +399,7 @@ export async function getWorkspaceProjectTaskStats(
     // Get task stats for each project
     const projectStats = await Promise.all(
       projects.map(async (project) => {
-        const taskStats = await prisma.$transaction([
+        const [totalTasks, completedTasks, avgResult] = await Promise.all([
           prisma.task.count({ where: { projectId: project.id } }),
           prisma.task.count({
             where: { projectId: project.id, completed: true },
@@ -394,17 +407,18 @@ export async function getWorkspaceProjectTaskStats(
           prisma.task.aggregate({
             where: { projectId: project.id },
             _avg: { completionPercentage: true },
-          }),
+          }) as unknown as Promise<TaskAggregateResult>,
         ]);
+
+        // Safely handle potential undefined/null values
+        const avgCompletion = avgResult?._avg?.completionPercentage ?? 0;
 
         return {
           id: project.id,
           name: project.name,
-          totalTasks: Number(taskStats[0]),
-          completedTasks: Number(taskStats[1]),
-          avgCompletionPercentage: Number(
-            taskStats[2]._avg.completionPercentage || 0
-          ),
+          totalTasks: Number(totalTasks ?? 0),
+          completedTasks: Number(completedTasks ?? 0),
+          avgCompletionPercentage: Number(avgCompletion),
         };
       })
     );

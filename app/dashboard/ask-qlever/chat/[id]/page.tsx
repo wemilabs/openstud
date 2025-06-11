@@ -8,6 +8,23 @@ import { ChatUI } from "@/components/dashboard/ask-qlever/chat-ui";
 import { ChatHistory } from "@/components/dashboard/ask-qlever/chat-history";
 import { PersonaType } from "@/lib/actions/ai-convo";
 
+type Message = {
+  id: string;
+  role: string;
+  content: string;
+  createdAt: Date;
+};
+
+type Conversation = {
+  id: string;
+  title: string | null;
+  persona: string;
+  createdById: string;
+  createdAt: Date;
+  updatedAt: Date;
+  messages: Message[];
+};
+
 export const metadata: Metadata = {
   title: "Chat with Qlever | OpenStud",
   description: "Get answers to your academic questions from Qlever AI",
@@ -27,7 +44,7 @@ export default async function ChatPage({
 
   const { id } = await params;
 
-  const conversation = await prisma.aIConversation.findUnique({
+  const conversation = (await prisma.aIConversation.findUnique({
     where: {
       id,
       createdById: session.user.id,
@@ -37,9 +54,15 @@ export default async function ChatPage({
         orderBy: {
           createdAt: "asc",
         },
+        select: {
+          id: true,
+          role: true,
+          content: true,
+          createdAt: true,
+        },
       },
     },
-  });
+  })) as Conversation | null;
 
   if (!conversation) {
     return notFound();

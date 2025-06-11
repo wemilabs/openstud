@@ -66,12 +66,16 @@ import { PendingInvitations } from "@/components/workspace/pending-invitations";
 type Member = {
   id: string;
   role: WorkspaceRole;
+  userId: string;
   user: {
     id: string;
     name: string | null;
     email: string | null;
     image: string | null;
   };
+  workspaceId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export default function WorkspacesPage() {
@@ -104,7 +108,7 @@ export default function WorkspacesPage() {
         return;
       }
 
-      setMembers(result.data || []);
+      setMembers((result.data || []) as Member[]);
     } catch (error) {
       console.error("Error fetching workspace members:", error);
       toast.error("Failed to fetch workspace members");
@@ -304,7 +308,7 @@ export default function WorkspacesPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
+                            <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -324,7 +328,7 @@ export default function WorkspacesPage() {
                                   }}
                                   className="text-destructive"
                                 >
-                                  <Trash className="mr-2 h-4 w-4" />
+                                  <Trash className="mr-2 size-4" />
                                   Delete Workspace
                                 </DropdownMenuItem>
                               </AlertDialogTrigger>
@@ -422,7 +426,7 @@ export default function WorkspacesPage() {
               <CardContent>
                 {isLoadingMembers ? (
                   <div className="flex justify-center p-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <div className="animate-spin rounded-full size-8 border-b-2 border-primary"></div>
                   </div>
                 ) : members.length === 0 ? (
                   <div className="text-center p-4">
@@ -444,7 +448,7 @@ export default function WorkspacesPage() {
                       {members.map((member) => (
                         <TableRow key={member.id}>
                           <TableCell className="flex items-center gap-2">
-                            <Avatar className="h-8 w-8">
+                            <Avatar className="size-8">
                               {member.user.image ? (
                                 <AvatarImage
                                   src={member.user.image}
@@ -475,7 +479,7 @@ export default function WorkspacesPage() {
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
+                                    <MoreHorizontal className="size-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
