@@ -118,7 +118,7 @@ export function EditNote({
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -130,12 +130,12 @@ export function EditNote({
                   <FormLabel>Content</FormLabel>
                   <FormControl>
                     <Textarea
-                      className="min-h-[200px]"
+                      className="h-80"
                       {...field}
                       value={field.value || ""}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />

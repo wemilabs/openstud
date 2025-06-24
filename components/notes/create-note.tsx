@@ -29,7 +29,6 @@ import { toast } from "sonner";
 import { createNote } from "@/lib/actions/notes";
 import { Plus } from "lucide-react";
 
-// Form validation schema
 const formSchema = z.object({
   title: z
     .string()
@@ -58,7 +57,6 @@ export function CreateNote({ courseId, className }: CreateNoteProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Initialize form with react-hook-form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,7 +65,6 @@ export function CreateNote({ courseId, className }: CreateNoteProps) {
     },
   });
 
-  // Handle form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
 
@@ -119,7 +116,7 @@ export function CreateNote({ courseId, className }: CreateNoteProps) {
                   <FormControl>
                     <Input placeholder="Note title" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -132,12 +129,12 @@ export function CreateNote({ courseId, className }: CreateNoteProps) {
                   <FormControl>
                     <Textarea
                       placeholder="Write your note content here..."
-                      className="min-h-[200px]"
+                      className="h-80 placeholder:text-sm"
                       {...field}
                       value={field.value || ""}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
