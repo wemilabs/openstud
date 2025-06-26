@@ -75,7 +75,7 @@ export function CourseList({ courses = [] }: CourseListProps) {
         <div className="flex min-h-[400px] flex-col items-center justify-center rounded-md border border-dashed p-8 text-center animate-in fade-in-50">
           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
             <h2 className="mt-6 text-xl font-semibold">No courses found</h2>
-            <p className="mb-8 mt-2 text-center text-sm font-normal leading-6 text-muted-foreground">
+            <p className="mb-8 mt-2 text-center font-mono text-sm font-normal leading-6 text-muted-foreground">
               {searchParams.get("search")
                 ? "No courses match your search. Try a different term."
                 : "You haven't created any courses yet. Start by creating your first course."}
@@ -119,7 +119,7 @@ export function CourseList({ courses = [] }: CourseListProps) {
               key={course.id}
               className="group relative overflow-hidden transition-all hover:shadow-md"
             >
-              <div className="absolute right-2 top-2 flex space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute right-2 top-2 flex space-x-1 md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
                 <EditCourse course={course} />
                 <DeleteCourse courseId={course.id} courseName={course.name} />
               </div>
@@ -133,13 +133,13 @@ export function CourseList({ courses = [] }: CourseListProps) {
                   </Link>
                 </div>
                 {course.description && (
-                  <CardDescription className="line-clamp-2 mt-2.5">
+                  <CardDescription className="line-clamp-2 mt-2.5 font-mono text-xs">
                     {course.description}
                   </CardDescription>
                 )}
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
                   <Calendar className="size-4" />
                   <span>
                     Created {formatDistanceToNow(course.createdAt)} ago

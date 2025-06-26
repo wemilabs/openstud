@@ -19,7 +19,7 @@ export function NoteList({ notes = [] }: NoteListProps) {
         <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
           <FileText className="h-10 w-10 text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold">No notes yet</h3>
-          <p className="mb-4 mt-2 text-center text-sm font-normal leading-6 text-muted-foreground">
+          <p className="mb-4 mt-2 text-center text-sm font-mono font-normal leading-6 text-muted-foreground">
             You haven't created any notes for this course yet. Start by adding
             your first note.
           </p>
@@ -33,7 +33,7 @@ export function NoteList({ notes = [] }: NoteListProps) {
       <div className="grid gap-4 md:grid-cols-2">
         {notes.map((note) => (
           <div key={note.id} className="relative group">
-            <div className="absolute right-2 top-2 z-10 flex space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="absolute right-2 top-2 z-10 flex space-x-1 md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
               <DownloadNote noteId={note.id} />
               <EditNote
                 noteId={note.id}

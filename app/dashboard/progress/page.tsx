@@ -4,8 +4,8 @@ export default function ProgressPage() {
   return (
     <div className="container py-6 space-y-10">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Progress</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-2xl font-bold tracking-tight">Progress</h1>
+        <p className="font-mono text-sm text-muted-foreground mt-2">
           Get relevant insights into your performance.
         </p>
       </div>

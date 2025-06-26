@@ -236,8 +236,8 @@ export default function WorkspacesPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Workspaces</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl font-bold tracking-tight">Workspaces</h1>
+        <p className="font-mono text-sm text-muted-foreground">
           Manage your workspaces and members
         </p>
       </div>

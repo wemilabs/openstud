@@ -211,7 +211,7 @@ export function DashboardHeader({
           </span>
 
           <Popover open={openWorkspace} onOpenChange={setOpenWorkspace}>
-            <PopoverTrigger asChild className="hidden md:flex">
+            <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 role="combobox"

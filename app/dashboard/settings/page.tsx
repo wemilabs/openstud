@@ -5,8 +5,8 @@ export default async function SettingsPage() {
   return (
     <div className="container py-6 space-y-10">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-2">
+        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+        <p className="font-mono text-sm text-muted-foreground mt-2">
           Manage your account settings and preferences.
         </p>
       </div>
@@ -14,8 +14,8 @@ export default async function SettingsPage() {
       {/* Preferences Section */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Preferences</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-xl font-bold tracking-tight">Preferences</h2>
+          <p className="font-mono text-sm text-muted-foreground mt-1">
             Manage your personal preferences.
           </p>
         </div>
@@ -30,10 +30,10 @@ export default async function SettingsPage() {
       {/* Academic Settings */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">
+          <h2 className="text-xl font-bold tracking-tight">
             Academic Settings
           </h2>
-          <p className="text-muted-foreground mt-1">
+          <p className="font-mono text-sm text-muted-foreground mt-1">
             Configure your academic profile and preferences.
           </p>
         </div>
@@ -46,8 +46,8 @@ export default async function SettingsPage() {
       {/* Task Management Section */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Task Management</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-xl font-bold tracking-tight">Task Management</h2>
+          <p className="font-mono text-sm text-muted-foreground mt-1">
             Customize how you manage and view your tasks.
           </p>
         </div>
@@ -62,8 +62,8 @@ export default async function SettingsPage() {
       {/* Notifications */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Notifications</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-xl font-bold tracking-tight">Notifications</h2>
+          <p className="font-mono text-sm text-muted-foreground mt-1">
             Control when and how you receive notifications.
           </p>
         </div>
@@ -78,8 +78,8 @@ export default async function SettingsPage() {
       {/* Integrations */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Integrations</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-xl font-bold tracking-tight">Integrations</h2>
+          <p className="font-mono text-sm text-muted-foreground mt-1">
             Connect and manage third-party services.
           </p>
         </div>
@@ -94,8 +94,8 @@ export default async function SettingsPage() {
       {/* Data & Privacy */}
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Data & Privacy</h2>
-          <p className="text-muted-foreground mt-1">
+          <h2 className="text-xl font-bold tracking-tight">Data & Privacy</h2>
+          <p className="font-mono text-sm text-muted-foreground mt-1">
             Manage your data and privacy settings.
           </p>
         </div>
