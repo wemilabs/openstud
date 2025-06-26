@@ -13,13 +13,13 @@ export const metadata = {
   description: "View and manage your course details",
 };
 
-interface CoursePageProps {
+export default async function CoursePage({
+  params,
+}: {
   params: Promise<{
     id: string;
   }>;
-}
-
-export default async function CoursePage({ params }: CoursePageProps) {
+}) {
   const { id } = await params;
 
   const { data: course, error } = await getCourseById(id);
@@ -47,7 +47,9 @@ export default async function CoursePage({ params }: CoursePageProps) {
           {course.name}
         </h1>
         {course.description && (
-          <p className="mt-2 text-muted-foreground">{course.description}</p>
+          <p className="font-mono mt-2 text-sm text-muted-foreground">
+            {course.description}
+          </p>
         )}
       </div>
 
@@ -56,7 +58,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold">Notes</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="font-mono text-sm text-muted-foreground">
             Add and manage your course notes.
           </p>
         </div>

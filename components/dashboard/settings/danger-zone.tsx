@@ -143,7 +143,7 @@ export function DangerZone() {
         <h2 className="text-xl font-bold text-red-600 dark:text-red-500">
           Danger Zone
         </h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="font-mono text-sm text-muted-foreground mt-1">
           These actions have serious consequences and cannot be undone.
         </p>
       </div>
@@ -155,7 +155,7 @@ export function DangerZone() {
                 {action.icon}
                 <CardTitle className="text-base">{action.title}</CardTitle>
               </div>
-              <CardDescription className="text-sm">
+              <CardDescription className="font-mono text-xs">
                 {action.description}
               </CardDescription>
             </CardHeader>
