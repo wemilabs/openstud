@@ -47,7 +47,10 @@ export async function createNote(input: NoteInput) {
     }
 
     const note = await prisma.note.create({
-      data: validatedData,
+      data: {
+        ...validatedData,
+        userId: session.user.id,
+      },
     });
 
     revalidatePath(`/dashboard/courses/${course.id}`);

@@ -45,10 +45,10 @@ export async function createWorkspace(input: WorkspaceInput) {
 
     // Create the workspace and add the current user as an owner without using a transaction
     try {
-      // Create the workspace
       const workspace = await prisma.workspace.create({
         data: {
           name: validatedData.name,
+          createdById: userId,
         },
       });
 

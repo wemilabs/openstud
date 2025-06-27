@@ -136,7 +136,7 @@ export async function resetUserData() {
     try {
       await prisma.workspaceInvitation.deleteMany({
         where: {
-          createdBy: user.id,
+          createdById: user.id,
         },
       });
     } catch (err) {
@@ -208,7 +208,7 @@ export async function deleteAccount() {
     try {
       await prisma.workspaceInvitation.deleteMany({
         where: {
-          createdBy: user.id,
+          createdById: user.id,
         },
       });
     } catch (err) {

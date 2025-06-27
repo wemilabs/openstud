@@ -88,7 +88,7 @@ export async function createWorkspaceInvitation(
         expires,
         maxUses: input.maxUses,
         usedCount: 0,
-        createdBy: userId,
+        createdById: userId,
       },
     });
 
