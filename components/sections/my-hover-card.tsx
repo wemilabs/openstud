@@ -7,7 +7,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { XformerlyTwitter } from "@/components/icons";
+import { Icons } from "@/components/icons";
 
 export function MyHoverCard() {
   return (
@@ -30,7 +30,7 @@ export function MyHoverCard() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <XformerlyTwitter />
+                <Icons.XSocial />
               </a>
             </h4>
             <p className="text-sm">

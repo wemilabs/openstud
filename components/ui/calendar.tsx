@@ -1,7 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import {
   addMonths,
   format,
@@ -13,8 +12,9 @@ import {
   subMonths,
 } from "date-fns";
 
-import { cn } from "@/lib/utils";
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface CalendarProps {
   className?: string;
@@ -25,8 +25,13 @@ interface CalendarProps {
   initialFocus?: boolean;
 }
 
-function Calendar({ className, selected, onSelect, disabled }: CalendarProps) {
-  const [currentMonth, setCurrentMonth] = React.useState<Date>(
+export function Calendar({
+  className,
+  selected,
+  onSelect,
+  disabled,
+}: CalendarProps) {
+  const [currentMonth, setCurrentMonth] = useState<Date>(
     selected || new Date()
   );
 
@@ -131,7 +136,7 @@ function Calendar({ className, selected, onSelect, disabled }: CalendarProps) {
           className="p-1 rounded-full hover:bg-muted flex items-center justify-center"
           onClick={handlePreviousMonth}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <Icons.chevronLeft className="size-4" />
         </button>
 
         <h2 className="text-sm font-medium">
@@ -143,7 +148,7 @@ function Calendar({ className, selected, onSelect, disabled }: CalendarProps) {
           className="p-1 rounded-full hover:bg-muted flex items-center justify-center"
           onClick={handleNextMonth}
         >
-          <ChevronRight className="h-4 w-4" />
+          <Icons.chevronRight className="size-4" />
         </button>
       </div>
 
@@ -176,5 +181,3 @@ function Calendar({ className, selected, onSelect, disabled }: CalendarProps) {
     </div>
   );
 }
-
-export { Calendar };
