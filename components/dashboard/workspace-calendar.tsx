@@ -12,13 +12,13 @@ import {
   eachDayOfInterval,
   getDay,
 } from "date-fns";
-import {
-  Calendar as CalendarIcon,
-  Filter,
-  Loader2,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { toast } from "sonner";
+
+import { cn } from "@/lib/utils";
+import { getWorkspaceTasks } from "@/lib/actions/workspace-tasks";
+
+import { Icons } from "@/components/icons";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   HoverCard,
@@ -30,14 +30,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
 import { TaskCategoryBadge } from "./task-category";
 import { TaskPriorityBadge } from "./task-priority";
-import { cn } from "@/lib/utils";
 import { Task } from "./task-card";
 import { TaskFilter } from "./task-filter";
-import { getWorkspaceTasks } from "@/lib/actions/workspace-tasks";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 
 interface TaskWithProject extends Task {
   projectName: string;
@@ -162,7 +159,7 @@ export function WorkspaceCalendar({ workspaceId }: WorkspaceCalendarProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <CalendarIcon className="h-5 w-5 text-primary" />
+          <Icons.calendar className="size-5 text-primary" />
           <h2 className="text-xl font-semibold">
             {month.toLocaleString("default", { month: "long" })}{" "}
             {month.getFullYear()}
@@ -172,7 +169,7 @@ export function WorkspaceCalendar({ workspaceId }: WorkspaceCalendarProps) {
           <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 gap-1">
-                <Filter className="h-3.5 w-3.5" />
+                <Icons.filter className="size-3.5" />
                 <span>Filter</span>
                 {(selectedCategories.length > 0 ||
                   selectedPriorities.length > 0) && (
@@ -210,7 +207,7 @@ export function WorkspaceCalendar({ workspaceId }: WorkspaceCalendarProps) {
             size="icon"
             onClick={() => setMonth(subMonths(month, 1))}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <Icons.chevronLeft className="size-4" />
           </Button>
 
           <h2 className="text-lg font-medium">{format(month, "MMMM yyyy")}</h2>
@@ -220,7 +217,7 @@ export function WorkspaceCalendar({ workspaceId }: WorkspaceCalendarProps) {
             size="icon"
             onClick={() => setMonth(addMonths(month, 1))}
           >
-            <ChevronRight className="h-4 w-4" />
+            <Icons.chevronRight className="size-4" />
           </Button>
         </div>
 
@@ -412,7 +409,7 @@ export function WorkspaceCalendar({ workspaceId }: WorkspaceCalendarProps) {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-20">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
+          <Icons.spinner className="size-5 animate-spin text-muted-foreground mr-2" />
           <p className="text-sm text-muted-foreground">Loading tasks...</p>
         </div>
       ) : filteredTasks.length === 0 ? (
