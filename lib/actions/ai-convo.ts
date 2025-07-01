@@ -44,11 +44,11 @@ async function generateAIConversationTitle(message: string): Promise<string> {
 export async function createNewConversation({
   query,
   persona,
-  isWebSearchEnabled,
+  useWebSearch,
 }: {
   query: string;
   persona: PersonaType;
-  isWebSearchEnabled?: boolean;
+  useWebSearch?: boolean;
 }) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -80,7 +80,7 @@ export async function createNewConversation({
   }
 
   // Include web search preference in the redirect URL
-  const searchParam = isWebSearchEnabled ? "?useWebSearch=true" : "";
+  const searchParam = useWebSearch ? "?useWebSearch=true" : "";
   redirect(`/dashboard/ask-qlever/chat/${conversationId}${searchParam}`);
 }
 
