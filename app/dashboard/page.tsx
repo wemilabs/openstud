@@ -16,7 +16,7 @@ export default async function DashboardPage() {
         <h1 className="text-xl font-medium tracking-tight">
           🎉 Hey, you're welcome dear{" "}
           <span className="font-mono text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-            {session?.user?.role?.toLocaleLowerCase()}.
+            {(session?.user?.role ?? "user").toLocaleLowerCase()}.
           </span>
         </h1>
         <p className="text-sm text-muted-foreground">

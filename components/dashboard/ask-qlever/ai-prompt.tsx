@@ -119,7 +119,7 @@ export function AIPrompt() {
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState(false);
+  const [useWebSearch, setUseWebSearch] = useState(false);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -155,7 +155,7 @@ export function AIPrompt() {
 
   // Handle search button toggle
   const handleSearchToggle = () => {
-    setIsWebSearchEnabled(!isWebSearchEnabled);
+    setUseWebSearch(!useWebSearch);
   };
 
   // Handle form submission
@@ -167,7 +167,7 @@ export function AIPrompt() {
       await createNewConversation({
         query,
         persona: selectedPersona,
-        isWebSearchEnabled,
+        useWebSearch,
       });
     });
   };
@@ -206,7 +206,7 @@ export function AIPrompt() {
                                 ? "gap-1.5 rounded-xl"
                                 : "rounded-full",
 
-                              index === 1 && isWebSearchEnabled
+                              index === 1 && useWebSearch
                                 ? "bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-300"
                                 : ""
                             )}
@@ -226,7 +226,7 @@ export function AIPrompt() {
                         <TooltipContent>
                           <p className="text-xs">
                             {index === 1
-                              ? isWebSearchEnabled
+                              ? useWebSearch
                                 ? "Disable web search"
                                 : "Search the web for up-to-date information"
                               : tooltip}

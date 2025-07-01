@@ -60,7 +60,6 @@ export function ChatUI({
       );
 
       // Extract citations from message content if they exist
-      // xAI and similar models often include citation links at the end of responses
       const citationRegex = /(?:^|\n)\[(\d+)\]:\s*(https?:\/\/[^\s]+)/gm;
       const matches = [...message.content.matchAll(citationRegex)];
 
