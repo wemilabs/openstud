@@ -23,10 +23,9 @@ export default function AskQleverPage() {
 
         <AIPrompt />
 
-        <div className="absolute bottom-4">
+        <div className="absolute bottom-10">
           <p className="text-muted-foreground text-center max-w-md text-xs">
-            ⚠️ File attachments, DeepSearch, Think mode, and other features
-            coming soon.
+            ⚠️ More features coming soon.
           </p>
         </div>
       </div>

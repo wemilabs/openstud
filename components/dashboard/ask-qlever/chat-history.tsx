@@ -3,13 +3,15 @@
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Icons } from "@/components/icons";
+import { formatDistanceToNow } from "date-fns";
+
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  deleteConversation,
+  getAllConversations,
+} from "@/lib/actions/ai-convo";
+import { cn } from "@/lib/utils";
+
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
@@ -21,11 +23,11 @@ import {
   CommandEmpty,
 } from "@/components/ui/command";
 import {
-  deleteConversation,
-  getAllConversations,
-} from "@/lib/actions/ai-convo";
-import { formatDistanceToNow } from "date-fns";
-import { cn } from "@/lib/utils";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ChatHistoryProps {
   currentId?: string;

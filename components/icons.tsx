@@ -50,6 +50,7 @@ import {
   Sparkles,
   MessageSquare,
   Globe,
+  ExternalLink,
   type Icon as LucideIcon,
 } from "lucide-react";
 
@@ -151,4 +152,5 @@ export const Icons = {
   google: GoogleIcon,
   XSocial: XformerlyTwitter,
   filter: Filter,
+  externalLink: ExternalLink,
 } as const;

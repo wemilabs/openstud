@@ -1,15 +1,12 @@
 "use client";
 
 import { useRef, useEffect, useState, useTransition } from "react";
+
+import { createNewConversation, PersonaType } from "@/lib/actions/ai-convo";
+import { cn } from "@/lib/utils";
+
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -19,8 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { createNewConversation, PersonaType } from "@/lib/actions/ai-convo";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ResearchModeAndSuggestionItem {
   label?: string;
@@ -46,7 +48,7 @@ const researchModeAndSuggestionItems: ResearchModeAndSuggestionItem[] = [
     label: "Search",
     icon: <Icons.globe className="size-4" />,
     tooltip: "Search the web",
-    disabled: true,
+    disabled: false,
   },
   // {
   //   label: "DeepSearch",
@@ -117,6 +119,7 @@ export function AIPrompt() {
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState(false);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -150,23 +153,30 @@ export function AIPrompt() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Handle search button toggle
+  const handleSearchToggle = () => {
+    setIsWebSearchEnabled(!isWebSearchEnabled);
+  };
+
   // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!query.trim() || isPending) return;
 
     startTransition(async () => {
-      await createNewConversation({ query, persona: selectedPersona });
+      await createNewConversation({
+        query,
+        persona: selectedPersona,
+        isWebSearchEnabled,
+      });
     });
   };
-
-  console.log(selectedPersona);
 
   return (
     <div className="w-full">
       <form className="w-full" onSubmit={handleSubmit}>
         <div className="flex flex-col w-full">
-          <div className="relative">
+          <div className="relative group">
             <Textarea
               ref={textareaRef}
               name="query"
@@ -182,7 +192,7 @@ export function AIPrompt() {
               <div className="flex items-center gap-2 text-muted-foreground">
                 {researchModeAndSuggestionItems
                   .slice(0, 3)
-                  .map(({ label, icon, tooltip, disabled }) => (
+                  .map(({ label, icon, tooltip, disabled }, index) => (
                     <TooltipProvider key={label}>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -194,19 +204,33 @@ export function AIPrompt() {
                               "text-xs font-normal border",
                               isLargeScreen
                                 ? "gap-1.5 rounded-xl"
-                                : "rounded-full"
+                                : "rounded-full",
+
+                              index === 1 && isWebSearchEnabled
+                                ? "bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-300"
+                                : ""
                             )}
-                            onClick={() =>
-                              alert(`${label}: Not implemented yet`)
-                            }
-                            disabled={disabled}
+                            onClick={() => {
+                              if (index === 1) {
+                                handleSearchToggle();
+                              } else {
+                                alert(`${label}: Not implemented yet`);
+                              }
+                            }}
+                            disabled={disabled && index !== 1}
                           >
                             {icon}
                             {isLargeScreen ? label : ""}
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p className="text-xs">{tooltip}</p>
+                          <p className="text-xs">
+                            {index === 1
+                              ? isWebSearchEnabled
+                                ? "Disable web search"
+                                : "Search the web for up-to-date information"
+                              : tooltip}
+                          </p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
