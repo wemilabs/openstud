@@ -1,32 +1,64 @@
-import { createXai } from "@ai-sdk/xai";
-import { streamText } from "ai";
-
 import { SYSTEM_PROMPT, PERSONA_PROMPTS } from "@/lib/ai/prompts";
+import {
+  streamWithGrok,
+  streamWithGrokSearch,
+  streamWithTavilyEnhancedGrok,
+} from "@/lib/search/providers";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { messages, persona = "tutor" /*context */ } = await req.json();
-  const xai = createXai({
-    apiKey: process.env.GROK_API_KEY!,
-    baseURL: process.env.GROK_API_BASE_URL!,
-  });
+  const {
+    messages,
+    persona = "tutor",
+    useWebSearch = false,
+  } = await req.json();
 
-  // const userContext = `
-  //   User's current courses: ${context?.courses?.join(", ") || "Not specified"}
-  //   Upcoming deadlines: ${context?.upcomingDeadlines?.join(", ") || "None"}
-  //   Recent tasks: ${context?.recentTasks?.join(", ") || "None"}
-  // `;
+  console.log(
+    `\n⚠️ Chat API - useWebSearch: ${useWebSearch}, persona: ${persona}`
+  );
 
   const personaPrompt =
     PERSONA_PROMPTS[persona as keyof typeof PERSONA_PROMPTS] || "";
+
   const fullSystemPrompt = `${SYSTEM_PROMPT}\n\n${personaPrompt}`;
 
-  const result = streamText({
-    model: xai(process.env.GROK_AI_CHAT_MODEL! || "grok-3-mini-fast-latest"),
-    system: fullSystemPrompt,
-    messages,
-  });
+  // Extract the current user message for search context
+  const currentMessage = messages[messages.length - 1]?.content || "";
 
-  return result.toDataStreamResponse();
+  try {
+    let result;
+
+    if (useWebSearch) {
+      console.log(
+        `✅ Using Tavily-enhanced search for query: ${currentMessage}\n`
+      );
+      // Use Tavily for enhanced web search
+      result = await streamWithTavilyEnhancedGrok(
+        messages,
+        fullSystemPrompt,
+        currentMessage
+      );
+    } else {
+      console.log(`✅ Using regular Grok without web search\n`);
+      // Use regular Grok without web search
+      result = await streamWithGrok(messages, fullSystemPrompt);
+    }
+
+    return result.toDataStreamResponse();
+  } catch (error) {
+    console.error(`\n⛔ Chat API error: ${error}\n`);
+
+    // Fallback to Grok with built-in search if Tavily fails
+    try {
+      const fallbackResult = await streamWithGrokSearch(
+        messages,
+        fullSystemPrompt
+      );
+      return fallbackResult.toDataStreamResponse();
+    } catch (fallbackError) {
+      console.error(`\n⛔ Fallback search also failed: ${fallbackError}\n`);
+      throw new Error("Both primary and fallback search methods failed");
+    }
+  }
 }

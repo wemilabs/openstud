@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
+import { addMessageToConversation, PersonaType } from "@/lib/actions/ai-convo";
 import { cn } from "@/lib/utils";
-import { addMessageToConversation } from "@/lib/actions/ai-convo";
 
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Icons } from "@/components/icons";
+import { Badge } from "@/components/ui/badge";
+
 import { CopyButton } from "./copy-button";
-import { PersonaType } from "@/lib/actions/ai-convo";
 
 type Message = {
   id: string;
@@ -25,11 +26,18 @@ export function ChatUI({
   initialMessages,
   conversationId,
   persona,
+  useWebSearch = false,
 }: {
   initialMessages: Message[];
   conversationId: string;
   persona: PersonaType;
+  useWebSearch?: boolean;
 }) {
+  // Track sources for each message
+  const [messageSources, setMessageSources] = useState<
+    Record<string, string[]>
+  >({});
+
   const {
     messages,
     input,
@@ -41,14 +49,32 @@ export function ChatUI({
     api: "/api/chat",
     initialMessages: initialMessages,
     id: conversationId,
-    body: { persona },
+    body: { persona, useWebSearch },
     onFinish: async (message) => {
       await addMessageToConversation(
         conversationId,
         "assistant",
         message.content,
-        persona
+        persona,
+        useWebSearch
       );
+
+      // Extract citations from message content if they exist
+      // xAI and similar models often include citation links at the end of responses
+      const citationRegex = /(?:^|\n)\[(\d+)\]:\s*(https?:\/\/[^\s]+)/gm;
+      const matches = [...message.content.matchAll(citationRegex)];
+
+      if (matches.length > 0) {
+        const extractedSources = matches
+          .map((match) => match[2]?.trim())
+          .filter(Boolean);
+        if (extractedSources.length > 0) {
+          setMessageSources((prev) => ({
+            ...prev,
+            [message.id]: extractedSources,
+          }));
+        }
+      }
     },
   });
 
@@ -264,6 +290,53 @@ export function ChatUI({
                   >
                     {content}
                   </ReactMarkdown>
+
+                  {/* Display sources if they exist for this message */}
+                  {role === "assistant" &&
+                    messageSources[id] &&
+                    messageSources[id].length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <p className="text-xs text-muted-foreground mb-1">
+                          Sources:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {messageSources[id].map((source, index) => {
+                            try {
+                              const url = new URL(source);
+                              return (
+                                <a
+                                  key={index}
+                                  href={source}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="no-underline"
+                                >
+                                  <Badge
+                                    variant="outline"
+                                    className="text-xs hover:bg-primary/10"
+                                  >
+                                    <Icons.externalLink className="mr-1 size-3" />
+                                    {url.hostname}
+                                  </Badge>
+                                </a>
+                              );
+                            } catch {
+                              // If the URL is invalid, still show it but without parsing
+                              return (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="text-xs hover:bg-primary/10"
+                                >
+                                  <Icons.externalLink className="mr-1 size-3" />
+                                  {source.substring(0, 30)}...
+                                </Badge>
+                              );
+                            }
+                          })}
+                        </div>
+                      </div>
+                    )}
                 </div>
               ) : null}
             </div>

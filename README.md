@@ -27,10 +27,14 @@ For a detailed understanding of the codebase:
 
 ## Credits
 
-- [Next.js](https://nextjs.org/) - The React framework
+- [Next.js](https://nextjs.org/) - The React Framework for the Web
 - [Tailwind CSS](https://tailwindcss.com/) - For a faster and more consistent development experience
 - [Shadcn UI](https://ui.shadcn.com/) - The component distribution system
 - [Prisma](https://www.prisma.io/) - For managing the database
+- [Auth.js](https://authjs.dev/) - Authentication
+- [xAI/Grok](https://x.ai/) - AI Chat API
+- [Tavily](https://tavily.ai/) - Search grounding and Web Search capabilities
+- [Vercel AI SDK](https://vercel.ai/sdk) - AI model integration and streaming
 - [Neon](https://neon.tech/) - As database
 - [Vercel](https://vercel.com/) - For hosting the website and providing a smooth user experience
 - [Windsurf Editor by Codeium](https://codeium.com/windsurf/) - The code editor

@@ -227,6 +227,7 @@ model Message {
   role            String
   persona         String @default("tutor")
   content         String       @db.Text
+  useWebSearch    Boolean      @default(false)
   createdAt       DateTime     @default(now())
 
   @@index([conversationId])

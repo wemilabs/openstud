@@ -1,12 +1,12 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { PersonaType } from "@/lib/actions/ai-convo";
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/prisma";
 
 import { ChatUI } from "@/components/dashboard/ask-qlever/chat-ui";
 import { ChatHistory } from "@/components/dashboard/ask-qlever/chat-history";
-import { PersonaType } from "@/lib/actions/ai-convo";
 
 type Message = {
   id: string;
@@ -32,10 +32,12 @@ export const metadata: Metadata = {
 
 export default async function ChatPage({
   params,
+  searchParams,
 }: {
   params: Promise<{
     id: string;
   }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -43,6 +45,8 @@ export default async function ChatPage({
   }
 
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const useWebSearch = resolvedSearchParams?.useWebSearch === "true";
 
   const conversation = (await prisma.aIConversation.findUnique({
     where: {
@@ -85,6 +89,7 @@ export default async function ChatPage({
             })
           )}
           persona={conversation.persona as PersonaType}
+          useWebSearch={useWebSearch}
         />
       </div>
     </section>

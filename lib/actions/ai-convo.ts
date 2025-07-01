@@ -44,9 +44,11 @@ async function generateAIConversationTitle(message: string): Promise<string> {
 export async function createNewConversation({
   query,
   persona,
+  isWebSearchEnabled,
 }: {
   query: string;
   persona: PersonaType;
+  isWebSearchEnabled?: boolean;
 }) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -77,7 +79,9 @@ export async function createNewConversation({
     redirect("/dashboard/ask-qlever?error=creation_failed");
   }
 
-  redirect(`/dashboard/ask-qlever/chat/${conversationId}`);
+  // Include web search preference in the redirect URL
+  const searchParam = isWebSearchEnabled ? "?useWebSearch=true" : "";
+  redirect(`/dashboard/ask-qlever/chat/${conversationId}${searchParam}`);
 }
 
 export async function getAllConversations() {
@@ -115,7 +119,8 @@ export async function addMessageToConversation(
   conversationId: string,
   role: "user" | "assistant",
   content: string,
-  persona: PersonaType
+  persona: PersonaType,
+  useWebSearch?: boolean
 ) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -140,6 +145,7 @@ export async function addMessageToConversation(
         role,
         content,
         ...(persona && { persona }),
+        ...(useWebSearch && { useWebSearch }),
       },
     });
 
