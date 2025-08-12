@@ -106,6 +106,7 @@ export async function getWorkspaces() {
           name: "asc",
         },
       },
+      cacheStrategy: { ttl: 60 },
     })) as WorkspaceMemberWithWorkspace[];
 
     // Extract the workspaces from the workspace members
@@ -143,6 +144,7 @@ export async function getWorkspaceById(id: string) {
       include: {
         workspace: true,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -181,6 +183,7 @@ export async function updateWorkspace(id: string, input: WorkspaceInput) {
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -232,6 +235,7 @@ export async function deleteWorkspace(id: string) {
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -278,6 +282,7 @@ export async function addWorkspaceMember(
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -296,6 +301,7 @@ export async function addWorkspaceMember(
     // Find the user by email
     const user = await prisma.user.findUnique({
       where: { email },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!user) {
@@ -310,6 +316,7 @@ export async function addWorkspaceMember(
           userId: user.id,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (existingMember) {
@@ -356,6 +363,7 @@ export async function removeWorkspaceMember(
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!currentMember) {
@@ -365,6 +373,7 @@ export async function removeWorkspaceMember(
     // Get the member to be removed
     const memberToRemove = await prisma.workspaceMember.findUnique({
       where: { id: memberId },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!memberToRemove || memberToRemove.workspaceId !== workspaceId) {
@@ -438,6 +447,7 @@ export async function updateWorkspaceMemberRole(
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!currentMember) {
@@ -451,6 +461,7 @@ export async function updateWorkspaceMemberRole(
     // Get the member to update
     const memberToUpdate = await prisma.workspaceMember.findUnique({
       where: { id: memberId },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!memberToUpdate || memberToUpdate.workspaceId !== workspaceId) {
@@ -507,6 +518,7 @@ export async function getWorkspaceMembers(workspaceId: string) {
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -527,6 +539,7 @@ export async function getWorkspaceMembers(workspaceId: string) {
         },
       },
       orderBy: [{ role: "asc" }, { user: { name: "asc" } }],
+      cacheStrategy: { ttl: 60 },
     });
 
     return { data: members };

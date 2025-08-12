@@ -81,6 +81,7 @@ export async function createProject(input: ProjectInput) {
         workspaceId,
         userId,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -135,6 +136,7 @@ export async function getProjects(workspaceId: string) {
         orderBy: {
           updatedAt: "desc",
         },
+        cacheStrategy: { ttl: 60 },
       });
 
       return { data: projects };
@@ -146,6 +148,7 @@ export async function getProjects(workspaceId: string) {
         workspaceId,
         userId,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -160,6 +163,7 @@ export async function getProjects(workspaceId: string) {
       orderBy: {
         updatedAt: "desc",
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     return { data: projects };
@@ -190,6 +194,7 @@ export async function getProject(projectId: string) {
       include: {
         workspace: true,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!project) {
@@ -204,6 +209,7 @@ export async function getProject(projectId: string) {
           workspaceId: project.workspaceId,
           userId,
         },
+        cacheStrategy: { ttl: 60 },
       });
     }
 
@@ -245,6 +251,7 @@ export async function getProjectTaskStats(projectId: string) {
       include: {
         workspace: true,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!project) {
@@ -259,6 +266,7 @@ export async function getProjectTaskStats(projectId: string) {
           workspaceId: project.workspaceId,
           userId,
         },
+        cacheStrategy: { ttl: 60 },
       });
     }
 
@@ -324,6 +332,7 @@ export async function getWorkspaceProjectTaskStats(
         select: {
           id: true,
         },
+        cacheStrategy: { ttl: 60 },
       });
 
       // Get task statistics for each project
@@ -371,6 +380,7 @@ export async function getWorkspaceProjectTaskStats(
           },
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspace) {
@@ -390,6 +400,7 @@ export async function getWorkspaceProjectTaskStats(
         id: true,
         name: true,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!projects.length) {
@@ -451,6 +462,7 @@ export async function deleteProject(projectId: string) {
       include: {
         workspace: true,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!project) {
@@ -469,6 +481,7 @@ export async function deleteProject(projectId: string) {
           workspaceId: project.workspaceId,
           userId,
         },
+        cacheStrategy: { ttl: 60 },
       });
 
       if (!workspaceMember) {

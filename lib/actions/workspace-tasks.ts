@@ -27,6 +27,7 @@ export async function getWorkspaceTasks(workspaceId: string) {
           id: true,
           name: true,
         },
+        cacheStrategy: { ttl: 60 },
       });
 
       // Get all tasks with due dates from these projects
@@ -42,6 +43,7 @@ export async function getWorkspaceTasks(workspaceId: string) {
         orderBy: {
           dueDate: "asc",
         },
+        cacheStrategy: { ttl: 60 },
       });
 
       // Map tasks to include project name
@@ -64,6 +66,7 @@ export async function getWorkspaceTasks(workspaceId: string) {
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -79,6 +82,7 @@ export async function getWorkspaceTasks(workspaceId: string) {
         id: true,
         name: true,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     // Get all tasks with due dates from these projects
@@ -94,6 +98,7 @@ export async function getWorkspaceTasks(workspaceId: string) {
       orderBy: {
         dueDate: "asc",
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     // Map tasks to include project name

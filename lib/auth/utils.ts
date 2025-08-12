@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
+import { cache } from "react";
 
 export async function getCurrentUser() {
   const session = await auth();
@@ -12,7 +13,7 @@ export async function getCurrentUserRole() {
   return user?.role;
 }
 
-export async function requireAuth() {
+export const requireAuth = cache(async () => {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -20,7 +21,7 @@ export async function requireAuth() {
   }
 
   return user;
-}
+});
 
 export async function getUserPlan() {
   const user = await getCurrentUser();
@@ -29,6 +30,7 @@ export async function getUserPlan() {
   const dbUser = await prisma.user.findUnique({
     where: { email: user.email },
     select: { plan: true },
+    cacheStrategy: { ttl: 60 },
   });
 
   return dbUser?.plan ?? "FREE";

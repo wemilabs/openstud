@@ -106,6 +106,7 @@ export async function getCourses({
           },
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     return {
@@ -136,6 +137,7 @@ export async function getCourseById(id: string) {
         id,
         userId: session.user.id,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!course) {

@@ -18,6 +18,7 @@ export async function GET(
       createdAt: true,
       updatedAt: true,
     },
+    cacheStrategy: { ttl: 60 },
   });
 
   if (!data) {

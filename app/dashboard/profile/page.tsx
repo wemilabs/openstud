@@ -27,6 +27,7 @@ export default async function ProfilePage() {
           schoolEmail: true,
           createdAt: true,
         },
+        cacheStrategy: { ttl: 60 },
       })
     : null;
 

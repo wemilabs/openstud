@@ -67,6 +67,7 @@ export async function createTask(input: TaskInput) {
       include: {
         workspace: true,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!project) {
@@ -107,6 +108,7 @@ export async function createTask(input: TaskInput) {
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -166,6 +168,7 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
           },
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!task) {
@@ -212,6 +215,7 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -298,6 +302,7 @@ export async function deleteTask(taskId: string) {
           },
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!task) {
@@ -331,6 +336,7 @@ export async function deleteTask(taskId: string) {
           userId,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -390,6 +396,7 @@ export async function getTasks(projectId: string) {
       include: {
         workspace: true,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!project) {
@@ -412,6 +419,7 @@ export async function getTasks(projectId: string) {
             userId,
           },
         },
+        cacheStrategy: { ttl: 60 },
       });
 
       hasAccess = !!workspaceMember;
@@ -429,6 +437,7 @@ export async function getTasks(projectId: string) {
       orderBy: {
         createdAt: "desc",
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     return { tasks };
