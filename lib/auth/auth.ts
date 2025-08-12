@@ -40,6 +40,7 @@ export const {
         const initialUser = await prisma.user.findUnique({
           where: { email: token.email! },
           select: { role: true, onboardingCompleted: true },
+          cacheStrategy: { ttl: 60 },
         });
         token.role = initialUser?.role ?? undefined;
         token.onboardingCompleted = initialUser?.onboardingCompleted ?? false;
@@ -61,6 +62,7 @@ export const {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: { role: true, onboardingCompleted: true },
+          cacheStrategy: { ttl: 60 },
         });
         if (dbUser) {
           token.role = dbUser.role ?? undefined;

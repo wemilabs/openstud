@@ -66,6 +66,7 @@ export default async function ChatPage({
         },
       },
     },
+    cacheStrategy: { ttl: 60 },
   })) as Conversation | null;
 
   if (!conversation) {

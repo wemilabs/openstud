@@ -247,6 +247,7 @@ export async function getRecentActivity(workspaceId?: string) {
               },
             },
           },
+          cacheStrategy: { ttl: 60 },
         });
 
         for (const member of members) {
@@ -283,6 +284,7 @@ export async function getRecentActivity(workspaceId?: string) {
           },
         },
       },
+      cacheStrategy: { ttl: 60 },
     })) as TaskWithCreator[];
 
     // Transform the data for the activity feed using the task creator information

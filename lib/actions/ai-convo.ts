@@ -106,6 +106,7 @@ export async function getAllConversations() {
           take: 1,
         },
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     return conversations;
@@ -133,6 +134,7 @@ export async function addMessageToConversation(
         id: conversationId,
         createdById: session.user.id,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!conversation) {
@@ -171,6 +173,7 @@ export async function deleteConversation(conversationId: string) {
         id: conversationId,
         createdById: session.user.id,
       },
+      cacheStrategy: { ttl: 60 },
     });
 
     if (!conversation) {
