@@ -3,7 +3,7 @@
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TaskChangesProvider } from "@/contexts/task-changes-context";
-import { unstable_ViewTransition as ViewTransition } from "react";
+// import { ViewTransition } from "react";
 
 /**
  * Combined providers for the application
@@ -18,7 +18,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         disableTransitionOnChange
       >
         <TaskChangesProvider>
-          <ViewTransition>{children}</ViewTransition>
+          {/* <ViewTransition> */}
+          {children}
+          {/* </ViewTransition> */}
         </TaskChangesProvider>
       </ThemeProvider>
     </AuthProvider>
