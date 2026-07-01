@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/hover-card";
 import { Icons } from "@/components/icons";
 
-export function MyHoverCard() {
+export function CustomHoverCard() {
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
@@ -23,9 +23,9 @@ export function MyHoverCard() {
           </Avatar>
           <div className="space-y-1 text-left">
             <h4 className="text-sm font-semibold">
-              @DorianTho5{" "}
+              @mthlish{" "}
               <a
-                href="https://x.com/DorianTho5"
+                href="https://x.com/mthlish"
                 className="hover:text-white/70 transition inline-flex items-center ml-2"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -34,14 +34,14 @@ export function MyHoverCard() {
               </a>
             </h4>
             <p className="text-sm">
-              Hey, I'm Matheo – creator and maintainer of OpenStud.
+              Hey, Lisham out here – creator and maintainer of OpenStud.
             </p>
             <div className="flex items-center pt-2">
-              <Globe className="mr-2 h-4 w-4 opacity-70" />{" "}
+              <Globe className="mr-2 size-4 opacity-70" />{" "}
               <span className="text-xs text-muted-foreground">
-                Reach me out{" "}
+                Reach out{" "}
                 <a
-                  href="https://cuttypiedev.vercel.app/about"
+                  href="https://lisham.dev/about"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline text-primary bg-clip-text font-medium"

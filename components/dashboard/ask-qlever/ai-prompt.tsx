@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useEffect, useState, useTransition } from "react";
+import * as SelectPrimitive from "@radix-ui/react-select";
+import { CheckIcon } from "lucide-react";
 
 import { createNewConversation, PersonaType } from "@/lib/actions/ai-convo";
 import { cn } from "@/lib/utils";
@@ -11,7 +13,6 @@ import {
   Select,
   SelectContent,
   SelectGroup,
-  SelectItem,
   SelectLabel,
   SelectTrigger,
   SelectValue,
@@ -50,12 +51,6 @@ const researchModeAndSuggestionItems: ResearchModeAndSuggestionItem[] = [
     tooltip: "Search the web",
     disabled: false,
   },
-  // {
-  //   label: "DeepSearch",
-  //   icon: <Icons.search className="size-4" />,
-  //   tooltip: "Advanced search and reasoning",
-  //   disabled: true,
-  // },
   {
     label: "Think",
     icon: <Icons.lightbulb className="size-4" />,
@@ -117,7 +112,6 @@ export function AIPrompt() {
   const [query, setQuery] = useState("");
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
-  const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [useWebSearch, setUseWebSearch] = useState(false);
 
@@ -241,7 +235,6 @@ export function AIPrompt() {
                 <div>
                   <Select
                     defaultValue="tutor"
-                    onOpenChange={setIsSelectOpen}
                     onValueChange={(value: string) =>
                       setSelectedPersona(value as PersonaType)
                     }
@@ -255,19 +248,19 @@ export function AIPrompt() {
                           Personas
                         </SelectLabel>
                         {PERSONAS.map(({ label, value, description }) => (
-                          <SelectItem key={value} value={value}>
-                            <div className="flex flex-col">
-                              <span>{label}</span>
-                              <span
-                                className={cn(
-                                  "text-xs text-muted-foreground",
-                                  isSelectOpen ? "" : "hidden"
-                                )}
-                              >
-                                {description}
-                              </span>
-                            </div>
-                          </SelectItem>
+                          <SelectPrimitive.Item
+                            key={value}
+                            value={value}
+                            className="focus:bg-accent focus:text-accent-foreground relative flex w-full cursor-default flex-col rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                          >
+                            <span className="absolute right-2 top-2 flex size-3.5 items-center justify-center">
+                              <SelectPrimitive.ItemIndicator>
+                                <CheckIcon className="size-4" />
+                              </SelectPrimitive.ItemIndicator>
+                            </span>
+                            <SelectPrimitive.ItemText>{label}</SelectPrimitive.ItemText>
+                            <span className="text-xs text-muted-foreground">{description}</span>
+                          </SelectPrimitive.Item>
                         ))}
                       </SelectGroup>
                     </SelectContent>
