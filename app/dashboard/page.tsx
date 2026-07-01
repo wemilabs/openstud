@@ -14,13 +14,13 @@ export default async function DashboardPage() {
     <>
       <div className="grid gap-1 mb-4">
         <h1 className="text-xl font-medium tracking-tight">
-          🎉 Hey, you're welcome dear{" "}
-          <span className="font-mono text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-            {(session?.user?.role ?? "user").toLocaleLowerCase()}.
+          👋🏼 Hi there{" "}
+          <span className="text-lg">
+            {(session?.user?.role ?? "guest").toLocaleLowerCase()} {(session?.user?.name ?? "user").toLocaleLowerCase()}
           </span>
         </h1>
         <p className="text-sm text-muted-foreground">
-          Here's your space for academic success.
+          Down below your latest metrics and activities
         </p>
       </div>
 

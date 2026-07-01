@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { MyHoverCard } from "@/components/sections/my-hover-card";
+import { CustomHoverCard } from "@/components/sections/custom-hover-card";
 
 export function Hero() {
   return (
@@ -21,8 +21,8 @@ export function Hero() {
           </h1>
           <h2 className="max-w-[750px] text-muted-foreground md:text-lg font-mono">
             Your all-in-one platform for efficient study and academic project
-            management—connecting students and tutors. Built by <MyHoverCard />,
-            for students.
+            management, with AI learning companions. Built by <CustomHoverCard />
+            , for students.
           </h2>
           <div className="flex flex-col gap-4 sm:flex-row mt-2">
             <Link

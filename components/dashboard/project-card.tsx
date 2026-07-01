@@ -71,10 +71,10 @@ export function ProjectCard({
     taskStats?.avgCompletionPercentage !== undefined
       ? Math.round(Number(taskStats.avgCompletionPercentage))
       : taskStats && taskStats.total > 0
-      ? Math.round(
+        ? Math.round(
           (Number(taskStats.completed) / Number(taskStats.total)) * 100
         )
-      : 0;
+        : 0;
 
   // Navigate to project page
   const navigateToProject = () => {
@@ -129,17 +129,17 @@ export function ProjectCard({
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Folder className="h-5 w-5 text-primary" />
+              <Folder className="size-5 text-primary" />
               <CardTitle className="text-lg">{name}</CardTitle>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
               onClick={onDeleteClick}
               title="Delete project"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="size-4" />
               <span className="sr-only">Delete project</span>
             </Button>
           </div>
@@ -151,7 +151,7 @@ export function ProjectCard({
         </CardHeader>
         <CardContent className="pb-2">
           <div className="flex items-center text-xs text-muted-foreground mb-2">
-            <Clock className="h-3 w-3 mr-1" />
+            <Clock className="size-3 mr-1" />
             <span>Updated {formatDate(updatedAt)}</span>
           </div>
           {taskStats && (
@@ -167,10 +167,10 @@ export function ProjectCard({
                     progressPercentage < 25
                       ? "bg-red-500"
                       : progressPercentage < 50
-                      ? "bg-orange-500"
-                      : progressPercentage < 75
-                      ? "bg-yellow-500"
-                      : "bg-green-500"
+                        ? "bg-orange-500"
+                        : progressPercentage < 75
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
                   }
                 />
               </div>

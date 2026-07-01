@@ -34,11 +34,10 @@ export function MobileNav({ className, userRole }: MobileNavProps) {
             <Logo href="/dashboard" className="flex items-center" />
           </SheetTitle>
           <SheetDescription className="">
-            You're currently using{" "}
+            You're currently on OpenStud{" "}
             <code className="bg-muted font-semibold px-2 rounded-full">
-              v1.60
-            </code>{" "}
-            of Openstud.
+              v1.60-beta
+            </code>
           </SheetDescription>
           <Badge
             variant="outline"
