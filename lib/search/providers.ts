@@ -60,7 +60,7 @@ export async function streamWithGrokSearch(
   });
 
   return streamText({
-    model: xai(process.env.GROK_AI_CHAT_MODEL! || "grok-3-fast-latest"),
+    model: xai(process.env.GROK_AI_CHAT_MODEL!),
     system: systemPrompt,
     messages,
     providerOptions: {
@@ -93,7 +93,7 @@ export async function streamWithGrok(
   });
 
   return streamText({
-    model: xai(process.env.GROK_AI_CHAT_MODEL! || "grok-3-fast-latest"),
+    model: xai(process.env.GROK_AI_CHAT_MODEL!),
     system: systemPrompt,
     messages,
   });
@@ -116,8 +116,7 @@ export async function streamWithTavilyEnhancedGrok(
       .slice(0, 5) // Limit to top 5 results to avoid token limits
       .map(
         (result, index) =>
-          `[${index + 1}] ${result.title}\nURL: ${
-            result.url
+          `[${index + 1}] ${result.title}\nURL: ${result.url
           }\nContent: ${result.content.substring(0, 500)}...\n`
       )
       .join("\n");

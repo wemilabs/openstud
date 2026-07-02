@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/prisma";
 import { createXai } from "@ai-sdk/xai";
-import { streamText, generateText } from "ai";
+import { generateText } from "ai";
 
 export type PersonaType =
   | "tutor"
@@ -22,7 +22,7 @@ async function generateAIConversationTitle(message: string): Promise<string> {
     });
 
     const result = await generateText({
-      model: xai(process.env.GROK_AI_CHAT_MODEL! || "grok-3-mini-fast-latest"),
+      model: xai(process.env.GROK_AI_CHAT_MODEL!),
       system:
         "Generate a very short, concise title (ensure it is not more than 80 characters long) that summarizes the first message a user begins a conversation with. Just return the title. No quotes, colons or formatting.",
       messages: [

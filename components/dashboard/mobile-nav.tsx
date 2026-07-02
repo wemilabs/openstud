@@ -50,13 +50,9 @@ export function MobileNav({ className, userRole }: MobileNavProps) {
         <DashboardNav userRole={userRole} />
 
         <SheetFooter className="text-xs text-muted-foreground text-center">
-          <div>
-            {/* Subscription renews in 12 days (Feb 11, - Mar 11, 2025) */}
-            Access more features by{" "}
-            <Link href="/dashboard/billing" className="underline">
-              subscribing
-            </Link>
-          </div>
+          <Link href="/dashboard/billing" className="underline">
+            Need unlimited access?
+          </Link>
         </SheetFooter>
       </SheetContent>
     </Sheet>
