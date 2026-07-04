@@ -24,7 +24,7 @@ async function generateAIConversationTitle(message: string): Promise<string> {
     const result = await generateText({
       model: xai(process.env.GROK_AI_CHAT_MODEL!),
       system:
-        "Generate a very short, concise title (ensure it is not more than 80 characters long) that summarizes the first message a user begins a conversation with. Just return the title. No quotes, colons or formatting.",
+        "Generate a very short, concise title (ensure it is not more than 80 characters long) that accurately summarizes the first message a user begins a conversation with. Just return the title. No quotes, colons or formatting.",
       messages: [
         {
           role: "user" as const,
