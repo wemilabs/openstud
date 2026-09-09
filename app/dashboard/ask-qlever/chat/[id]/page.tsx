@@ -5,8 +5,8 @@ import { PersonaType } from "@/lib/actions/ai-convo";
 import { auth } from "@/lib/auth/auth";
 import prisma from "@/lib/prisma";
 
-import { ChatUI } from "@/components/dashboard/ask-qlever/chat-ui";
 import { ChatHistory } from "@/components/dashboard/ask-qlever/chat-history";
+import { ChatUI } from "@/components/dashboard/ask-qlever/chat-ui";
 
 type Message = {
   id: string;
@@ -66,7 +66,6 @@ export default async function ChatPage({
         },
       },
     },
-    cacheStrategy: { ttl: 60 },
   })) as Conversation | null;
 
   if (!conversation) {
@@ -87,7 +86,7 @@ export default async function ChatPage({
               id,
               role: role as "user" | "assistant",
               content,
-            })
+            }),
           )}
           persona={conversation.persona as PersonaType}
           useWebSearch={useWebSearch}

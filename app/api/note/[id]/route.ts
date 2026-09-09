@@ -1,10 +1,10 @@
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
 import jsPDF from "jspdf";
+import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
 
@@ -18,7 +18,6 @@ export async function GET(
       createdAt: true,
       updatedAt: true,
     },
-    cacheStrategy: { ttl: 60 },
   });
 
   if (!data) {
@@ -26,7 +25,7 @@ export async function GET(
       {
         error: "Note not found",
       },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -53,7 +52,7 @@ export async function GET(
       dateStyle: "long",
     }).format(data.updatedAt)}`,
     margin,
-    10
+    10,
   );
 
   notePdf.text(
@@ -61,7 +60,7 @@ export async function GET(
       data.course?.code ? `(${data.course?.code})` : ""
     }`,
     margin,
-    14
+    14,
   );
 
   // Add title
@@ -80,7 +79,7 @@ export async function GET(
   // Split content into lines that fit within the content width
   const contentLines = notePdf.splitTextToSize(
     data.content ?? "",
-    contentWidth
+    contentWidth,
   );
 
   // Calculate line height

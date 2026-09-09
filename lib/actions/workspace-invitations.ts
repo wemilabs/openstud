@@ -31,7 +31,7 @@ const generateInvitationToken = (): string => {
  */
 export async function createWorkspaceInvitation(
   workspaceId: string,
-  input: InvitationInput
+  input: InvitationInput,
 ) {
   try {
     const session = await auth();
@@ -59,7 +59,6 @@ export async function createWorkspaceInvitation(
           userId,
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -127,7 +126,6 @@ export async function getWorkspaceInvitations(workspaceId: string) {
           userId,
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -155,7 +153,6 @@ export async function getWorkspaceInvitations(workspaceId: string) {
       orderBy: {
         createdAt: "desc",
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     return { data: invitations };
@@ -186,7 +183,6 @@ export async function deleteWorkspaceInvitation(invitationId: string) {
       include: {
         workspace: true,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!invitation) {
@@ -201,7 +197,6 @@ export async function deleteWorkspaceInvitation(invitationId: string) {
           userId,
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -251,7 +246,6 @@ export async function validateInvitationToken(token: string) {
       where: {
         id: userId,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!currentUser || !currentUser.email) {
@@ -266,7 +260,6 @@ export async function validateInvitationToken(token: string) {
       include: {
         workspace: true,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!invitation) {
@@ -294,7 +287,6 @@ export async function validateInvitationToken(token: string) {
           userId,
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (existingMember) {

@@ -5,8 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url       = env("DATABASE_URL") // points to the connection pool for queries
-  directUrl = env("DIRECT_URL")   // points to the database for migrations
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {

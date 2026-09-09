@@ -30,7 +30,6 @@ export async function getUserPlan() {
   const dbUser = await prisma.user.findUnique({
     where: { email: user.email },
     select: { plan: true },
-    cacheStrategy: { ttl: 60 },
   });
 
   return dbUser?.plan ?? "FREE";

@@ -30,7 +30,7 @@ export const {
 
       if (account && user) {
         console.log(
-          "[Auth JWT Callback] Initial sign-in/link account detected."
+          "[Auth JWT Callback] Initial sign-in/link account detected.",
         );
         token.id = user.id;
         token.email = user.email;
@@ -40,7 +40,6 @@ export const {
         const initialUser = await prisma.user.findUnique({
           where: { email: token.email! },
           select: { role: true, onboardingCompleted: true },
-          cacheStrategy: { ttl: 60 },
         });
         token.role = initialUser?.role ?? undefined;
         token.onboardingCompleted = initialUser?.onboardingCompleted ?? false;
@@ -57,12 +56,11 @@ export const {
           typeof token.onboardingCompleted === "undefined")
       ) {
         console.log(
-          "[Auth JWT Callback] Token might be missing data. Fetching..."
+          "[Auth JWT Callback] Token might be missing data. Fetching...",
         );
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
           select: { role: true, onboardingCompleted: true },
-          cacheStrategy: { ttl: 60 },
         });
         if (dbUser) {
           token.role = dbUser.role ?? undefined;
@@ -74,7 +72,7 @@ export const {
         } else {
           console.log(
             "[Auth JWT Callback] User not found in DB for token ID:",
-            token.id
+            token.id,
           );
         }
       }
@@ -83,7 +81,7 @@ export const {
       if (trigger === "update" && session) {
         console.log(
           "[Auth JWT Callback] Update trigger detected. Updating token from session:",
-          session
+          session,
         );
         if (session.user?.role) {
           token.role = session.user.role;

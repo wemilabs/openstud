@@ -9,10 +9,7 @@ import { createXai } from "@ai-sdk/xai";
 import { generateText } from "ai";
 
 export type PersonaType =
-  | "tutor"
-  | "study-buddy"
-  | "writing-assistant"
-  | "project-helper";
+  "tutor" | "study-buddy" | "writing-assistant" | "project-helper";
 
 async function generateAIConversationTitle(message: string): Promise<string> {
   try {
@@ -106,7 +103,6 @@ export async function getAllConversations() {
           take: 1,
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     return conversations;
@@ -121,7 +117,7 @@ export async function addMessageToConversation(
   role: "user" | "assistant",
   content: string,
   persona: PersonaType,
-  useWebSearch?: boolean
+  useWebSearch?: boolean,
 ) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -134,7 +130,6 @@ export async function addMessageToConversation(
         id: conversationId,
         createdById: session.user.id,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!conversation) {
@@ -173,12 +168,11 @@ export async function deleteConversation(conversationId: string) {
         id: conversationId,
         createdById: session.user.id,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!conversation) {
       throw new Error(
-        "Conversation not found or user does not have permission"
+        "Conversation not found or user does not have permission",
       );
     }
 
