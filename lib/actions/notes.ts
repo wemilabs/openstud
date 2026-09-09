@@ -40,7 +40,6 @@ export async function createNote(input: NoteInput) {
         id: validatedData.courseId,
         userId: session.user.id,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!course) {
@@ -81,7 +80,6 @@ export async function getNotesByCourseId(courseId: string) {
         id: courseId,
         userId: session.user.id,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!course) {
@@ -95,7 +93,6 @@ export async function getNotesByCourseId(courseId: string) {
       orderBy: {
         createdAt: "desc",
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     return { data: notes };
@@ -122,7 +119,6 @@ export async function getNoteById(id: string) {
       include: {
         course: true,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!note) {
@@ -146,7 +142,7 @@ export async function getNoteById(id: string) {
  */
 export async function updateNote(
   id: string,
-  input: Omit<NoteInput, "courseId">
+  input: Omit<NoteInput, "courseId">,
 ) {
   try {
     const session = await auth();
@@ -170,7 +166,6 @@ export async function updateNote(
       include: {
         course: true,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!existingNote) {
@@ -218,7 +213,6 @@ export async function deleteNote(id: string) {
       include: {
         course: true,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!note) {

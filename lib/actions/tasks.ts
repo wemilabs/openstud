@@ -67,7 +67,6 @@ export async function createTask(input: TaskInput) {
       include: {
         workspace: true,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!project) {
@@ -108,7 +107,6 @@ export async function createTask(input: TaskInput) {
           userId,
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -168,7 +166,6 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
           },
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!task) {
@@ -215,7 +212,6 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
           userId,
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -234,7 +230,7 @@ export async function updateTask(taskId: string, input: Partial<TaskInput>) {
     // If user is not the task creator or admin/owner, and is trying to modify more than completionPercentage
     const isTaskCreator = task.createdById === userId;
     const isWorkspaceOwnerOrAdmin = ["OWNER", "ADMIN"].includes(
-      workspaceMember.role
+      workspaceMember.role,
     );
 
     if (
@@ -302,7 +298,6 @@ export async function deleteTask(taskId: string) {
           },
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!task) {
@@ -336,7 +331,6 @@ export async function deleteTask(taskId: string) {
           userId,
         },
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!workspaceMember) {
@@ -348,7 +342,7 @@ export async function deleteTask(taskId: string) {
     // 2. Workspace owner/admin who can delete any task
     const isTaskCreator = task.createdById === userId;
     const isWorkspaceOwnerOrAdmin = ["OWNER", "ADMIN"].includes(
-      workspaceMember.role
+      workspaceMember.role,
     );
 
     if (!isTaskCreator && !isWorkspaceOwnerOrAdmin) {
@@ -396,7 +390,6 @@ export async function getTasks(projectId: string) {
       include: {
         workspace: true,
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     if (!project) {
@@ -419,7 +412,6 @@ export async function getTasks(projectId: string) {
             userId,
           },
         },
-        cacheStrategy: { ttl: 60 },
       });
 
       hasAccess = !!workspaceMember;
@@ -437,7 +429,6 @@ export async function getTasks(projectId: string) {
       orderBy: {
         createdAt: "desc",
       },
-      cacheStrategy: { ttl: 60 },
     });
 
     return { tasks };

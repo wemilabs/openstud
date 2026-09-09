@@ -102,7 +102,7 @@ export async function getTaskStatsByCategory(workspaceId?: string) {
         name: stat.category || "Uncategorized",
         total: Math.round(stat._avg.completionPercentage || 0),
         count: stat._count.id,
-      })
+      }),
     );
 
     return { data: formattedStats };
@@ -199,26 +199,40 @@ export async function getRecentActivity(workspaceId?: string) {
     };
 
     const userProjects = (await prisma.project.findMany(
-      projectsQuery
+      projectsQuery,
     )) as ProjectWithUserInfo[];
     const projectIds = userProjects.map((project) => project.id);
-    const projectNames = userProjects.reduce((acc, project) => {
-      acc[project.id] = project.name;
-      return acc;
-    }, {} as Record<string, string>);
+    const projectNames = userProjects.reduce(
+      (acc, project) => {
+        acc[project.id] = project.name;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
 
     // Create a map of project owners for future reference
-    const projectOwners = userProjects.reduce((acc, project) => {
-      if (project.user) {
-        acc[project.id] = {
-          id: project.user.id,
-          name: project.user.name,
-          email: project.user.email,
-          image: project.user.image,
-        };
-      }
-      return acc;
-    }, {} as Record<string, { id: string; name: string | null; email: string | null; image: string | null }>);
+    const projectOwners = userProjects.reduce(
+      (acc, project) => {
+        if (project.user) {
+          acc[project.id] = {
+            id: project.user.id,
+            name: project.user.name,
+            email: project.user.email,
+            image: project.user.image,
+          };
+        }
+        return acc;
+      },
+      {} as Record<
+        string,
+        {
+          id: string;
+          name: string | null;
+          email: string | null;
+          image: string | null;
+        }
+      >,
+    );
 
     // Get workspace members for each project to ensure we have current user info
     const workspaceUsers = new Map<
@@ -247,7 +261,6 @@ export async function getRecentActivity(workspaceId?: string) {
               },
             },
           },
-          cacheStrategy: { ttl: 60 },
         });
 
         for (const member of members) {
@@ -284,7 +297,6 @@ export async function getRecentActivity(workspaceId?: string) {
           },
         },
       },
-      cacheStrategy: { ttl: 60 },
     })) as TaskWithCreator[];
 
     // Transform the data for the activity feed using the task creator information
@@ -294,7 +306,7 @@ export async function getRecentActivity(workspaceId?: string) {
       let description = "";
 
       const projectWorkspaceId = userProjects.find(
-        (p) => p.id === task.projectId
+        (p) => p.id === task.projectId,
       )?.workspaceId;
       const isWorkspaceProject =
         projectWorkspaceId !== null && projectWorkspaceId !== undefined;
@@ -316,7 +328,7 @@ export async function getRecentActivity(workspaceId?: string) {
         console.log(
           `Task ${task.id} has no creator, using project owner: ${
             activityUser?.name || "unknown"
-          }`
+          }`,
         );
       }
 

@@ -1,5 +1,4 @@
 import { PrismaClient } from "@/lib/generated/prisma/client";
-import { withAccelerate } from "@prisma/extension-accelerate";
 
 // Prevent multiple instances of Prisma Client in development
 declare global {
@@ -7,7 +6,7 @@ declare global {
 }
 
 const prismaClientSingleton = () => {
-  return new PrismaClient().$extends(withAccelerate()).$extends({
+  return new PrismaClient().$extends({
     // Add query logging in development
     query: {
       async $allOperations({ operation, model, args, query }) {
