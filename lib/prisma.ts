@@ -1,4 +1,5 @@
 import { PrismaClient } from "@/lib/generated/prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
 
 // Prevent multiple instances of Prisma Client in development
 declare global {
@@ -6,7 +7,8 @@ declare global {
 }
 
 const prismaClientSingleton = () => {
-  return new PrismaClient().$extends({
+  const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
+  return new PrismaClient({ adapter }).$extends({
     // Add query logging in development
     query: {
       async $allOperations({ operation, model, args, query }) {

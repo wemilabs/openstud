@@ -8,7 +8,6 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
-
 minimumReleaseAgeExclude:
   - '@next/env@15.5.20 || 15.5.24'
   - '@next/swc-darwin-arm64@15.5.20 || 15.5.24'
